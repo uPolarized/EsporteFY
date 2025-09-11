@@ -1,0 +1,80 @@
+/* app/static/css/login/base.css */
+
+.welcome-card {
+    max-width: 500px;
+    margin: 4rem auto; /* Centraliza horizontalmente e dá um espaço no topo */
+    padding: 2rem 2.5rem;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.welcome-card h1 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-card .lead {
+    color: #6c757d; /* Cinza do Bootstrap */
+    margin-bottom: 2rem;
+}
+
+.welcome-card .btn {
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+
+
+/* ================= NAVBAR ================= */
+.navbar {
+    background: linear-gradient(135deg, #ec6767, #eb0606); /* Azul degradê moderno */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 1rem;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s ease;
+}
+
+.navbar .navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.navbar .nav-link {
+    color: #e9ecef !important; /* Cinza claro */
+    font-weight: 500;
+    margin-left: 1rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+.navbar-toggler {
+    border: none;
+    outline: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-toggler-icon {
+    filter: invert(1); /* Ícone hamburguer branco */
+}
+
+/* Navbar em scroll */
+.navbar.scrolled {
+    background: #aa3030; /* Azul sólido */
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     # Seus apps vêm primeiro
     'app',
+    'perfis',
 
     # Depois os apps de terceiros
     'allauth',
@@ -130,7 +131,13 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+
+
+# Para servir arquivos estáticos em desenvolvimento e encontrar nos apps
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static", # Opcional: para static files globais na raiz do projeto
+]
+STATIC_ROOT = BASE_DIR / "staticfiles" # Onde 'collectstatic' vai juntar tudo em produção
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

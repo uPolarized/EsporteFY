@@ -7,25 +7,36 @@
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title mb-3 text-center">Cadastro</h3>
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4 text-center">Crie sua Conta</h3>
+                
                 <form method="post">
                     {% csrf_token %}
+
                     {{ form|crispy }}
-                    <button type="submit" class="btn btn-success w-100 mt-3">Cadastrar</button>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success">Cadastrar</button>
+                    </div>
                 </form>
-                <hr>
+                
+                <hr class="my-4">
+                
                 {% providers_media_js %}
                 <div class="text-center">
                     {% if socialaccount_providers %}
                         {% for provider in socialaccount_providers %}
-                            <a href="{% provider_login_url provider.id %}" class="btn btn-outline-danger w-100 mb-2">
-                                Cadastrar com {{ provider.name }}
-                            </a>
+                             {% if provider.id == 'google' %}
+                                <a href="{% provider_login_url provider.id %}" class="btn btn-outline-danger w-100 mb-2">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 8px;">
+                                    Cadastrar com {{ provider.name }}
+                                </a>
+                            {% endif %}
                         {% endfor %}
                     {% endif %}
                 </div>
-                <p class="text-center mt-2">
+                
+                <p class="text-center mt-3">
                     Já tem conta? <a href="{% url 'account_login' %}">Login</a>
                 </p>
             </div>
@@ -33,4 +44,3 @@
     </div>
 </div>
 {% endblock %}
-#qqq
