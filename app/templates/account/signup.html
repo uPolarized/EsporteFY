@@ -1,0 +1,35 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags socialaccount %}
+
+{% block title %}Cadastro - EsporteFY{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-3 text-center">Cadastro</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-success w-100 mt-3">Cadastrar</button>
+                </form>
+                <hr>
+                {% providers_media_js %}
+                <div class="text-center">
+                    {% if socialaccount_providers %}
+                        {% for provider in socialaccount_providers %}
+                            <a href="{% provider_login_url provider.id %}" class="btn btn-outline-danger w-100 mb-2">
+                                Cadastrar com {{ provider.name }}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <p class="text-center mt-2">
+                    Já tem conta? <a href="{% url 'account_login' %}">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
