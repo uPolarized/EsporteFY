@@ -1,0 +1,169 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Entrar — Meu Projeto</title>
+  <!-- Exemplo de CSS mínimo; troque por seu arquivo static se preferir -->
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --accent:#2b6cb0;
+      --muted:#6b7280;
+      --danger:#e53e3e;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      color:#111827;
+    }
+    .container{
+      width:100%;
+      max-width:960px;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:32px;
+      align-items:center;
+    }
+    .brand{
+      padding:32px;
+    }
+    .brand h1{margin:0 0 8px;font-size:28px}
+    .brand p{margin:0;color:var(--muted)}
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      box-shadow: 0 6px 18px rgba(11,15,30,0.08);
+      padding:28px;
+    }
+
+    form .field{margin-bottom:14px}
+    label{display:block;font-size:13px;margin-bottom:6px;color:#374151}
+    input[type="text"], input[type="password"], input[type="email"]{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid #e6e9ef;
+      border-radius:8px;
+      font-size:15px;
+      background:transparent;
+    }
+    input[type="submit"]{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:0;
+      background:var(--accent);
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+      font-size:15px;
+    }
+    .small{font-size:13px;color:var(--muted)}
+    .help{color:var(--danger);font-size:13px;margin-top:6px}
+    .actions{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px}
+    .links a{color:var(--accent);text-decoration:none;font-weight:600}
+    .remember{display:flex;gap:8px;align-items:center}
+    .footer-note{margin-top:16px;font-size:13px;color:var(--muted)}
+    @media(max-width:880px){
+      .container{grid-template-columns:1fr; padding:0 6px}
+      .brand{order:2;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <section class="brand">
+      <div class="card" style="background:linear-gradient(135deg, rgba(43,108,176,0.08), rgba(99,102,241,0.04));">
+        <h1>Bem-vindo de volta 👋</h1>
+        <p>Entre com sua conta para continuar ao sistema.</p>
+        <p class="small" style="margin-top:12px">Não possui conta? <a href="{% url 'register' %}">Crie gratuitamente</a>.</p>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="login-heading">
+      <h2 id="login-heading" style="margin-top:0;margin-bottom:8px">Entrar</h2>
+
+      <!-- Exibe mensagens não-field -->
+      {% if form.non_field_errors %}
+        <div class="help" role="alert">
+          {% for err in form.non_field_errors %}
+            {{ err }}{% if not forloop.last %}<br>{% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- next (redirecionamento) -->
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% else %}
+          <!-- caso use ?next= na url -->
+          {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+          {% endif %}
+        {% endif %}
+
+        <!-- Username / Email -->
+        <div class="field">
+          <label for="id_username">Usuário ou e-mail</label>
+          <input type="text" name="username" id="id_username" required
+                 value="{{ form.username.value|default:'' }}" autocomplete="username" />
+          {% if form.username.errors %}
+            <div class="help" role="alert">
+              {% for err in form.username.errors %}
+                {{ err }}{% if not forloop.last %}<br>{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="id_password">Senha</label>
+          <input type="password" name="password" id="id_password" required autocomplete="current-password" />
+          {% if form.password.errors %}
+            <div class="help" role="alert">
+              {% for err in form.password.errors %}
+                {{ err }}{% if not forloop.last %}<br>{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="actions">
+          <div class="remember">
+            <input type="checkbox" name="remember" id="id_remember" {% if request.POST.remember %}checked{% endif %}/>
+            <label for="id_remember" class="small">Lembrar-me</label>
+          </div>
+          <div class="links small">
+            <a href="{% url 'password_reset' %}">Esqueceu a senha?</a>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <input type="submit" value="Entrar">
+        </div>
+
+        <p class="footer-note">Ao entrar você aceita nossos <a href="{% url 'terms' %}">Termos</a> e <a href="{% url 'privacy' %}">Política de Privacidade</a>.</p>
+      </form>
+
+      <!-- Suporte / Exibição de debug simples -->
+      <div style="margin-top:12px">
+        <p class="small">Precisa de ajuda? <a href="{% url 'contact' %}">Contate o suporte</a>.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
