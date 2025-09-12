@@ -1,18 +1,15 @@
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView # Mude ListView para TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from conteudo.api_client import buscar_noticias_esportivas # Importe nossa nova função
 
 class HomeView(TemplateView):
     template_name = "home.html"
 
-    def dispatch(self, request, *args, **kwargs):
-        # Se o usuário que acessa a homepage já estiver autenticado,
-        # redireciona-o para a página de feed.
-        if request.user.is_authenticated:
-            return redirect('feed')
-        # Se não estiver autenticado, continua normalmente e mostra a homepage.
-        return super().dispatch(request, *args, **kwargs)
-
-
 class FeedView(LoginRequiredMixin, TemplateView):
     template_name = 'feed.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Chama a função da API e adiciona as notícias ao contexto do template
+        context['noticias'] = buscar_noticias_esportivas()
+        return context

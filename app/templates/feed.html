@@ -8,9 +8,9 @@
     {# Mensagem de boas-vindas personalizada #}
     <h1 class="mb-4">Bem-vindo de volta, {{ user.username|capfirst }}!</h1>
 
-    <div class="row g-4"> {# g-4 adiciona um espaçamento entre as colunas #}
+    <div class="row g-4">
         
-        {# Coluna Principal (esquerda) #}
+        {# Coluna Principal (esquerda) - ONDE AS NOTÍCIAS DEVEM APARECER #}
         <div class="col-lg-8">
             
             {# Seção de Ação Rápida #}
@@ -23,15 +23,33 @@
                 </div>
             </div>
 
-            {# Espaço para o feed de partidas ou quadras disponíveis #}
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    Quadras Próximas
+            {# --- FEED DE NOTÍCIAS COMEÇA AQUI --- #}
+            <h3 class="mb-3">Últimas Notícias do Esporte</h3>
+
+            {% for noticia in noticias %}
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        {% if noticia.urlToImage %}
+                            <img src="{{ noticia.urlToImage }}" class="img-fluid rounded mb-3" alt="{{ noticia.title }}">
+                        {% endif %}
+                        <h5 class="card-title">{{ noticia.title }}</h5>
+                        {% if noticia.description %}
+                            <p class="card-subtitle mb-2 text-muted">{{ noticia.description }}</p>
+                        {% endif %}
+                        
+                        <a href="{{ noticia.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Ler Matéria Completa</a>
+                        
+                        <small class="text-muted d-block mt-2">Fonte: {{ noticia.source.name }}</small>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted"><em>(Em breve: aqui aparecerá uma lista de quadras disponíveis para agendamento...)</em></p>
+            {% empty %}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted">Não foi possível carregar as notícias no momento. Tente novamente mais tarde.</p>
+                    </div>
                 </div>
-            </div>
+            {% endfor %}
+            {# --- FEED DE NOTÍCIAS TERMINA AQUI --- #}
 
         </div>
 

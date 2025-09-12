@@ -1,39 +1,41 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags socialaccount %}
+{% load crispy_forms_tags socialaccount %} {# 🚨 GARANTA QUE ESSA LINHA ESTÁ AQUI 🚨 #}
 
 {% block title %}Login - EsporteFY{% endblock %}
 
 {% block extra_head %}
-    {# IMPORTA O NOVO ARQUIVO CSS AQUI #}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/login/loginaccount.css' %}">
 {% endblock %}
 
 
 {% block content %}
-{# ADICIONA A NOVA CLASSE AO CONTAINER PRINCIPAL #}
 <div class="container login-container">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
             <div class="card shadow-sm">
-                <div class="card-body">
-                    <h3 class="card-title mb-3 text-center">Login</h3>
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4 text-center">Login</h3>
+                    
                     <form method="post">
                         {% csrf_token %}
                         {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Entrar</button>
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary">Entrar</button>
+                        </div>
                     </form>
-                    <hr>
-                    {% providers_media_js %}
+                    
+                    <div class="text-center text-muted my-3">ou</div>
+
                     <div class="text-center">
-                        {% if socialaccount_providers %}
-                            {% for provider in socialaccount_providers %}
-                                <a href="{% provider_login_url provider.id %}" class="btn btn-outline-danger w-100 mb-2">
-                                    Login com {{ provider.name }}
-                                </a>
-                            {% endfor %}
-                        {% endif %}
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary w-100">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 10px; vertical-align: middle;">
+                            Entrar com Google
+                        </a>
                     </div>
+                    
+                    <hr class="my-4">
+
                     <p class="text-center mt-2">
                         Não tem conta? <a href="{% url 'account_signup' %}">Cadastre-se</a>
                     </p>

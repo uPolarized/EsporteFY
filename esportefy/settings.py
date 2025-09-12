@@ -6,6 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+
+NEWS_API_KEY = env('NEWS_API_KEY', default=None)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = []
@@ -20,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'app',
     'perfis',
+    'conteudo',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -93,19 +96,18 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.forms.CustomSignupForm' 
 
 
+# settings.py
+
+# ... (restante do código)
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
-        'OAUTH_PKCE_ENABLED': True,
-        'APP': {
-            'client_id': env('GOOGLE_CLIENT_ID'),
-            'secret': env('GOOGLE_CLIENT_SECRET'),
-            'key': ''
-        }
     }
 }
 
+# ... (restante do código)
 # --------------------------------------------------------------------------
 # --- CONFIGURAÇÃO DE ENVIO DE E-MAIL (SMTP) ---
 # --------------------------------------------------------------------------
