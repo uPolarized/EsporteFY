@@ -1,47 +1,77 @@
-/* app/static/css/login/base.css */
+/* app/static/css/base.css */
 
-
+/* Importa a fonte para todas as páginas */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ========================================= */
+/* ===== 1. VARIÁVEIS DE TEMA (Modo Claro/Escuro) ===== */
+/* ========================================= */
+
+/* Padrão (Modo Claro) */
+:root {
+    --body-bg-color: #f8f9fa; 
+    --text-color: #212529;
+    --card-bg-color: #ffffff;
+    --link-color: #0d6efd;
+    --border-color: #dee2e6;
+    --muted-text-color: #6c757d;
+}
+
+/* Modo Escuro */
+body.dark-mode {
+    --body-bg-color: #212121;
+    --text-color: #f8f9fa;
+    --card-bg-color: #343a40;
+    --link-color: #92b8ec;
+    --border-color: #495057;
+    --muted-text-color: #adb5bd;
+}
+
+
+/* ========================================= */
+/* ===== 2. ESTILOS GERAIS (Aplicam as variáveis) ===== */
+/* ========================================= */
 
 body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--body-bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.navbar-brand {
-    font-weight: 700;
+/* Garante que o texto de links use a variável */
+a {
+    color: var(--link-color);
+}
+
+.text-muted {
+    color: var(--muted-text-color) !important;
+}
+
+/* O card e welcome-card usam o mesmo estilo de fundo agora */
+.card,
+.welcome-card {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .welcome-card {
     max-width: 500px;
-    margin: 4rem auto; /* Centraliza horizontalmente e dá um espaço no topo */
+    margin: 4rem auto;
     padding: 2rem 2.5rem;
-    background-color: #ffffff;
-    border: none;
     border-radius: 0.75rem;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     text-align: center;
 }
 
-.welcome-card h1 {
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
+/* ========================================= */
+/* ===== 3. ESTILOS DA NAVBAR ===== */
+/* ========================================= */
 
-.welcome-card .lead {
-    color: #6c757d; /* Cinza do Bootstrap */
-    margin-bottom: 2rem;
-}
-
-.welcome-card .btn {
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-}
-
-
-/* ================= NAVBAR ================= */
 .navbar {
-    background: linear-gradient(135deg, #ec6767, #eb0606); /* Azul degradê moderno */
+    background: linear-gradient(135deg, #ec6767, #eb0606);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 0.75rem 1rem;
     transition: background 0.3s ease, box-shadow 0.3s ease;
@@ -60,7 +90,7 @@ body {
 }
 
 .navbar .nav-link {
-    color: #e9ecef !important; /* Cinza claro */
+    color: #e9ecef !important;
     font-weight: 500;
     margin-left: 1rem;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -81,11 +111,10 @@ body {
 }
 
 .navbar-toggler-icon {
-    filter: invert(1); /* Ícone hamburguer branco */
+    filter: invert(1);
 }
 
-/* Navbar em scroll */
 .navbar.scrolled {
-    background: #aa3030; /* Azul sólido */
+    background: #aa3030;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
 }
