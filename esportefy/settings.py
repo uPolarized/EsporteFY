@@ -2,25 +2,13 @@ from pathlib import Path
 import environ
 import os
 
-# Caminho base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Inicializa django-environ
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Segurança
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = []
-
-
-# Crispy Forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-
-# settings.py
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -30,12 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-
-    # Seus apps vêm primeiro
     'app',
     'perfis',
-
-    # Depois os apps de terceiros
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -43,33 +27,70 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 ]
-SITE_ID = 1
-
-# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # obrigatório Allauth
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   
+]
+ROOT_URLCONF = 'esportefy.urls'
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'app' / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+WSGI_APPLICATION = 'esportefy.wsgi.application'
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3','NAME': BASE_DIR / 'db.sqlite3',}}
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Autenticação
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'
+USE_I18N = True
+USE_TZ = True
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Configurações Allauth atualizadas (sem warnings)
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+# Configurações do Allauth
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True # O username será pedido no nosso formulário, não exigido pelo allauth
+ACCOUNT_LOGIN_METHODS = ['username', 'email']
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# ESTA É A MUDANÇA: em vez de herdar, apontamos para um formulário simples.
+ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.forms.CustomSignupForm' 
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -83,61 +104,3 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
-ROOT_URLCONF = 'esportefy.urls'
-
-
-
-
-# Templates
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [
-            BASE_DIR / "templates",  # para templates globais
-        ],
-        'APP_DIRS': True,  # busca templates dentro de cada app
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'esportefy.wsgi.application'
-
-# Database SQLite (pode trocar para PostgreSQL usando DATABASE_URL)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Senhas
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-# Internacionalização
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-
-
-# Para servir arquivos estáticos em desenvolvimento e encontrar nos apps
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static", # Opcional: para static files globais na raiz do projeto
-]
-STATIC_ROOT = BASE_DIR / "staticfiles" # Onde 'collectstatic' vai juntar tudo em produção
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

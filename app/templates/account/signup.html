@@ -4,41 +4,47 @@
 {% block title %}Cadastro - EsporteFY{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h3 class="card-title mb-4 text-center">Crie sua Conta</h3>
-                
-                <form method="post">
-                    {% csrf_token %}
-
-                    {{ form|crispy }}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-3 text-center">Crie sua Conta</h3>
                     
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-success">Cadastrar</button>
+                    <!-- Botão de Cadastro com Google -->
+                    <div class="text-center mb-3">
+                        <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-outline-secondary w-100">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 10px; vertical-align: middle;">
+                            Cadastrar com Google
+                        </a>
                     </div>
-                </form>
-                
-                <hr class="my-4">
-                
-                {% providers_media_js %}
-                <div class="text-center">
-                    {% if socialaccount_providers %}
-                        {% for provider in socialaccount_providers %}
-                             {% if provider.id == 'google' %}
-                                <a href="{% provider_login_url provider.id %}" class="btn btn-outline-danger w-100 mb-2">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 8px;">
-                                    Cadastrar com {{ provider.name }}
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
+                     <!-- Aviso sobre o preenchimento posterior dos dados -->
+                    <p class="text-center text-muted small mt-4">
+                        <strong></strong> Você pode adicionar seus dados de perfil (esporte preferido, idade e nível de habilidade) mais tarde, na sua página de perfil.
+                    </p>
+
+                    
+
+                    <!-- Formulário de Cadastro Padrão -->
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success">Cadastrar com E-mail</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Aviso sobre o preenchimento posterior dos dados -->
+                    <p class="text-center text-muted small mt-4">
+                        <strong>Dica:</strong> Você pode adicionar seus dados de perfil (esporte preferido, idade e nível de habilidade) mais tarde, na sua página de perfil.
+                    </p>
+                    
+                    <hr class="my-3">
+
+                    <p class="text-center mt-2">
+                        Já tem conta? <a href="{% url 'account_login' %}">Login</a>
+                    </p>
                 </div>
-                
-                <p class="text-center mt-3">
-                    Já tem conta? <a href="{% url 'account_login' %}">Login</a>
-                </p>
             </div>
         </div>
     </div>
