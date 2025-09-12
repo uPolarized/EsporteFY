@@ -1,26 +1,19 @@
 from django import forms
 from .models import Perfil
 
-# Definimos a opção vazia uma vez para reutilizá-la
-EMPTY_CHOICE = [('', 'Selecione uma opção')]
-
+# --- Formulário para Cadastro (com os campos extras) ---
 class CustomSignupForm(forms.Form):
     username = forms.CharField(max_length=30, label='Nome de Usuário')
-    
-    # Adicionamos a opção vazia antes das opções do modelo
     esporte_preferido = forms.ChoiceField(
-        choices=EMPTY_CHOICE + Perfil.ESPORTES_CHOICES,
+        choices=Perfil.ESPORTES_CHOICES,
         label="Qual seu esporte principal?",
         required=False
     )
-    
-    # Fazemos o mesmo para o nível de habilidade
     nivel_habilidade = forms.ChoiceField(
-        choices=EMPTY_CHOICE + Perfil.NIVEL_HABILIDADE_CHOICES,
+        choices=Perfil.NIVEL_HABILIDADE_CHOICES,
         label="Qual seu nível de habilidade?",
         required=False
     )
-    
     idade = forms.IntegerField(label="Idade", required=False)
 
     def signup(self, request, user):
@@ -32,3 +25,9 @@ class CustomSignupForm(forms.Form):
         
         user.save()
         perfil.save()
+
+# --- Formulário para Editar o Perfil (estava faltando) ---
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = Perfil
+        fields = ['foto', 'bio', 'esportes_preferidos', 'nivel_habilidade', 'idade']

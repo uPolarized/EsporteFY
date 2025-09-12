@@ -1,0 +1,31 @@
+{% extends "account/base.html" %}
+
+{% block title %}Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <img src="{{ object.foto.url }}" class="img-fluid rounded-circle mb-3" alt="Foto de Perfil">
+                </div>
+                <div class="col-md-9">
+                    <h2>{{ object.user.username }}</h2>
+                    <p class="text-muted">{{ object.user.email }}</p>
+                    <hr>
+                    <h4>Sobre Mim</h4>
+                    <p>{{ object.bio|default:"Nenhuma informação." }}</p>
+                    <h4>Preferências</h4>
+                    <ul>
+                        <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
+                        <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
+                        <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
+                    </ul>
+                    <a href="{% url 'editar_perfil' %}" class="btn btn-primary">Editar Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

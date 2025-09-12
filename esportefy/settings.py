@@ -78,7 +78,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-LOGIN_REDIRECT_URL = '/'
+
+LOGIN_REDIRECT_URL = '/feed/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configurações do Allauth
@@ -104,3 +105,23 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# --------------------------------------------------------------------------
+# --- CONFIGURAÇÃO DE ENVIO DE E-MAIL (SMTP) ---
+# --------------------------------------------------------------------------
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True  # Para comunicação segura
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')  # Lê o e-mail do arquivo .env
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD') # Lê a senha de app do arquivo .env
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # O e-mail que aparecerá como remetente
+
+
+#----------------------------------------------------------------------------
+
+
+# --- Configuração de Arquivos de Mídia (Uploads dos Usuários)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

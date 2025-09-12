@@ -1,0 +1,60 @@
+{% extends "account/base.html" %}
+
+{% block title %}Seu Feed - EsporteFY{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    {# Mensagem de boas-vindas personalizada #}
+    <h1 class="mb-4">Bem-vindo de volta, {{ user.username|capfirst }}!</h1>
+
+    <div class="row g-4"> {# g-4 adiciona um espaçamento entre as colunas #}
+        
+        {# Coluna Principal (esquerda) #}
+        <div class="col-lg-8">
+            
+            {# Seção de Ação Rápida #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">O que você gostaria de fazer?</h5>
+                    <p class="card-text text-muted">Encontre uma quadra disponível ou veja o status das suas próximas partidas.</p>
+                    <a href="#" class="btn btn-primary">Agendar uma Quadra</a>
+                    <a href="#" class="btn btn-outline-secondary">Ver Minhas Partidas</a>
+                </div>
+            </div>
+
+            {# Espaço para o feed de partidas ou quadras disponíveis #}
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    Quadras Próximas
+                </div>
+                <div class="card-body">
+                    <p class="text-muted"><em>(Em breve: aqui aparecerá uma lista de quadras disponíveis para agendamento...)</em></p>
+                </div>
+            </div>
+
+        </div>
+
+        {# Coluna Lateral (direita) #}
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                 <div class="card-header">
+                    Meu Perfil
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if user.perfil.foto %}
+                            <img src="{{ user.perfil.foto.url }}" class="img-fluid rounded-circle" alt="Foto de Perfil" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <p><strong>Usuário:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Esporte:</strong> {{ user.perfil.esportes_preferidos|default:"Não definido" }}</p>
+                    <p><strong>Nível:</strong> {{ user.perfil.nivel_habilidade|default:"Não definido" }}</p>
+                    <a href="{% url 'editar_perfil' %}">Editar Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
