@@ -8,7 +8,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('app.urls')),
-    path('perfis/', include('perfis.urls')), # Vamos criar este arquivo a seguir
+    path('perfis/', include('perfis.urls')),
+    path('partidas/', include('partidas.urls')),
 ]
 
 # Serve os arquivos de mídia apenas em modo DEBUG

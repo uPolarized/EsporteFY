@@ -6,10 +6,10 @@
     <title>{% block title %}EsporteFY{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/login/base.css' %}">
-
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -17,31 +17,30 @@
 <body class="{% block body_class %}bg-light{% endblock %}">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
+    
         {% if user.is_authenticated %}
-    <a class="navbar-brand" href="{% url 'feed' %}">EsporteFY</a>
-{% else %}
-    <a class="navbar-brand" href="{% url 'home' %}">EsporteFY</a>
-{% endif %}
+            <a class="navbar-brand" href="{% url 'feed' %}">EsporteFY</a>
+        {% else %}
+            <a class="navbar-brand" href="{% url 'home' %}">EsporteFY</a>
+        {% endif %}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 {% if user.is_authenticated %}
-
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'perfis:lista_usuarios' %}">Encontrar Jogadores</a>
                     </li>
-
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {% if user.perfil.foto %}
-                                <img src="{{ user.perfil.foto.url }}" alt=" " width="32" height="32" class="rounded-circle me-2">
+                                <img src="{{ user.perfil.foto.url }}" alt=" " width="32" height="32" class="rounded-circle me-2" style="object-fit: cover;">
                             {% endif %}
                             {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            {# --- CORREÇÃO APLICADA AQUI --- #}
                             <li><a class="dropdown-item" href="{% url 'perfis:perfil' %}">Ver Perfil</a></li>
                             <li><a class="dropdown-item" href="{% url 'perfis:editar_perfil' %}">Editar Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -56,10 +55,49 @@
         </div>
     </div>
 </nav>
-
 {% block content %}{% endblock %}
 
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055; margin-top: 4rem;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="toast-header">
+                    {% if message.tags == 'success' %}
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong class="me-auto">Sucesso!</strong>
+                    {% elif message.tags == 'error' %}
+                        <i class="bi bi-x-octagon-fill text-danger me-2"></i>
+                        <strong class="me-auto">Erro!</strong>
+                    {% elif message.tags == 'warning' %}
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        <strong class="me-auto">Atenção!</strong>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill text-info me-2"></i>
+                        <strong class="me-auto">Aviso</strong>
+                    {% endif %}
+                    <small class="text-muted">agora</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function(toastEl) {
+            // Garante que o toast não seja escondido automaticamente se o usuário passar o mouse sobre ele
+            return new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+        });
+        toastList.forEach(toast => toast.show());
+    });
+</script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>

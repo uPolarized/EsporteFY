@@ -1,0 +1,112 @@
+/* ========================================= */
+/* ===== 1. ESTILOS GERAIS ===== */
+/* ========================================= */
+
+/* Garante que a navbar mantenha o mesmo estilo do base.css */
+
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #fdf6f6, #ffecec);
+    color: #212529;
+    margin: 0;
+    padding: 0;
+}
+.navbar .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+
+
+.container {
+    max-width: 900px;
+    
+}
+
+
+
+/* ========================================= */
+/* ===== 2. TÍTULO ===== */
+/* ========================================= */
+h2 {
+    font-weight: 700;
+    color: #d32f2f;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* ========================================= */
+/* ===== 3. FORMULÁRIO ===== */
+/* ========================================= */
+form {
+    background: linear-gradient(145deg, #fff, #fff5f5);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* Inputs, selects e textareas */
+form input,
+form select,
+form textarea {
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #d32f2f;
+    box-shadow: 0 0 8px rgba(211, 47, 47, 0.4);
+    outline: none;
+}
+
+/* Labels */
+form label {
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Botão Salvar */
+.btn-success {
+    background: linear-gradient(135deg, #ec6767, #eb0606);
+    border: none;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(211, 47, 47, 0.6);
+}
+
+/* Mensagens de erro e sucesso (Crispy Forms) */
+.text-danger {
+    font-size: 0.85rem;
+}
+
+/* ========================================= */
+/* ===== 4. RESPONSIVIDADE ===== */
+/* ========================================= */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    form {
+        padding: 1.5rem;
+    }
+}

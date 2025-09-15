@@ -39,6 +39,24 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+
+/* Navbar: alinhar imagem e nome do usuário */
+.navbar .nav-link.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Espaço entre foto e nome */
+    padding: 0.25rem 0.5rem; /* Ajusta altura da navbar */
+}
+
+.navbar .nav-link.dropdown-toggle img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+
 /* Garante que o texto de links use a variável */
 a {
     color: var(--link-color);

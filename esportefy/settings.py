@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'app',
+    'partidas',
     'perfis',
     'conteudo',
     'allauth',
