@@ -24,6 +24,7 @@ def buscar_noticias_esportivas():
         '"Brasileirão"',
         '"Copa do Brasil"',
         '"Champions League"',
+        '"Maricá"'
     ]
     query_string = " OR ".join(keywords)
     

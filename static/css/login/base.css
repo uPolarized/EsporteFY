@@ -71,12 +71,15 @@ a {
 /* ========================================= */
 
 .navbar {
-    background: linear-gradient(135deg, #ec6767, #eb0606);
+    background: linear-gradient(270deg, #eeafaf, #eb0606, #ff4c4c, #ec6767);
+    background-size: 600% 600%; /* aumenta a área do gradiente para animar */
+    animation: gradientAnimation 8s ease infinite; /* animação contínua */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 0.75rem 1rem;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
 }
 
+/* Mantém os estilos já existentes */
 .navbar .navbar-brand {
     font-weight: 700;
     font-size: 1.4rem;
@@ -115,6 +118,15 @@ a {
 }
 
 .navbar.scrolled {
-    background: #aa3030;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================= */
+/* ===== ANIMAÇÃO DO GRADIENTE ===== */
+/* ========================================= */
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
