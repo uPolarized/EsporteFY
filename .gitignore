@@ -1,0 +1,8 @@
+.env
+venv/
+data/
+dotenv_files/
+htmlcov/
+
+default.conf
+certs

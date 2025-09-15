@@ -1,0 +1,95 @@
+/* Fundo moderno com gradiente */
+body {
+    background: linear-gradient(135deg, #0a192f, #1e3c72, #2a5298);
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Animação suave no gradiente */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Card do login */
+.card {
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Título */
+.card-title {
+    font-weight: 700;
+    color: #f1f1f1;
+}
+
+/* Botão principal */
+.btn-primary {
+    background: linear-gradient(90deg, #1e90ff, #00bfff);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(30, 144, 255, 0.6);
+}
+
+/* Botão social */
+.btn-outline-danger {
+    border-radius: 12px;
+    font-weight: 600;
+    border: 2px solid #ff4b2b;
+    color: #ff4b2b;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background: #ff4b2b;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 75, 43, 0.6);
+}
+
+/* Links */
+a {
+    color: #00bfff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #1e90ff;
+    text-decoration: underline;
+}
+
+/* Ajuste responsivo */
+@media (max-width: 768px) {
+    .card {
+        padding: 10px;
+    }
+    .card-title {
+        font-size: 1.5rem;
+    }
+}

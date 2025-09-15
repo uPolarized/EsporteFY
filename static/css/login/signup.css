@@ -1,0 +1,68 @@
+/* Estilos para a página de cadastro */
+
+.signup-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.signup-card .card-body {
+    padding: 2.5rem; /* Espaçamento interno generoso */
+}
+
+.signup-card .card-title {
+    font-weight: 700;
+    color: #212529; /* Título com cor escura e forte */
+}
+
+/* Estilo do botão de cadastro com e-mail */
+.btn-success {
+    background-color: #198754; /* Verde do Bootstrap */
+    border-color: #198754;
+    padding: 12px;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-success:hover {
+    background-color: #157347; /* Verde um pouco mais escuro no hover */
+}
+
+/* Estilo do botão de cadastro com Google */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Espaço entre o logo e o texto */
+    padding: 12px;
+    font-weight: 500;
+    border-color: #dee2e6; /* Borda cinza clara */
+    color: #495057; /* Texto cinza escuro */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-google:hover {
+    background-color: #f8f9fa; /* Fundo levemente acinzentado no hover */
+    border-color: #ced4da;
+}
+
+.btn-google img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Linha divisória */
+hr {
+    color: #dee2e6; /* Cor da linha */
+}
+
+/* Aviso sobre preenchimento posterior */
+.profile-tip {
+    background-color: #e9ecef; /* Fundo cinza claro */
+    color: #495057;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 0.875rem; /* Tamanho de fonte um pouco menor */
+    text-align: center;
+}

@@ -1,0 +1,32 @@
+/* static/css/login/loginsocial.css */
+
+.social-login-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.social-login-card .card-body {
+    padding: 2.5rem; /* Espaçamento interno generoso */
+}
+
+.social-login-card .card-title {
+    font-weight: 700;
+    color: #212529;
+}
+
+.social-login-card .btn-primary {
+    background-color: #0d6efd; /* Azul do Bootstrap */
+    border-color: #0d6efd;
+    padding: 12px;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.social-login-card .btn-primary:hover {
+    background-color: #0b5ed7; /* Azul mais escuro no hover */
+}
+
+.social-login-card .alert-danger {
+    text-align: left; /* Alinha o texto de erro à esquerda para melhor legibilidade */
+}

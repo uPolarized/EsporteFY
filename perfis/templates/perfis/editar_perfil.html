@@ -1,0 +1,20 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags static %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/editar_perfil.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Perfil</h2>
+    <hr>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success mt-3">Salvar Alterações</button>
+    </form>
+</div>
+{% endblock %}

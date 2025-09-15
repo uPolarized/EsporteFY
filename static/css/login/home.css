@@ -1,0 +1,102 @@
+/* app/static/css/home.css */
+
+body.home-page {
+    background-color: #ffffff; /* Fundo branco padrão para o conteúdo */
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1935&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 140px 0; /* Aumentei o espaçamento vertical */
+    text-align: center;
+}
+
+.hero-section h1 {
+    font-size: 3.8rem; /* Fonte um pouco maior */
+    font-weight: 700;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* Sombra no texto para legibilidade */
+}
+
+.hero-section .lead {
+    font-size: 1.6rem;
+    max-width: 700px; /* Limita a largura do subtítulo */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Seções Gerais */
+.section {
+    padding: 100px 0; /* Aumenta o espaçamento entre as seções */
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 70px;
+    font-weight: 700;
+    font-size: 2.8rem;
+    color: #343a40; /* Um cinza mais escuro */
+}
+
+/* Seção "Como Funciona" */
+.step-card {
+    border: none;
+    padding: 40px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    text-align: center;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+.step-card .step-number {
+    background-color: #0d6efd;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 25px auto;
+}
+
+.step-card h4 {
+    color: #212529;
+    font-weight: 600;
+}
+
+/* Seção "Diferenciais" */
+.feature-icon {
+    font-size: 3.5rem;
+    color: #0d6efd;
+    margin-bottom: 25px;
+}
+
+.feature-item h4 {
+    font-weight: 600;
+}
+
+
+/* Seção "Nossa Missão" & CTA Final */
+.mission-section {
+    padding-bottom: 0; /* Remove padding inferior para juntar com o CTA */
+}
+
+.cta-section {
+    background-color: #f8f9fa;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+}
+
+.cta-section h2 {
+    font-size: 2.2rem;
+}

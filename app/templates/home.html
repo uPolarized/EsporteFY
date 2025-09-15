@@ -1,0 +1,91 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}EsporteFY - Encontre e Agende sua Quadra{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/home.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block body_class %}home-page{% endblock %} 
+
+{% block content %}
+    
+    <header class="hero-section">
+        <div class="container">
+            <h1 class="display-4">O Jogo Começa Aqui</h1>
+            <p class="lead">Encontre, agende e jogue. A quadra perfeita está a apenas um clique de distância.</p>
+            </div>
+    </header>
+
+    <main>
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Como Funciona</h2>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <h4 class="mb-3">Busque</h4>
+                            <p class="text-muted">Use nossos filtros para encontrar quadras por esporte, localização e horário.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <h4 class="mb-3">Agende</h4>
+                            <p class="text-muted">Escolha o horário livre e confirme a reserva instantaneamente.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <h4 class="mb-3">Jogue!</h4>
+                            <p class="text-muted">Compareça na data e hora marcadas e aproveite o seu jogo. Simples assim!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Por que escolher o EsporteFY?</h2>
+                <div class="row text-center justify-content-center">
+                    <div class="col-md-5 feature-item">
+                        <i class="bi bi-geo-alt-fill feature-icon"></i>
+                        <h4>Quadras Perto de Você</h4>
+                        <p class="text-muted">Nosso mapa interativo mostra as melhores opções na sua região.</p>
+                    </div>
+                    <div class="col-md-5 feature-item">
+                        <i class="bi bi-calendar2-check-fill feature-icon"></i>
+                        <h4>Acompanhamento de partidas em Tempo Real</h4>
+                        <p class="text-muted">A disponibilidade é atualizada instantaneamente. Sem conflitos de horário.</p>
+                    </div>
+                    </div>
+            </div>
+        </section>
+
+        <section class="section mission-section">
+            <div class="container text-center" style="max-width: 800px;">
+                <h2 class="section-title">Nossa Missão</h2>
+                <p class="lead text-muted">
+                    Acreditamos que o esporte tem o poder de unir pessoas e transformar vidas. O EsporteFY nasceu da paixão por facilitar o acesso à prática esportiva, conectando atletas a espaços de qualidade de forma simples e eficiente. Queremos ser a ponte entre você e sua próxima partida inesquecível.
+                </p>
+            </div>
+        </section>
+
+        <section class="section cta-section">
+            <div class="container">
+                <h2 class="section-title">Pronto para Jogar?</h2>
+                <p class="lead text-muted mb-4">Junte-se à nossa comunidade de atletas ou acesse sua conta para continuar de onde parou.</p>
+                <div>
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mx-2 my-2">Crie sua Conta</a>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline-secondary btn-lg mx-2 my-2">Faça Login</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+{% endblock %}
