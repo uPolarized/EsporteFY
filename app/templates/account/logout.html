@@ -1,0 +1,44 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Sair{% endblock %}
+
+{% block extra_head %}
+    {# Importa o CSS específico para esta página #}
+    <link rel="stylesheet" href="{% static 'css/login/logout.css' %}">
+    {# Importa a biblioteca de ícones do Bootstrap #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+
+{% block content %}
+<div class="container logout-container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card logout-card">
+                <div class="card-body">
+
+                    <div class="icon">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </div>
+                    
+                    <h3 class="card-title">Sair da Conta</h3>
+                    
+                    <p class="text-muted mt-3 mb-4">
+                        Você tem certeza que deseja sair da sua conta no EsporteFY?
+                    </p>
+                    
+                    <form method="post" action="{% url 'account_logout' %}">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-danger" type="submit">Sim, quero sair</button>
+                            <a href="{% url 'feed' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

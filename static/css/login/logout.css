@@ -1,0 +1,28 @@
+/* static/css/login/logout.css */
+
+.logout-container {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.logout-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.logout-card .card-body {
+    padding: 2.5rem;
+}
+
+.logout-card .icon {
+    font-size: 3.5rem;
+    color: #fd7e14; /* Laranja do Bootstrap para "alerta" */
+    margin-bottom: 1.5rem;
+}
+
+.logout-card .card-title {
+    font-weight: 700;
+    color: #212529;
+}
