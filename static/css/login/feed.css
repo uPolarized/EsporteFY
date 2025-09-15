@@ -1,0 +1,33 @@
+/* static/css/feed.css */
+
+/* Título de Boas-Vindas */
+.welcome-header {
+    font-weight: 700;
+}
+
+/* Card de Ação Rápida */
+.action-card .card-header {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Feed de Notícias */
+.news-feed-title {
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 0.5rem;
+}
+
+.news-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.news-card img {
+    max-height: 250px;
+    object-fit: cover;
+}

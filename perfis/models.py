@@ -20,6 +20,9 @@ class Perfil(models.Model):
     bio = models.TextField(max_length=500, blank=True, verbose_name="Sobre Mim")
     
     
+    # Este campo vai nos ajudar a listar os amigos de um perfil facilmente.
+    amigos = models.ManyToManyField(User, related_name='amigos', blank=True)
+    
 
 
     def __str__(self):
@@ -30,3 +33,20 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         Perfil.objects.create(user=instance)
     instance.perfil.save()
+
+
+    # --- NOVO MODELO DE SOLICITAÇÃO DE AMIZADE ---
+class SolicitacaoAmizade(models.Model):
+    solicitante = models.ForeignKey(User, on_delete=models.CASCADE, related_name='solicitacoes_enviadas')
+    receptor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='solicitacoes_recebidas')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    aceito = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Solicitação de Amizade"
+        verbose_name_plural = "Solicitações de Amizade"
+        # Garante que um usuário não possa enviar mais de um pedido para a mesma pessoa
+        unique_together = ('solicitante', 'receptor')
+
+    def __str__(self):
+        return f'De {self.solicitante.username} para {self.receptor.username}'

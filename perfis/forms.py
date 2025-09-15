@@ -4,11 +4,15 @@ from .models import Perfil
 # --- Formulário para Cadastro (com os campos extras) ---
 class CustomSignupForm(forms.Form):
     username = forms.CharField(max_length=30, label='Nome de Usuário')
+
+    email = forms.EmailField(label="E-mail", required=True)
+    
     esporte_preferido = forms.ChoiceField(
         choices=Perfil.ESPORTES_CHOICES,
         label="Qual seu esporte principal?",
         required=False
     )
+
     nivel_habilidade = forms.ChoiceField(
         choices=Perfil.NIVEL_HABILIDADE_CHOICES,
         label="Qual seu nível de habilidade?",

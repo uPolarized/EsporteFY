@@ -122,6 +122,8 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')  # Lê o e-mail do arquivo .env
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD') # Lê a senha de app do arquivo .env
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # O e-mail que aparecerá como remetente
 
+# Faz o usuário logar automaticamente ao clicar no link de verificação
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 #----------------------------------------------------------------------------
 
