@@ -9,19 +9,9 @@ body {
     padding: 0;
 }
 
-h1.welcome-header {
-    font-size: 2.5rem;
-    font-weight: 800;
-    text-align: center;
-    color: #ff6b6b;
-    text-shadow: 2px 2px 12px rgba(0,0,0,0.6);
-    margin-bottom: 2rem;
-    transition: transform 0.3s ease;
-}
 
-h1.welcome-header:hover {
-    transform: scale(1.05);
-}
+
+
 
 .section-title {
     font-weight: 700;

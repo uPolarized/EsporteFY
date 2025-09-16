@@ -1,0 +1,55 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Minhas Partidas - EsporteFY{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/minhas_partidas.css' %}">
+    
+{% endblock %}
+
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Minhas Partidas</h1>
+
+    <!-- Seção de Partidas Futuras -->
+    <h3 class="mb-3">Próximos Jogos</h3>
+    {% for partida in partidas_futuras %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ partida.titulo }}</h5>
+                <p class="card-text mb-1"><i class="bi bi-geo-alt-fill"></i> <strong>Local:</strong> {{ partida.local }} - {{ partida.get_bairro_display }}</p>
+                <p class="card-text"><i class="bi bi-calendar-event"></i> <strong>Quando:</strong> {{ partida.data_hora|date:"d/m/Y \à\s H:i" }}</p>
+                <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-sm btn-danger">Sair da Partida</a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="card card-body">
+            <p class="text-muted mb-0">Você ainda não tem partidas agendadas. <a href="{% url 'feed' %}">Que tal encontrar uma?</a></p>
+        </div>
+    {% endfor %}
+
+    <hr class="my-5">
+
+    <!-- Seção de Histórico de Partidas -->
+    <h3 class="mb-3">Histórico de Jogos</h3>
+    {% for partida in partidas_passadas %}
+        <div class="card shadow-sm mb-3">
+             <div class="card-body">
+                <h5 class="card-title">{{ partida.titulo }}</h5>
+                <p class="card-text text-muted mb-1"><i class="bi bi-geo-alt-fill"></i> {{ partida.local }} - {{ partida.get_bairro_display }}</p>
+                <p class="card-text text-muted"><i class="bi bi-calendar-event"></i> Jogou em: {{ partida.data_hora|date:"d/m/Y" }}</p>
+                
+                <!-- O botão de avaliação aparecerá aqui no futuro -->
+                <a href="{% url 'partidas:avaliar_partida' partida_id=partida.id %}" class="btn btn-sm btn-primary">Avaliar Partida</a>
+            </div>
+        </div>
+    {% empty %}
+         <div class="card card-body">
+            <p class="text-muted mb-0">Nenhuma partida no seu histórico ainda.</p>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

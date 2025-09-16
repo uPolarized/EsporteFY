@@ -1,0 +1,67 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Avaliar Partida{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/avaliar_partida.css' %}">
+
+
+ <style>
+        /* CSS para transformar radio buttons em estrelas */
+        .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; border: none; padding: 0;}
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 2rem; color: #ddd; cursor: pointer; transition: color 0.2s; }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label { color: #ffc107; }
+        .form-group > div { border: none !important; padding: 0 !important; }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4">Avaliar Partida</h2>
+                    <h5 class="text-center text-muted mb-4">{{ partida.titulo }}</h5>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-5 text-center">
+                            <h4>Avaliação da Quadra</h4>
+                            {{ quadra_form|crispy }}
+                        </div>
+
+                        <h4>Avaliação de Jogadores (Fair Play)</h4>
+                        {{ jogador_formset.management_form }} {# Essencial para o formset funcionar #}
+                        
+                        {% for form, jogador in forms_e_jogadores %}
+                            <div class="d-flex align-items-center mb-3 border-top pt-3">
+                                <div class="me-3">
+                                    {% if jogador.perfil.foto %}
+                                        <img src="{{ jogador.perfil.foto.url }}" alt="" width="50" height="50" class="rounded-circle">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ jogador.username }}</strong>
+                                    {{ form|crispy }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Enviar Avaliações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

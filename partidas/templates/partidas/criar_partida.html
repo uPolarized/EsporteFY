@@ -1,7 +1,13 @@
 {% extends "account/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Criar Nova Partida{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/criar_partida.css' %}">
+    
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
