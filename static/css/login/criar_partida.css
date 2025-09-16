@@ -123,3 +123,122 @@ form label {
         width: 100%;
     }
 }
+
+
+/* static/css/partidas/criar_partida.css */
+
+/* Aplica o fundo escuro APENAS nesta página */
+body.criar-partida-page {
+    background-color: #0a192f;
+    color: #e0e0e0;
+}
+
+/* Centraliza o card na página */
+.criar-partida-container {
+    min-height: calc(100vh - 56px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card com efeito de vidro (Glassmorphism) */
+.criar-partida-card {
+    background: rgba(30, 60, 114, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.criar-partida-card .card-title {
+    font-weight: 700;
+    color: #ff5252;
+}
+
+/* --- Estilos para os campos do formulário (Dark Mode) --- */
+.criar-partida-card .form-label { color: #bdbdbd; }
+.criar-partida-card .form-control,
+.criar-partida-card .form-select {
+    background: rgba(10, 25, 47, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 0.5rem;
+}
+.criar-partida-card .form-control::placeholder { color: #8892b0; }
+.criar-partida-card .form-control:focus,
+.criar-partida-card .form-select:focus {
+    background: rgba(10, 25, 47, 0.7);
+    border-color: #ff5252;
+    box-shadow: 0 0 0 0.25rem rgba(255, 82, 82, 0.25);
+    color: #fff;
+}
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* --- Botão --- */
+.btn-primary {
+    background: #ff5252;
+    border-color: #ff5252;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary:hover {
+    background: #ff1744;
+    border-color: #ff1744;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 82, 82, 0.4);
+}
+
+
+/* ================================================= */
+/* --- NOVOS ESTILOS PARA O MODAL DE SELEÇÃO --- */
+/* ================================================= */
+.modal-content {
+    background: rgba(30, 60, 114, 0.5); /* Fundo translúcido */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 1rem;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Deixa o 'X' branco */
+}
+
+.quadra-selector-card {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.05); /* Fundo do card da quadra translúcido */
+    height: 100%;
+}
+
+.quadra-selector-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+}
+
+.quadra-selector-card.selected {
+    border-color: #ff5252; /* Borda vermelha para indicar seleção */
+    box-shadow: 0 0.5rem 1rem rgba(255, 82, 82, 0.25);
+}
+
+.quadra-selector-card img {
+    height: 150px;
+    object-fit: cover;
+}
+.quadra-selector-card .card-title {
+    color: #f1f1f1;
+}
+.quadra-selector-card .card-text {
+    color: #bdbdbd;
+}

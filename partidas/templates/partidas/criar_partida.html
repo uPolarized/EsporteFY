@@ -1,26 +1,39 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags %}
-{% load static %}
+{% load static crispy_forms_tags %}
 
 {% block title %}Criar Nova Partida{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/login/criar_partida.css' %}">
-    
 {% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-7">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Criar Nova Partida</h2>
+                    <h2 class="card-title text-center mb-4">Organize sua Partida</h2>
                     <form method="post">
                         {% csrf_token %}
-                        {{ form|crispy }}
+                        
+                        {{ form.titulo|as_crispy_field }}
+                        {{ form.esporte|as_crispy_field }}
+
+                        <div class="mb-3">
+                            <label for="id_quadra_display" class="form-label">Quadra</label>
+                            <div class="input-group">
+                                <input type="text" id="id_quadra_display" class="form-control" placeholder="Nenhuma quadra selecionada" readonly>
+                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#selecionarQuadraModal">Escolher</button>
+                            </div>
+                            {{ form.quadra.as_hidden }}
+                        </div>
+                        
+                        {{ form.data_hora|as_crispy_field }}
+                        {{ form.jogadores_necessarios|as_crispy_field }}
+
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary">Publicar Partida</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Publicar Partida</button>
                         </div>
                     </form>
                 </div>
@@ -28,4 +41,58 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="selecionarQuadraModal" tabindex="-1" aria-labelledby="selecionarQuadraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selecionarQuadraModalLabel">Selecione uma Quadra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    {% for quadra in quadras %}
+                    <div class="col-md-6">
+                        <div class="card quadra-selector-card" onclick="selecionarQuadra('{{ quadra.id }}', '{{ quadra.nome }}')">
+                            {% if quadra.foto %}
+                            <img src="{{ quadra.foto.url }}" class="card-img-top" alt="{{ quadra.nome }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ quadra.nome }}</h5>
+                                <p class="card-text text-muted">{{ quadra.get_bairro_display }}</p>
+                                <p class="card-text small">{{ quadra.descricao|truncatewords:20 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+function selecionarQuadra(quadraId, quadraNome) {
+    // Atualiza o campo de texto visível para o usuário
+    document.getElementById('id_quadra_display').value = quadraNome;
+    
+    // Atualiza o valor do campo <select> oculto, que será enviado
+    document.getElementById('id_quadra').value = quadraId;
+
+    // Remove a classe 'selected' de todos os cards
+    document.querySelectorAll('.quadra-selector-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Adiciona a classe 'selected' ao card clicado
+    event.currentTarget.classList.add('selected');
+
+    // Fecha o modal após a seleção
+    var modal = bootstrap.Modal.getInstance(document.getElementById('selecionarQuadraModal'));
+    modal.hide();
+}
+</script>
 {% endblock %}

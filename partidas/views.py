@@ -11,7 +11,7 @@ from django.utils import timezone # Importa a funcionalidade de tempo
 from django.forms import modelformset_factory
 from .forms import AvaliacaoQuadraForm, AvaliacaoJogadorForm
 from .models import AvaliacaoQuadra, AvaliacaoJogador
-
+from quadras.models import Quadra # Importe o modelo Quadra
 
 
 class CriarPartidaView(LoginRequiredMixin, CreateView):
@@ -19,6 +19,12 @@ class CriarPartidaView(LoginRequiredMixin, CreateView):
     form_class = PartidaForm
     template_name = 'partidas/criar_partida.html'
     success_url = reverse_lazy('feed')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Envia a lista de todas as quadras para o template
+        context['quadras'] = Quadra.objects.all()
+        return context
 
     def form_valid(self, form):
         form.instance.organizador = self.request.user
