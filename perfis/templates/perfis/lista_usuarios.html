@@ -1,11 +1,36 @@
 {% extends "account/base.html" %}
+{% load static crispy_forms_tags %}
 {% load static %}
-
 {% block title %}Encontrar Jogadores - EsporteFY{% endblock %}
+
+
+{% block extra_head %}
+    
+    <link rel="stylesheet" href="{% static 'css/login/lista_usuarios.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container my-4 my-md-5">
     <h1 class="mb-4">Encontrar Jogadores na Plataforma</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    {{ filtro_form.nome_usuario|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ filtro_form.esporte|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ filtro_form.nivel|as_crispy_field }}
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     {# Área para exibir mensagens de feedback (ex: "Pedido de amizade enviado!") #}
     {% if messages %}
@@ -51,10 +76,27 @@
                 </div>
             </div>
         {% empty %}
-            <div class="list-group-item">
-                <p class="mb-0 text-muted">Nenhum outro usuário encontrado na plataforma.</p>
+            <div class="list-group-item text-center p-4">
+                <h5 class="mb-1">Nenhum jogador encontrado</h5>
+                <p class="mb-0 text-muted">Tente ajustar os seus filtros de busca.</p>
             </div>
         {% endfor %}
     </div>
+
+    {% if is_paginated %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.previous_page_number }}">&laquo;</a></li>
+                {% endif %}
+
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.next_page_number }}">&raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 </div>
 {% endblock %}

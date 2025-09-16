@@ -1,35 +1,46 @@
 /* app/static/css/home.css */
 
+/* ===== Tema Geral ===== */
 body.home-page {
-    background-color: #ffffff; /* Fundo branco padrão para o conteúdo */
+    background-color: #121212; /* Fundo escuro */
+    color: #e0e0e0; /* Texto padrão em cinza claro */
+    font-family: 'Inter', sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Hero Section */
+/* ===== Hero Section ===== */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1935&auto=format&fit=crop');
+    background: linear-gradient(rgba(10, 10, 30, 0.75), rgba(10, 10, 30, 0.85)),
+        url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1935&auto=format&fit=crop');
     background-size: cover;
     background-position: center;
-    color: white;
-    padding: 140px 0; /* Aumentei o espaçamento vertical */
+    color: #ffffff;
+    padding: 140px 0;
     text-align: center;
 }
 
 .hero-section h1 {
-    font-size: 3.8rem; /* Fonte um pouco maior */
+    font-size: 3.8rem;
     font-weight: 700;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* Sombra no texto para legibilidade */
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
 }
 
 .hero-section .lead {
     font-size: 1.6rem;
-    max-width: 700px; /* Limita a largura do subtítulo */
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 700px;
+    margin: 20px auto 0 auto;
+    color: #d1d9ff;
 }
 
-/* Seções Gerais */
+/* ===== Seções Gerais ===== */
 .section {
-    padding: 100px 0; /* Aumenta o espaçamento entre as seções */
+    padding: 100px 0;
+    background-color: #181818; /* Fundo das seções */
+}
+
+.section:nth-child(even) {
+    background-color: #1f1f1f; /* Alternância sutil */
 }
 
 .section-title {
@@ -37,29 +48,41 @@ body.home-page {
     margin-bottom: 70px;
     font-weight: 700;
     font-size: 2.8rem;
-    color: #343a40; /* Um cinza mais escuro */
+    color: #f1f1f1;
+    position: relative;
 }
 
-/* Seção "Como Funciona" */
+.section-title::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 4px;
+    margin: 15px auto 0;
+    background: linear-gradient(90deg, #0d6efd, #7b2ff7);
+    border-radius: 4px;
+}
+
+/* ===== "Como Funciona" ===== */
 .step-card {
     border: none;
     padding: 40px;
-    border-radius: 12px;
-    background-color: #fff;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    border-radius: 14px;
+    background-color: #222;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     text-align: center;
     height: 100%;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .step-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    background-color: #292929;
+    box-shadow: 0 10px 30px rgba(13, 110, 253, 0.3);
 }
 
 .step-card .step-number {
-    background-color: #0d6efd;
-    color: white;
+    background: linear-gradient(135deg, #0d6efd, #7b2ff7);
+    color: #fff;
     font-size: 1.5rem;
     font-weight: bold;
     width: 60px;
@@ -67,36 +90,92 @@ body.home-page {
     line-height: 60px;
     border-radius: 50%;
     margin: 0 auto 25px auto;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.5);
 }
 
+.dark-section {
+    background-color: #121212; /* fundo escuro elegante */
+    color: #f8f9fa; /* texto claro */
+    padding: 100px 0;
+}
+
+.dark-section .section-title {
+    color: #ffffff;
+}
+
+.dark-section p {
+    color: #d1d1d1; /* cinza suave para contraste */
+}
+
+.dark-section .feature-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-section .feature-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.dark-section .feature-icon {
+    color: #0d6efd; /* mantém o azul do tema */
+}
+
+
+
 .step-card h4 {
-    color: #212529;
+    color: #ffffff;
     font-weight: 600;
 }
 
-/* Seção "Diferenciais" */
+/* ===== Diferenciais ===== */
 .feature-icon {
     font-size: 3.5rem;
     color: #0d6efd;
     margin-bottom: 25px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+    transform: scale(1.2);
+    color: #7b2ff7;
 }
 
 .feature-item h4 {
     font-weight: 600;
+    color: #eaeaea;
 }
 
-
-/* Seção "Nossa Missão" & CTA Final */
+/* ===== Nossa Missão & CTA Final ===== */
 .mission-section {
-    padding-bottom: 0; /* Remove padding inferior para juntar com o CTA */
+    padding-bottom: 0;
 }
 
 .cta-section {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f31818, #17122000);
     text-align: center;
-    border-top: 1px solid #e9ecef;
+    color: #fff;
+    padding: 80px 20px;
 }
 
 .cta-section h2 {
     font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.cta-section a.btn {
+    background: #fff;
+    color: #0d6efd;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.cta-section a.btn:hover {
+    background: #121212;
+    color: #fff;
 }

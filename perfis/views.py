@@ -7,22 +7,45 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm
-
+from .forms import PerfilForm, FiltroUsuarioForm 
+from .forms import PerfilForm # Importe o formulário
 # --- A VIEW QUE ESTAVA FALTANDO ---
 class ListaUsuariosView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'perfis/lista_usuarios.html'
     context_object_name = 'usuarios'
+    paginate_by = 10 # Adiciona paginação para não sobrecarregar a página
 
     def get_queryset(self):
-        # Exclui o próprio usuário da lista para não adicionar a si mesmo
-        return User.objects.exclude(id=self.request.user.id)
+        # Começa com todos os utilizadores, exceto o próprio
+        queryset = User.objects.exclude(id=self.request.user.id).select_related('perfil')
+        
+        # Cria uma instância do formulário com os dados da busca (GET request)
+        form = FiltroUsuarioForm(self.request.GET)
+        
+        # Se o formulário for válido, aplica os filtros
+        if form.is_valid():
+            nome = form.cleaned_data.get('nome_usuario')
+            esporte = form.cleaned_data.get('esporte')
+            nivel = form.cleaned_data.get('nivel')
+
+            if nome:
+                queryset = queryset.filter(username__icontains=nome)
+            if esporte:
+                queryset = queryset.filter(perfil__esportes_preferidos=esporte)
+            if nivel:
+                queryset = queryset.filter(perfil__nivel_habilidade=nivel)
+        
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        # Busca os status de amizade para exibir os botões corretos no template
+        # Adiciona o formulário de filtro ao contexto para ser usado no template
+        context['filtro_form'] = FiltroUsuarioForm(self.request.GET or None)
+
+        # Prepara listas para checagem rápida de amizade no template
         amigos = user.perfil.amigos.all()
         solicitacoes_enviadas_qs = SolicitacaoAmizade.objects.filter(solicitante=user)
         solicitacoes_recebidas_qs = SolicitacaoAmizade.objects.filter(receptor=user)
@@ -66,8 +89,12 @@ class EditarPerfilView(LoginRequiredMixin, UpdateView):
     template_name = 'perfis/editar_perfil.html'
     success_url = reverse_lazy('perfis:perfil')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return self.request.user.perfil
+
+    def form_valid(self, form):
+        # Lógica para salvar o formulário
+        return super().form_valid(form)
 
 @login_required
 def aceitar_solicitacao(request, solicitacao_id):

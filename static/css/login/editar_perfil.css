@@ -1,130 +1,242 @@
-/* ========================================= */
-/* ===== 1. ESTILOS GERAIS ===== */
-/* ========================================= */
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(145deg, #1f1f1f, #2c2c2c); /* fundo escuro */
-    color: #f1f1f1;
-    margin: 0;
-    padding: 0;
+/*
+ * perfil_layout2.css
+ * Layout 2 (Sidebar + Feed) - Tema escuro, glass, hover suave
+ * Scoped under .profile-page/.profile-layout-wrapper to avoid global overrides
+ */
+
+/* Variáveis de tema */
+:root {
+    --bg-0: #0b0d10;
+    --bg-1: rgba(24, 24, 26, 0.78);
+    --glass-border: rgba(255, 255, 255, 0.03);
+    --accent: #e53935;
+    --accent-2: #ff6b6b;
+    --muted: #9da4a9;
+    --text: #eef1f3;
+    --glass-blur: 10px;
+    --card-radius: 12px;
+    --shadow-lg: 0 12px 30px rgba(2, 6, 23, 0.6);
 }
 
-.navbar .container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+/* Aplicar fundo na página onde esse CSS é carregado */
+.profile-layout-wrapper {
+    background: linear-gradient(180deg, var(--bg-0) 0%, #070708 100%);
+    min-height: 72vh;
+    color: var(--text);
 }
 
-.container {
-    max-width: 900px;
+/* Grid layout: left / center */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Mobile: single column stack */
+@media (max-width: 992px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ----- CARDS (glass) ----- */
+.card-glass,
+.side-card {
+    background: linear-gradient(180deg, rgba(28, 28, 30, 0.6), rgba(22, 22, 24, 0.6));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--shadow-lg);
+    padding: 1.5rem;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* hover suave */
+.card-glass:hover,
+.side-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(229, 57, 53, 0.06);
+}
+
+/* ----- LEFT SIDEBAR ----- */
+.profile-left {
+    position: relative;
+}
+
+/* side card wrapper */
+.side-card {
+    position: sticky;
+    top: 86px;
+    /* ajusta conforme o header/navegação */
     padding: 1rem;
-    border-radius: 1rem;
-    background: #2e2e2e; /* container escuro */
-    border: 1px solid #444;
-    transition: box-shadow 0.3s ease;
 }
 
-.container:hover {
-    box-shadow: 0 0 25px rgba(255, 107, 107, 0.4); /* glow vermelho */
-}
-
-/* ========================================= */
-/* ===== 2. TÍTULO ===== */
-/* ========================================= */
-h2 {
-    font-weight: 700;
-    color: #fff; /* branco */
-    margin-bottom: 1rem;
+/* avatar */
+.avatar-wrap {
     text-align: center;
-    transition: color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 0.6rem;
 }
 
-h2:hover {
-    color: #ff6b6b;
-    transform: scale(1.03);
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    display: inline-block;
 }
 
-/* ========================================= */
-/* ===== 3. FORMULÁRIO ===== */
-/* ========================================= */
-form {
-    background: linear-gradient(145deg, #2e2e2e, #3a3a3a); /* escuro */
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid #444;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-form:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(255, 107, 107, 0.4);
-}
-
-/* Inputs, selects e textareas */
-form input,
-form select,
-form textarea {
-    border-radius: 0.5rem;
-    border: 1px solid #555;
-    background: #2c2c2c; /* fundo escuro */
-    color: #fff; /* texto branco */
-    padding: 0.5rem 0.75rem;
-    width: 100%;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-form input::placeholder,
-form textarea::placeholder {
-    color: #bbb; /* placeholder cinza claro para contraste */
-}
-
-form input:focus,
-form select:focus,
-form textarea:focus {
-    border-color: #ff6b6b; /* foco vermelho */
-    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
-    outline: none;
-}
-
-/* Labels */
-form label {
-    font-weight: 500;
-    margin-top: 0.5rem;
-    display: block;
-    color: #fff; /* branco */
-}
-
-/* Botão Salvar */
-.btn-success {
-    background: linear-gradient(135deg, #ff6b6b, #d32f2f);
-    border: none;
-    padding: 0.6rem 1.5rem;
-    font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.avatar.placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #424242;
     color: #fff;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    font-size: 2.4rem;
+    font-weight: 700;
 }
 
-.btn-success:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+/* meta */
+.username {
+    margin: 0.6rem 0 0.1rem;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 
-/* Mensagens de erro e sucesso (Crispy Forms) */
-.text-danger {
-    font-size: 0.85rem;
-    color: #ff6b6b;
+.email {
+    text-align: center;
+    margin-bottom: 0.6rem;
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
-/* ========================================= */
-/* ===== 4. RESPONSIVIDADE ===== */
-/* ========================================= */
-@media (max-width: 768px) {
-    .container {
-        padding: 1rem;
-    }
+/* stats */
+.side-stats {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: space-between;
+    margin-top: 0.8rem;
+}
 
-    form {
-        padding: 1.5rem;
-    }
+.side-stats .stat {
+    text-align: center;
+    flex: 1;
+}
+
+.side-stats .num {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.side-stats .label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+/* side menu */
+.side-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+}
+
+.side-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 6px 8px;
+    border-radius: 8px;
+    display: block;
+}
+
+.side-link:hover {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--accent-2);
+}
+
+/* ----- CENTER ----- */
+.profile-center {
+    min-width: 0;
+}
+
+/* card headings */
+.card-glass h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text);
+}
+
+/* input fields */
+.form-control,
+.form-select {
+    background: rgba(28, 28, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+.form-control:focus,
+.form-select:focus {
+    background: rgba(28, 28, 30, 0.5);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem rgba(229, 57, 53, 0.25);
+}
+.form-label {
+    color: var(--text);
+}
+
+/* file input styling (customize if needed) */
+input[type="file"]::file-selector-button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: var(--accent-2);
+}
+
+
+/* ----- BUTTON STYLES ----- */
+/* primary */
+.btn.btn-primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(229, 57, 53, 0.12);
+    transition: transform 0.2s ease;
+}
+
+.btn.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(229, 57, 53, 0.16);
+}
+
+/* outline */
+.btn.btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+.btn.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.04);
 }

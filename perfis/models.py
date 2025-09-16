@@ -17,16 +17,18 @@ class Perfil(models.Model):
     nivel_habilidade = models.CharField(max_length=50, choices=NIVEL_HABILIDADE_CHOICES, blank=True, null=True, verbose_name="Nível de Habilidade")
     idade = models.PositiveIntegerField(blank=True, null=True, verbose_name="Idade")
     foto = models.ImageField(upload_to='fotos_perfil/', null=True, blank=True, default='fotos_perfil/default.jpg', verbose_name="Foto de Perfil")
-    bio = models.TextField(max_length=500, blank=True, verbose_name="Sobre Mim")
     
+    # --- CAMPOS CORRIGIDOS ---
+    mini_bio = models.TextField(max_length=500, blank=True, verbose_name="Sobre Mim")
+    cidade = models.CharField(max_length=100, blank=True, null=True, verbose_name="Cidade")
     
-    # Este campo vai nos ajudar a listar os amigos de um perfil facilmente.
+    # ... o restante do seu modelo Perfil continua igual
     amigos = models.ManyToManyField(User, related_name='amigos', blank=True)
     
-
-
     def __str__(self):
         return f'Perfil de {self.user.username}'
+
+# ... (o resto do seu código, incluindo a função 'receiver' e a classe 'SolicitacaoAmizade')
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):

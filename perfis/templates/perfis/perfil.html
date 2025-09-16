@@ -1,77 +1,166 @@
 {% extends "account/base.html" %}
 {% load static %}
 
-{% block title %}Meu Perfil{% endblock %}
+{% block title %}{{ object.user.username }} — Perfil{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/login/perfil.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="profile-page">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+  {# Usamos container-fluid para aproveitar largura e o grid do layout #}
+  <div class="container-fluid profile-layout-wrapper py-4">
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3 text-center d-flex flex-column align-items-center">
-                    {% if object.foto %}
-                        <img src="{{ object.foto.url }}" class="img-fluid rounded-circle mb-3" alt="Foto de Perfil" style="width: 150px; height: 150px; object-fit: cover;">
-                    {% else %}
-                        <div class="bg-secondary rounded-circle mb-3 d-flex align-items-center justify-content-center text-white" style="width: 150px; height: 150px;">
-                            <span style="font-size: 4rem;">{{ object.user.username|first|upper }}</span>
-                        </div>
-                    {% endif %}
-                    <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-sm w-100">Editar Perfil</a>
-                </div>
-                <div class="col-md-9">
-                    <h2>{{ object.user.username }}</h2>
-                    <p class="text-muted">{{ object.user.email }}</p>
-                    <hr>
-                    <h4>Sobre Mim</h4>
-                    <p>{{ object.bio|default:"Nenhuma informação adicionada ainda." }}</p>
-                    <h4>Preferências de Jogo</h4>
-                    <ul class="list-unstyled">
-                        <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
-                        <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
-                        <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
-                    </ul>
-                </div>
+    <div class="profile-layout">
+
+      <!-- LEFT SIDEBAR -->
+      <aside class="profile-left">
+        <div class="side-card">
+          <div class="avatar-wrap">
+            {% if object.foto %}
+              <img src="{{ object.foto.url }}" alt="Avatar {{ object.user.username }}" class="avatar">
+            {% else %}
+              <div class="avatar placeholder">
+                <span>{{ object.user.username|first|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <h3 class="username">{{ object.user.username }}</h3>
+          <p class="email text-muted">{{ object.user.email }}</p>
+
+          <div class="side-actions">
+            <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+            <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
+          </div>
+
+          <div class="side-stats mt-3">
+            <div class="stat">
+              <span class="num">42</span>
+              <span class="label text-muted">Partidas</span>
             </div>
+            <div class="stat">
+              <span class="num">128</span>
+              <span class="label text-muted">Amigos</span>
+            </div>
+            <div class="stat">
+              <span class="num">Lvl 3</span>
+              <span class="label text-muted">Nível</span>
+            </div>
+          </div>
+
+          <hr>
+
+          <nav class="side-menu">
+            <a href="#" class="side-link">Atividade</a>
+            <a href="{% url 'perfis:perfil' %}" class="side-link">Sobre</a>
+           
+          </nav>
         </div>
-    </div>
+      </aside>
 
-    {% if solicitacoes_pendentes %}
-        <div class="card shadow-sm p-3">
-            <div class="card-header">
-                <h4 class="mb-0">Pedidos de Amizade Pendentes ({{ solicitacoes_pendentes|length }})</h4>
-            </div>
-            <div class="list-group list-group-flush mt-2">
-                {% for solicitacao in solicitacoes_pendentes %}
-                    <div class="list-group-item">
-                        <div class="my-1 d-flex align-items-center">
-                            {% if solicitacao.solicitante.perfil.foto %}
-                                <img src="{{ solicitacao.solicitante.perfil.foto.url }}" alt="" width="40" height="40" class="rounded-circle me-2">
-                            {% endif %}
-                            <strong>{{ solicitacao.solicitante.username }}</strong> quer ser seu amigo.
-                        </div>
-                        <div class="my-1">
-                            <a href="{% url 'perfis:aceitar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-success me-2">✓ Aceitar</a>
-                            <a href="{% url 'perfis:recusar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-danger">✗ Recusar</a>
-                        </div>
+      <!-- CENTER FEED (perfil + feed) -->
+      <main class="profile-center">
+        <div class="center-header card-glass">
+          <div class="center-meta">
+            <h1 class="name">{{ object.user.username }}</h1>
+            <p class="muted">{{ object.user.email }}</p>
+          </div>
+          <div class="center-actions">
+            <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary">Editar</a>
+            <a href="#" class="btn btn-outline">Seguir</a>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <!-- Sobre -->
+          <section class="card-glass about-card">
+            <h4>Sobre Mim</h4>
+            <p class="muted small">
+              {{ object.bio|default:"Nenhuma informação adicionada ainda." }}
+            </p>
+          </section>
+
+          <!-- Preferências -->
+          <section class="card-glass prefs-card">
+            <h4>Preferências de Jogo</h4>
+            <ul class="prefs-list small muted">
+              <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
+              <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
+              <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
+            </ul>
+          </section>
+
+          <!-- Atividade / Feed -->
+          <section class="card-glass activity-card full-width">
+            <h4>Atividade</h4>
+
+            {# Se tiver uma variável activities, iterar; caso contrário placeholder #}
+            {% if activities %}
+              <div class="activity-list">
+                {% for a in activities %}
+                  <div class="activity-item">
+                    <div class="act-left">
+                      <div class="dot"></div>
                     </div>
+                    <div class="act-body">
+                      <div class="act-title">{{ a.title }}</div>
+                      <div class="act-meta small muted">{{ a.timestamp }}</div>
+                    </div>
+                  </div>
                 {% endfor %}
-            </div>
+              </div>
+            {% else %}
+              <div class="empty-activity muted">
+                Nenhuma atividade recente. Jogue uma partida, publique algo ou conecte-se com amigos!
+              </div>
+            {% endif %}
+          </section>
         </div>
-    {% endif %}
+      </main>
 
-</div>
+      <!-- RIGHT COLUMN (pendentes / sugeridos) -->
+      <aside class="profile-right">
+        <div class="right-card card-glass">
+          <h5>Pedidos Pendentes</h5>
+
+          {% if solicitacoes_pendentes %}
+            <div class="pending-list">
+              {% for solicitacao in solicitacoes_pendentes %}
+                <div class="pending-item">
+                  <div class="p-left">
+                    {% if solicitacao.solicitante.perfil.foto %}
+                      <img src="{{ solicitacao.solicitante.perfil.foto.url }}" class="mini-avatar" alt="">
+                    {% else %}
+                      <div class="mini-avatar placeholder">{{ solicitacao.solicitante.username|first|upper }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="p-body">
+                    <strong>{{ solicitacao.solicitante.username }}</strong>
+                    <div class="small muted">quer ser seu amigo</div>
+                  </div>
+                  <div class="p-actions">
+                    <a href="{% url 'perfis:aceitar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-success">✓</a>
+                    <a href="{% url 'perfis:recusar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-danger">✗</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="muted small">Nenhum pedido pendente</div>
+          {% endif %}
+        </div>
+
+        <div class="right-card card-glass mt-3">
+          <h5>Sugestões</h5>
+          <div class="suggestions muted small">Sugira amigos e times aqui — recurso futuro.</div>
+        </div>
+      </aside>
+
+    </div> <!-- /profile-layout -->
+
+  </div> <!-- /container-fluid -->
+</div> <!-- /profile-page -->
 {% endblock %}

@@ -1,0 +1,291 @@
+/* ============================
+   Lista de Usuários - Tema Escuro
+   Seguro para o template fornecido
+   ============================ */
+
+/* ---- Variáveis de tema ---- */
+:root{
+    --bg: #1a1b1d;
+    --page-pad: 1.25rem;
+    --card-bg: rgba(28,28,30,0.72);
+    --card-border: rgba(255,255,255,0.04);
+    --glass-blur: 10px;
+    --accent: #e53935;       /* vermelho principal EsporteFY */
+    --accent-2: #ff6b6b;     /* tom de destaque */
+    --muted: #9aa0a6;
+    --text: #f3f4f6;
+    --success: #2ecc71;
+    --danger: #ff6b6b;
+    --shadow: 0 8px 22px rgba(2,6,23,0.6);
+}
+
+.mb-4{
+    text-align: center;
+}
+
+/* ---- Fundo e tipografia ---- */
+html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, #0b0c0d 100%);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", Tahoma, system-ui, -apple-system, "Helvetica Neue", Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mantém espaçamento do container e centraliza verticalmente em telas altas */
+.container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* ---- Card principal (search/form) ---- */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Hover leve no card, não altera layout */
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 4px 10px rgba(229,57,53,0.06);
+}
+
+/* Espaçamento interno responsivo do body do card */
+.card-body {
+    padding: 1rem 1rem;
+}
+@media (min-width: 768px) {
+    .card-body { padding: 1.25rem 1.5rem; }
+}
+
+/* ---- Inputs e selects (crispy/bootstrap) ---- */
+.form-control,
+.form-select {
+    background-color: rgba(38,38,38,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    -webkit-appearance: none;
+}
+
+/* Mantém o placeholder mais suave */
+.form-control::placeholder { color: rgba(255,255,255,0.35); }
+
+/* Foco claro e acessível */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(229,57,53,0.08);
+    outline: none;
+    background-color: rgba(48,48,48,0.9);
+}
+
+/* focus-visible para acessibilidade */
+:focus-visible {
+    outline: 2px dashed rgba(255,255,255,0.06);
+    outline-offset: 2px;
+}
+
+/* ---- Lista de usuários (list-group) ---- */
+.list-group {
+    margin-top: 0.5rem;
+    border-radius: 12px;
+    overflow: visible; /* permite sombras dos itens */
+}
+
+/* Itens com glass + transição — NÃO alteramos display/flex-direction */
+.list-group-item {
+    background: linear-gradient(180deg, rgba(28,28,30,0.64), rgba(23,23,24,0.64));
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 10px;
+    margin-bottom: 0.6rem;
+    padding: 0.9rem;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    align-items: center; /* ajuda o conteúdo flex */
+}
+
+/* Hover "lift" com glow sutil do accent — não muda fluxo */
+.list-group-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 6px 18px rgba(229,57,53,0.08);
+    background: linear-gradient(180deg, rgba(34,34,34,0.75), rgba(25,25,26,0.75));
+}
+
+/* Quando estiver ativo/clicked breve feedback */
+.list-group-item:active {
+    transform: translateY(-1px);
+    transition-duration: 0.09s;
+}
+
+/* Conteúdo flex interno — preserva orientações responsivas do template */
+.list-group-item > .d-flex {
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Assure wrap on small screens (keeps Bootstrap behavior) */
+@media (max-width: 575.98px) {
+    .list-group-item { padding: 0.85rem; }
+}
+
+/* ---- Avatares ---- */
+.list-group-item img.rounded-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-block;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Placeholder quando não há foto (template usa bg-secondary inline) */
+.list-group-item .bg-secondary.rounded-circle {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #424242; /* fallback */
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Texto do usuário */
+.list-group-item h5 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Subtexto (esporte, nível) */
+.list-group-item small.text-muted {
+    color: var(--muted);
+    display: block;
+    margin-top: 0.18rem;
+}
+
+/* ---- Botões de ação ---- */
+.btn {
+    border-radius: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* Botão primário (Adicionar Amigo) */
+.btn-primary {
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+    border: none;
+    color: #fff;
+    padding: 6px 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(229,57,53,0.12);
+}
+
+/* Hover/Active do primário */
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(229,57,53,0.16); }
+.btn-primary:active { transform: translateY(0); }
+
+/* Botões secundários e warning */
+.btn-secondary {
+    background: rgba(66,66,66,0.9);
+    border: 1px solid rgba(255,255,255,0.03);
+    color: var(--text);
+}
+.btn-secondary:hover { transform: translateY(-2px); background: rgba(90,90,90,0.95); }
+
+.btn-warning {
+    background: linear-gradient(90deg, #ffb84d 0%, #ff9f1a 100%);
+    border: none;
+    color: #111;
+}
+.btn-warning:hover { transform: translateY(-2px); }
+
+/* Pedido Enviado (disabled) */
+.btn[disabled], .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Badge "Amigos" */
+.badge.bg-success {
+    background-color: rgba(46,204,113,0.12);
+    color: var(--success);
+    border: 1px solid rgba(46,204,113,0.12);
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ---- Alertas (messages) ---- */
+.alert {
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(36,36,36,0.72), rgba(26,26,26,0.72));
+    border: 1px solid rgba(255,255,255,0.03);
+    color: var(--text);
+}
+
+/* Especificidade para danger / success */
+.alert-danger {
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+    background: rgba(40,16,16,0.6);
+}
+.alert-success {
+    border-left: 4px solid var(--success);
+    color: var(--success);
+    background: rgba(14,28,16,0.6);
+}
+
+/* Botão fechar nas alerts (inverte para visível em tema escuro) */
+.alert .btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+}
+
+/* ---- Paginação ---- */
+.pagination .page-link {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.03);
+    color: var(--muted);
+    margin: 0 0.12rem;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(90deg, rgba(229,57,53,0.95), rgba(255,107,107,0.95));
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 20px rgba(229,57,53,0.12);
+}
+
+.pagination .page-link:hover {
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+/* ---- Pequenos ajustes visuais ---- */
+/* Garante contraste do link de perfil (se houver) */
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; color: #ff8b8b; }
+
+/* Garante que os componentes flutuantes não cortem sombra */
+.list-group, .card { overflow: visible; }
+
+/* Ajustes mobile finais */
+@media (max-width: 576px){
+    .list-group-item { padding: 0.85rem; }
+    .list-group-item h5 { font-size: 0.98rem; }
+    .btn { font-size: 0.88rem; padding: 6px 8px; }
+}
