@@ -5,4 +5,4 @@ class PerfisConfig(AppConfig):
     name = 'perfis'
 
     def ready(self):
-        import perfis.signals # Importa nossos sinais quando o app estiver pronto
+        import perfis.signals

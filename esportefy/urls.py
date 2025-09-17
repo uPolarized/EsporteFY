@@ -10,6 +10,7 @@ urlpatterns = [
     path('', include('app.urls')),
     path('perfis/', include('perfis.urls')),
     path('partidas/', include('partidas.urls')),
+    path('social/', include('social.urls')),
 ]
 
 # Serve os arquivos de mídia apenas em modo DEBUG

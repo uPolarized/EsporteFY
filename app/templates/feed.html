@@ -8,47 +8,80 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
 
-{% block body_class %}dark-theme{% endblock %} {# Adiciona uma classe ao body para o tema escuro #}
-
 {% block content %}
-<div class="container my-4">
+<div class="container-fluid my-4">
 
-    <div class="welcome-container">
-        {% now "H" as hora_atual %}
-        <h1 class="welcome-header">
-            {% if hora_atual|add:"0" < 12 %}Bom dia
-            {% elif hora_atual|add:"0" < 18 %}Boa tarde
-            {% else %}Boa noite
-            {% endif %}
-            , {{ user.username|capfirst }}!
-        </h1>
-    </div>
+    <!-- Bloco de Mensagens -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="row gx-4">
+        <!-- COLUNA DA ESQUERDA (FEED DE ATIVIDADES) -->
         <div class="col-lg-3">
-            <h2 class="section-title"><i class="bi bi-people-fill"></i>Mural Social</h2>
-            </div>
-
-        <div class="col-lg-6">
-            <div class="card action-card mb-4">
-                <div class="card-header">Acesso Rápido</div>
-                <div class="card-body d-flex flex-wrap gap-2">
-                    <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-plus-circle-fill me-2"></i>Criar Partida
-                    </a>
-                    <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1">
-                        <i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas
-                    </a>
+            <h2 class="section-title"><i class="bi bi-activity"></i>Feed de Atividades</h2>
+            {% for atividade in atividades %}
+            <div class="card shadow-sm mb-3 post-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if atividade.ator.perfil.foto %}
+                            <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="mb-0 lh-sm small">
+                                <strong>{{ atividade.ator.username }}</strong>
+                                {{ atividade.verbo }}
+                                {% if atividade.alvo %}
+                                    <strong>"{{ atividade.alvo }}"</strong>
+                                {% endif %}
+                            </p>
+                            <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="card"><div class="card-body text-muted small">Nenhuma atividade na comunidade ainda.</div></div>
+            {% endfor %}
+        </div>
 
+        <!-- COLUNA CENTRAL (PARTIDAS) -->
+        <div class="col-lg-6">
+            <div class="text-center">
+                {% now "H" as hora_atual %}
+                <h1 class="mb-4 welcome-header">
+                    {% if hora_atual|add:"0" < 12 %}Bom dia
+                    {% elif hora_atual|add:"0" < 18 %}Boa tarde
+                    {% else %}Boa noite
+                    {% endif %}
+                    , {{ user.username|capfirst }}!
+                </h1>
+            </div>
+            
+            <div class="card shadow-sm mb-4 action-card">
+                <div class="card-header text-center">Acesso Rápido</div>
+                <div class="card-body d-flex flex-wrap gap-2">
+                    <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1"><i class="bi bi-plus-circle-fill me-2"></i>Criar Partida</a>
+                    <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas</a>
+                </div>
+            </div>
+            
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="section-title"><i class="bi bi-dribbble"></i>Partidas Abertas</h2>
+                <h2 class="section-title mb-0"><i class="bi bi-dribbble"></i>Partidas Abertas</h2>
                 <div class="dropdown">
-                    <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         Bairro: <strong>{{ bairro_atual_nome }}</strong>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
                         {% for valor, nome in bairros_disponiveis %}
                             <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
@@ -58,9 +91,62 @@
             </div>
             
             {% for partida in partidas %}
-            <div class="card match-card mb-3">
+            <div class="card shadow-sm mb-3 match-card">
                 <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">{{ partida.titulo }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}
+                            </h6>
+                            <p class="card-text mb-2"><i class="bi bi-calendar-event"></i> {{ partida.data_hora|date:"d/m/Y \à\s H:i" }}</p>
+                        </div>
+                        <div class="text-end">
+                            {% if partida.vagas_restantes == 1 %}<span class="badge bg-danger fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+                            {% elif partida.vagas_restantes <= 3 %}<span class="badge bg-warning text-dark fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+                            {% else %}<span class="badge bg-primary fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+                            {% endif %}
+                            <small class="d-block text-muted">Jogadores</small>
+                        </div>
                     </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if user == partida.organizador %}<a href="{% url 'partidas:cancelar_partida' partida_id=partida.id %}" class="btn btn-warning">Cancelar Partida</a>
+                            {% elif user in partida.jogadores_confirmados.all %}<a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-danger">Sair da Partida</a>
+                            {% elif partida.vagas_restantes > 0 %}<a href="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="btn btn-success">Participar</a>
+                            {% else %}<button class="btn btn-secondary" disabled>Lotado</button>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#jogadoresModal{{ partida.id }}">
+                            Ver jogadores confirmados ({{ partida.vagas_preenchidas }})
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="jogadoresModalLabel{{ partida.id }}">Jogadores Confirmados</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="list-group list-group-flush">
+                                {% for jogador in partida.jogadores_confirmados.all %}
+                                    <div class="list-group-item d-flex align-items-center">
+                                        {% if jogador.perfil.foto %}<img src="{{ jogador.perfil.foto.url }}" alt="" width="40" height="40" class="rounded-circle me-3" style="object-fit: cover;">
+                                        {% else %}<div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;"><span class="fw-bold">{{ jogador.username|first|upper }}</span></div>
+                                        {% endif %}
+                                        <span>{{ jogador.username }}</span>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-muted">Seja o primeiro a participar!</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             {% empty %}
             <div class="card no-match-card">
@@ -72,13 +158,14 @@
             {% endfor %}
         </div>
 
+        <!-- COLUNA DA DIREITA (NOTÍCIAS) -->
         <div class="col-lg-3 news-sidebar">
-            <h2 class="section-title"><i class="bi bi-newspaper"></i>Notícias</h2>
+            <h2 class="section-title text-center"><i class="bi bi-newspaper"></i>Notícias</h2>
             {% for noticia in noticias %}
-            <a href="{{ noticia.url }}" target="_blank">
-                <div class="card news-card mb-3">
+            <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
+                <div class="card shadow-sm mb-3 news-card">
                     {% if noticia.urlToImage %}
-                        <img src="{{ noticia.urlToImage }}" class="card-img-top" alt="{{ noticia.title }}">
+                        <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>

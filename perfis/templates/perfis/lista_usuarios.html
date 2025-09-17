@@ -1,19 +1,19 @@
 {% extends "account/base.html" %}
 {% load static crispy_forms_tags %}
-{% load static %}
+
 {% block title %}Encontrar Jogadores - EsporteFY{% endblock %}
 
-
 {% block extra_head %}
-    
     <link rel="stylesheet" href="{% static 'css/login/lista_usuarios.css' %}">
 {% endblock %}
 
+{% block body_class %}dark-theme{% endblock %} {# Aplica o tema escuro #}
+
 {% block content %}
 <div class="container my-4 my-md-5">
-    <h1 class="mb-4">Encontrar Jogadores na Plataforma</h1>
+    <h1 class="mb-4 text-center">Encontrar Jogadores na Plataforma</h1>
 
-    <div class="card shadow-sm mb-4">
+    <div class="card filter-card mb-4">
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
                 <div class="col-md-5">
@@ -32,21 +32,15 @@
         </div>
     </div>
 
-    {# Área para exibir mensagens de feedback (ex: "Pedido de amizade enviado!") #}
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
+        {# ... (o seu código de mensagens continua aqui) ... #}
     {% endif %}
 
     <div class="list-group shadow-sm">
         {% for usuario in usuarios %}
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center flex-column flex-sm-row gap-3">
+            <div class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row gap-3">
                 
-                {# Informações do Usuário #}
+                {# Informações do Utilizador #}
                 <div class="d-flex align-items-center">
                     {% if usuario.perfil.foto %}
                         <img src="{{ usuario.perfil.foto.url }}" alt="Foto de {{ usuario.username }}" width="50" height="50" class="rounded-circle me-3" style="object-fit: cover;">
@@ -56,20 +50,23 @@
                         </div>
                     {% endif %}
                     <div>
-                        <h5 class="mb-1">{{ usuario.username }}</h5>
-                        <small class="text-muted">Esporte: {{ usuario.perfil.esportes_preferidos|default:"Não informado" }} | Nível: {{ usuario.perfil.nivel_habilidade|default:"Não informado" }}</small>
+                        <h5 class="mb-1">
+                            <a href="{% url 'perfis:ver_perfil' username=usuario.username %}">
+                                {{ usuario.username }}
+                            </a>
+                        </h5>
+                        <small class="text-muted">Desporto: {{ usuario.perfil.esportes_preferidos|default:"Não informado" }} | Nível: {{ usuario.perfil.nivel_habilidade|default:"Não informado" }}</small>
                     </div>
                 </div>
                 
                 {# Botões de Ação de Amizade #}
-                <div class="mt-2 mt-sm-0">
+                <div class="d-flex gap-2 mt-2 mt-sm-0">
                     {% if usuario in amigos_lista %}
                         <span class="badge bg-success p-2">Amigos</span>
                     {% elif usuario in enviadas_lista %}
                         <button class="btn btn-sm btn-secondary" disabled>Pedido Enviado</button>
                     {% elif usuario in recebidas_lista %}
-                        {# Link para a página de perfil do usuário, onde ele pode aceitar #}
-                        <a href="{% url 'perfis:perfil' %}" class="btn btn-sm btn-warning">Responder Pedido</a>
+                        <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-sm btn-warning">Responder Pedido</a>
                     {% else %}
                         <a href="{% url 'perfis:enviar_solicitacao' receptor_id=usuario.id %}" class="btn btn-sm btn-primary">Adicionar Amigo</a>
                     {% endif %}
@@ -89,9 +86,7 @@
                 {% if page_obj.has_previous %}
                     <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.previous_page_number }}">&laquo;</a></li>
                 {% endif %}
-
                 <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
-
                 {% if page_obj.has_next %}
                     <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.next_page_number }}">&raquo;</a></li>
                 {% endif %}

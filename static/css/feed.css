@@ -1,33 +1,28 @@
-/* ========================================= */
 /* ===== 1. ESTILOS GERAIS ===== */
-/* ========================================= */
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(145deg, #1f1f1f, #2c2c2c); /* fundo escuro */
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
     color: #f1f1f1;
     margin: 0;
     padding: 0;
 }
 
-/* Container ao redor da saudação */
+/* Saudação */
 .welcome-container {
-    background: linear-gradient(145deg, #2c2c2c, #1f1f1f); /* fundo escuro gradiente */
-    border: 2px solid #f84242;                              /* borda chamativa */
+    background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+    border: 2px solid #ff6b6b;
     border-radius: 1.5rem;
     padding: 2rem 1.5rem;
     margin: 2rem auto;
     max-width: 700px;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);        /* sombra suave */
+    box-shadow: 0 8px 25px rgba(255,107,107,0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .welcome-container:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5);      /* hover mais chamativo */
+    box-shadow: 0 15px 35px rgba(255,107,107,0.5);
 }
-
-/* Texto da saudação */
 .welcome-header {
     font-size: 2.5rem;
     font-weight: 800;
@@ -38,164 +33,78 @@ body {
     letter-spacing: 1px;
     margin: 0;
 }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glow { from { text-shadow:0 0 5px rgba(255,81,47,0.5),0 0 10px rgba(221,36,118,0.4); } to { text-shadow:0 0 15px rgba(255,81,47,0.8),0 0 25px rgba(221,36,118,0.6); } }
 
-/* Animação de entrada */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* ===== 2. BOTÕES ===== */
+.btn-primary { background: linear-gradient(135deg,#ff6b6b,#ff3b3b); border:none; box-shadow:0 4px 12px rgba(255,107,107,0.4); transition:all 0.3s ease; color:#fff; }
+.btn-primary:hover { transform: scale(1.05); box-shadow:0 8px 25px rgba(255,107,107,0.6);}
+.btn-outline-secondary { border-color:#ff6b6b; color:#ff6b6b; transition:all 0.3s ease;}
+.btn-outline-secondary:hover { background:#ff6b6b; color:#fff; transform:scale(1.03);}
+.btn-success { background: linear-gradient(135deg,#4caf50,#388e3c); border:none; transition: transform 0.2s ease, box-shadow 0.2s ease;}
+.btn-success:hover { transform: scale(1.05); box-shadow:0 6px 20px rgba(76,175,80,0.4); }
 
-/* Efeito de brilho pulsante */
-@keyframes glow {
-    from {
-        text-shadow: 0 0 5px rgba(255, 81, 47, 0.5),
-                     0 0 10px rgba(221, 36, 118, 0.4);
-    }
-    to {
-        text-shadow: 0 0 15px rgba(255, 81, 47, 0.8),
-                     0 0 25px rgba(221, 36, 118, 0.6);
-    }
-}
+/* ===== 3. ACESSO RÁPIDO ===== */
+.action-card { background:#2e2e2e; border:1px solid #444; border-radius:1rem; box-shadow:0 8px 25px rgba(0,0,0,0.4); transition:transform 0.3s ease, box-shadow 0.3s ease; }
+.action-card:hover { transform: translateY(-5px); box-shadow:0 15px 35px rgba(255,107,107,0.3); }
+.action-card .card-header { font-weight:700; color:#ff6b6b; background:#3a3a3a; border-bottom:1px solid #444; text-align:center; text-transform:uppercase; letter-spacing:1px;}
+.action-card .btn { display:inline-flex; align-items:center; justify-content:center; font-weight:600; border-radius:0.8rem; padding:0.75rem 1rem; font-size:1rem; transition:all 0.3s ease; text-decoration:none; }
+.action-card .btn-primary { box-shadow:0 4px 14px rgba(255,107,107,0.35);}
+.action-card .btn-primary:hover { transform: scale(1.07) translateY(-2px); box-shadow:0 8px 25px rgba(255,107,107,0.6);}
+.action-card .btn-outline-secondary { border:2px solid #ff6b6b; background:transparent;}
+.action-card .btn-outline-secondary:hover { background:#ff6b6b; color:#fff !important; transform:scale(1.05); box-shadow:0 6px 20px rgba(255,107,107,0.4); }
 
+/* ===== 4. DROPDOWN FILTRO ===== */
+.dropdown .btn { background:#3a3a3a; color:#f1f1f1; border:1px solid #555; border-radius:0.8rem; font-weight:600; transition:all 0.3s ease; }
+.dropdown .btn:hover, .dropdown .btn:focus { background:#ff6b6b; color:#fff; border-color:#ff6b6b; }
+.dropdown-menu { background:#2c2c2c; color:#f1f1f1; border:1px solid #444; border-radius:0.8rem; box-shadow:0 5px 15px rgba(0,0,0,0.3); padding:0.5rem 0; }
+.dropdown-menu a.dropdown-item { color:#f1f1f1; padding:0.5rem 1rem; border-radius:0.5rem; transition:all 0.3s ease; }
+.dropdown-menu a.dropdown-item:hover { background:#d32f2f; color:#fff; }
+
+/* ===== 5. CARDS DE PARTIDAS ===== */
+.match-card, .no-match-card { background:#2e2e2e; border:1px solid #444; border-radius:1rem; margin-bottom:1rem; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
+.no-match-card a { color:#ff6b6b; font-weight:600; text-decoration:none; }
+.no-match-card a:hover { color:#ff3d3d; text-decoration:underline; }
+
+/* ===== 6. SIDEBAR DE NOTÍCIAS ===== */
+.news-sidebar a { text-decoration:none; color:inherit; transition:all 0.3s ease;}
+.news-sidebar a:hover { color:#ff6b6b; transform:scale(1.02);}
+.news-card { border-radius:1rem; overflow:hidden; transition:transform 0.3s ease, box-shadow 0.3s ease; background:#3a3a3a; border:1px solid #555; }
+.news-card img { object-fit:cover; max-height:180px; width:100%; transition:transform 0.3s ease; }
+.news-card:hover { transform:translateY(-5px); box-shadow:0 15px 35px rgba(255,107,107,0.3); }
+.news-card:hover img { transform:scale(1.05); }
+.news-card .card-title { font-weight:600; font-size:1rem; margin-bottom:0.3rem; color:#ff6b6b; }
+.news-source { font-size:0.75rem; color:#ccc; }
 
 
 
 .section-title {
     font-weight: 700;
-    font-size: 1.5rem;
-    color: #ff6b6b;
-    margin-bottom: 1rem;
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
+    justify-content: center; /* centraliza horizontalmente */
     gap: 0.5rem;
+    color: #ff6b6b;
     text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
-}
-
-/* ========================================= */
-/* ===== 2. BOTÕES ===== */
-/* ========================================= */
-.btn-primary {
-    background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
-    border: none;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
-}
-
-.btn-outline-secondary {
-    border-color: #ff6b6b;
-    color: #ff6b6b;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-secondary:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: scale(1.03);
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #4caf50, #388e3c);
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-success:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-/* ======================= */
-/* CARD DE ACESSO RÁPIDO */
-/* ======================= */
-.action-card {
-    background: #2e2e2e;              /* fundo escuro */
-    border: 1px solid #444;           /* borda discreta */
-    border-radius: 1rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.action-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(255,107,107,0.3);
-}
-
-.action-card .card-header {
-    font-weight: 700;
-    color: #ff6b6b;
-    background: #3a3a3a;
-    border-bottom: 1px solid #444;
-    text-align: center;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* ======================= */
-/* BOTÕES DENTRO DO CARD */
-/* ======================= */
-.action-card .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    border-radius: 0.8rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
+.section-title i {
+    font-size: 1.6rem;
+    color: #ff6b6b;
+    transition: transform 0.3s ease;
 }
 
-/* Botão primário */
-.action-card .btn-primary {
-    background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
-    color: #fff !important;
-    border: none;
-    box-shadow: 0 4px 14px rgba(255, 107, 107, 0.35);
+.section-title i:hover {
+    transform: rotate(15deg) scale(1.2);
 }
 
-.action-card .btn-primary:hover {
-    transform: scale(1.07) translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
-}
-
-/* Botão secundário */
-.action-card .btn-outline-secondary {
-    border: 2px solid #ff6b6b;
-    color: #ff6b6b !important;
-    background: transparent;
-}
-
-.action-card .btn-outline-secondary:hover {
-    background: #ff6b6b;
-    color: #fff !important;
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255,107,107,0.4);
-}
-
-/* ======================= */
-/* RESPONSIVIDADE */
-/* ======================= */
-@media (max-width: 768px) {
-    .action-card .btn {
-        width: 100%;
-    }
-}
-
-
-/* ======================= */
-/* FILTRO DE BAIRROS */
-/* ======================= */
-
-/* Botão do dropdown */
 .dropdown .btn {
     background: #3a3a3a;      /* fundo escuro */
     color: #f1f1f1;           /* texto claro */
-    border: 1px solid #555;   /* borda discreta */
+    border: 1px solid #555;
     border-radius: 0.8rem;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -208,17 +117,15 @@ body {
     border-color: #ff6b6b;
 }
 
-/* Menu do dropdown */
 .dropdown-menu {
     background-color: #2c2c2c; /* fundo escuro do menu */
-    color: #f1f1f1;            /* texto claro */
+    color: #f1f1f1;
     border: 1px solid #444;
     border-radius: 0.8rem;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     padding: 0.5rem 0;
 }
 
-/* Itens do menu */
 .dropdown-menu a.dropdown-item {
     color: #f1f1f1;
     padding: 0.5rem 1rem;
@@ -232,70 +139,33 @@ body {
 }
 
 
+/* ===== LINK NO CARD SEM PARTIDAS ===== */
 
-/* ========================================= */
-/* ===== 4. CARDS DE PARTIDAS ===== */
-/* ========================================= */
-.section-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: linear-gradient(90deg, #ff6b6b, #ff3d3d);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    animation: fadeInDown 1s ease, glowRed 2s ease-in-out infinite alternate;
+.no-activity-card {
+    background: #2e2e2e;           /* fundo escuro */
+    border: 1px solid #444;        /* borda discreta */
+    border-radius: 1rem;
+    text-align: center;
+    color: #f1f1f1;                /* texto branco */
+    padding: 1rem 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3); /* sombra suave */
+    font-size: 0.9rem;
 }
 
-/* Ícone alinhado */
-.section-title i {
-    font-size: 1.6rem;
-    color: #ff6b6b;
-    transition: transform 0.3s ease;
-}
 
-.section-title i:hover {
-    transform: rotate(15deg) scale(1.2);
-}
 
-/* Animação de entrada */
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-/* Glow pulsante */
-@keyframes glowRed {
-    from {
-        text-shadow: 0 0 8px rgba(255, 107, 107, 0.4),
-                     0 0 15px rgba(255, 61, 61, 0.3);
-    }
-    to {
-        text-shadow: 0 0 15px rgba(255, 107, 107, 0.8),
-                     0 0 30px rgba(255, 61, 61, 0.6);
-    }
-}
-
-/* Estilo especial para card vazio */
 .no-match-card {
-    background: #2e2e2e;       /* mesmo fundo das match-card */
+    background: #2e2e2e;
     border: 1px solid #444;
     border-radius: 1rem;
     text-align: center;
-    color: #f1f1f1;            /* texto claro */
+    color: #f1f1f1;
+    padding: 1rem 1rem;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    line-height: 1.5rem; /* mantém o texto legível */
 }
 
-/* Link de ação */
 .no-match-card a {
     color: #ff6b6b;
     font-weight: 600;
@@ -310,129 +180,11 @@ body {
 
 
 
-/* ========================================= */
-/* ===== 5. SIDEBAR DE NOTÍCIAS ===== */
-/* ========================================= */
-/* Remove sublinhado e cor padrão dos links das notícias */
-
-.news-sidebar a {
-    text-decoration: none;
-    color: inherit; /* herda a cor do card (branco/rosa) */
-    transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.news-sidebar a:hover {
-    color: #ff6b6b; /* destaque ao passar o mouse */
-    transform: scale(1.02);
-}
-
-.section-title {
-  text-align: center;     /* centraliza o texto */
-  display: flex;          /* ativa flexbox */
-  align-items: center;    /* centraliza verticalmente ícone + texto */
-  justify-content: center;/* centraliza horizontalmente */
-  gap: 8px;               /* espaço entre ícone e texto */
-}
-
-
-.news-card {
-    border-radius: 1rem;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: #3a3a3a;
-    color: #f1f1f1;
-    border: 1px solid #555;
-}
-
-.news-card img {
-    object-fit: cover;
-    max-height: 180px;
-    width: 100%;
-    transition: transform 0.3s ease;
-}
-
-.news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
-}
-
-.news-card:hover img {
-    transform: scale(1.05);
-}
-
-.news-card .card-title {
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-    color: #ff6b6b;
-}
-
-.news-source {
-    font-size: 0.75rem;
-    color: #ccc;
-}
-
-/* ========================================= */
-/* ===== 6. RESPONSIVIDADE ===== */
-/* ========================================= */
-@media (max-width: 992px) {
-    .news-sidebar {
-        position: relative;
-        top: auto;
-        margin-top: 2rem;
-    }
-}
-
-@media (max-width: 768px) {
-    h1.welcome-header {
-        font-size: 2rem;
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-    }
-
-    .btn {
-        width: 100%;
-    }
-
-    .match-card, .news-card, .action-card {
-        margin-bottom: 1rem;
-    }
-}
-
-
-
-/* ========================================= */
-/* ===== ALERTAS COMO POP-UP ===== */
-/* ========================================= */
-.alert {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    min-width: 300px;
-    z-index: 1050; /* acima do resto da página */
-    border-radius: 1rem;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    transition: transform 0.4s ease, opacity 0.4s ease;
-    opacity: 0;
-    transform: translateY(-20px);
-}
-
-/* Quando aparece */
-.alert.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Tipos de alertas */
-.alert-success { background: linear-gradient(135deg, #4caf50, #2e7d32); color: #e0f7e9; border: 1px solid #1b5e20; }
-.alert-danger  { background: linear-gradient(135deg, #ff6b6b, #d32f2f); color: #fff1f1; border: 1px solid #b71c1c; }
-.alert-warning { background: linear-gradient(135deg, #ffb74d, #f57c00); color: #3e2e0d; border: 1px solid #e65100; }
-.alert-info    { background: linear-gradient(135deg, #64b5f6, #1976d2); color: #e8f0fe; border: 1px solid #0d47a1; }
-
-/* Botão de fechar visível no fundo escuro */
-.alert-dismissible .btn-close {
-    filter: invert(1);
+/* ===== 7. RESPONSIVIDADE ===== */
+@media(max-width:992px){ .news-sidebar{position:relative;top:auto;margin-top:2rem;} }
+@media(max-width:768px){
+    h1.welcome-header{font-size:2rem;}
+    .section-title{font-size:1.25rem;}
+    .btn{width:100%;}
+    .match-card, .news-card, .action-card{margin-bottom:1rem;}
 }

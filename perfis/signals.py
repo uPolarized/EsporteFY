@@ -1,17 +1,19 @@
-from django.contrib.auth.signals import user_logged_in
+from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from django.contrib import messages
+from django.contrib.auth.models import User
+from .models import Perfil
+from social.models import Atividade
 
-@receiver(user_logged_in)
-def post_login(sender, user, request, **kwargs):
-    """
-    Este sinal é disparado toda vez que um usuário faz login.
-    """
-    # Verifica se o login foi recente (para evitar mostrar a mensagem
-    # em sessões antigas "lembradas"). a.is_new é True no primeiro login.
-    if user.is_authenticated and kwargs.get('is_new', False):
-        messages.info(
-            request, 
-            f'Bem-vindo ao EsporteFY, {user.username}! Confira as partidas abertas e as últimas notícias.',
-            extra_tags='welcome-toast' # Uma "tag" especial para o nosso toast
-        )
+@receiver(m2m_changed, sender=Perfil.amigos.through)
+def criar_atividade_nova_amizade(sender, instance, action, pk_set, **kwargs):
+    if action == 'post_add':
+        quem_aceitou = instance.user
+        for user_pk in pk_set:
+            quem_enviou = User.objects.get(pk=user_pk)
+            
+            # Cria UMA ÚNICA atividade, guardando os dois envolvidos
+            Atividade.objects.create(
+                ator=quem_aceitou,
+                verbo='tornou-se amigo(a) de',
+                utilizador_relacionado=quem_enviou
+            )

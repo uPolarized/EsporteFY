@@ -1,42 +1,52 @@
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.shortcuts import render, redirect
+from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.db.models import Max
+from datetime import timedelta # 1. Importa o timedelta
+
+# Importações dos modelos e API
 from conteudo.api_client import buscar_noticias_esportivas
 from partidas.models import Partida
-from django.utils import timezone
 from quadras.models import Quadra
+from social.models import Atividade
 
-class HomeView(TemplateView):
-    template_name = "home.html" # Assumindo que este arquivo está em app/templates/home.html
-
-    def dispatch(self, request, *args, **kwargs):
+class HomeView(View):
+    template_name = "home.html"
+    def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('feed')
-        return super().dispatch(request, *args, **kwargs)
+        return render(request, self.template_name)
 
-class FeedView(LoginRequiredMixin, TemplateView):
-    template_name = 'feed.html' # <-- Correto
+class FeedView(LoginRequiredMixin, View):
+    template_name = 'feed.html'
+    
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         context['noticias'] = buscar_noticias_esportivas()
 
+        uma_semana_atras = timezone.now() - timedelta(days=7)
+        
+        # 3. Busca apenas as atividades que aconteceram DEPOIS daquela data
+        context['atividades'] = Atividade.objects.filter(
+            timestamp__gte=uma_semana_atras
+        ).select_related('ator__perfil')[:20]
+        
         bairro_filtrado = self.request.GET.get('bairro', 'todos')
         partidas_list = Partida.objects.filter(data_hora__gte=timezone.now()).select_related('quadra')
-
         if bairro_filtrado and bairro_filtrado != 'todos':
             partidas_list = partidas_list.filter(quadra__bairro=bairro_filtrado)
         
-        # --- CORREÇÃO APLICADA AQUI ---
-        # Pega as opções de bairro do modelo Quadra, que é o local correto agora
-        bairros_dict = dict(Quadra.BAIRRO_CHOICES)
-        context['bairros_disponiveis'] = Quadra.BAIRRO_CHOICES
-        # -------------------------------
-        
-        bairro_atual_nome = bairros_dict.get(bairro_filtrado, 'Todos')
-
         context['partidas'] = partidas_list
+        context['bairros_disponiveis'] = Quadra.BAIRRO_CHOICES
         context['bairro_atual'] = bairro_filtrado
-        context['bairro_atual_nome'] = bairro_atual_nome
+        context['bairro_atual_nome'] = dict(Quadra.BAIRRO_CHOICES).get(bairro_filtrado, 'Todos')
+        
+        # Lógica do Feed de Atividades
+        context['atividades'] = Atividade.objects.all().select_related('ator__perfil')[:20]
         
         return context

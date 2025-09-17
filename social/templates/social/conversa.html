@@ -1,0 +1,33 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Conversa com {{ outro_usuario.username }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>Conversa com {{ outro_usuario.username }}</h3>
+        </div>
+        <div id="chat-log" class="card-body" style="height: 50vh; overflow-y: auto;">
+            {% for mensagem in mensagens %}
+                <div class="mb-2 {% if mensagem.remetente == request.user %}text-end{% endif %}">
+                    <small class="text-muted">{{ mensagem.remetente.username }} - {{ mensagem.timestamp|date:"H:i" }}</small>
+                    <div class="d-inline-block p-2 rounded-3 {% if mensagem.remetente == request.user %}bg-primary text-white{% else %}bg-light{% endif %}">
+                        {{ mensagem.conteudo }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="card-footer">
+            <form id="chat-form" method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-grid mt-2">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
