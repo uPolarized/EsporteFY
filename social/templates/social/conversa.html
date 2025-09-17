@@ -20,14 +20,72 @@
             {% endfor %}
         </div>
         <div class="card-footer">
-            <form id="chat-form" method="post">
-                {% csrf_token %}
-                {{ form|crispy }}
-                <div class="d-grid mt-2">
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </div>
+            {% if user.is_authenticated %}
+            <form id="chat-form" class="d-flex">
+                <input type="text" id="chat-message-input" class="form-control me-2" placeholder="Digite a sua mensagem..." autocomplete="off">
+                <button type="submit" class="btn btn-primary">Enviar</button>
             </form>
+            {% else %}
+                <p>Você precisa estar logado para enviar mensagens.</p>
+            {% endif %}
         </div>
     </div>
 </div>
+
+{{ outro_usuario.username|json_script:"json-outro-usuario-username" }}
+{{ request.user.username|json_script:"json-meu-usuario-username" }}
+{% endblock %}
+
+{% block extra_js %}
+{% if user.is_authenticated %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const outroUsuarioUsername = JSON.parse(document.getElementById('json-outro-usuario-username').textContent);
+        const meuUsuarioUsername = JSON.parse(document.getElementById('json-meu-usuario-username').textContent);
+        const chatLog = document.querySelector('#chat-log');
+        const messageInput = document.querySelector('#chat-message-input');
+        const chatForm = document.querySelector('#chat-form');
+
+       // --- CORREÇÃO DO SCROLL AQUI ---
+        // Rola a caixa de chat para a mensagem mais recente assim que a página carrega
+        chatLog.scrollTop = chatLog.scrollHeight;
+        // --------------------------------
+
+       const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const chatSocket = new WebSocket(
+    ws_protocol + '//' + window.location.host + '/ws/chat/' + encodeURIComponent(outroUsuarioUsername) + '/'
+);
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('mb-2');
+            if (data.username === meuUsuarioUsername) {
+                messageDiv.classList.add('text-end');
+            }
+            messageDiv.innerHTML = `
+                <small class="text-muted">${data.username} - ${data.timestamp}</small>
+                <div class="d-inline-block p-2 rounded-3 ${data.username === meuUsuarioUsername ? 'bg-primary text-white' : 'bg-light'}">
+                    ${data.message}
+                </div>
+            `;
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Socket de chat fechado inesperadamente.');
+        };
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = messageInput.value;
+            if (message.trim() !== '') {
+                chatSocket.send(JSON.stringify({'message': message}));
+                messageInput.value = '';
+            }
+        });
+        messageInput.focus();
+    });
+</script>
+{% endif %}
 {% endblock %}

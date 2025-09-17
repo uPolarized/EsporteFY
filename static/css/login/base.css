@@ -148,3 +148,65 @@ a {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
+
+
+
+
+/* --- ESTILO GERAL DOS TOASTS --- */
+.toast {
+    background-color: rgba(30, 30, 30, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0;
+}
+
+/* --- TOAST HEADER --- */
+.toast-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+/* Cor do ícone e título padrão */
+.toast-header .bi-check-circle-fill { color: #4caf50; }
+.toast-header .bi-x-octagon-fill { color: #f44336; }
+.toast-header .bi-exclamation-triangle-fill { color: #ffc107; }
+.toast-header .bi-info-circle-fill { color: #2196f3; }
+
+/* Botão de fechar */
+.toast-header .btn-close {
+    background-color: transparent;
+    filter: invert(1);
+    opacity: 0.7;
+}
+
+.toast-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* --- TOAST DE NOVA MENSAGEM --- */
+.toast.new-message-toast .toast-header {
+    background-color: rgba(229, 57, 53, 0.8);
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast.new-message-toast .toast-header .bi-chat-dots-fill {
+    color: #fff;
+}
+
+.toast.new-message-toast .toast-header .btn-close {
+    filter: invert(0);
+}
+
+.toast.new-message-toast .toast-body a {
+    background-color: #e53935;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+}
+
+.toast.new-message-toast .toast-body a:hover {
+    background-color: #d32f2f;
+}

@@ -10,9 +10,22 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 NEWS_API_KEY = env('NEWS_API_KEY', default=None)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
-ALLOWED_HOSTS = []
+
+
+# esportefy/settings.py
+ALLOWED_HOSTS = ['*']
+
+# esportefy/settings.py
+
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8000", "http://localhost:3000", 'https://*.ngrok-free.app']
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
+
 
 INSTALLED_APPS = [
+    'daphne',   # Adicionado para o Channels
+    'channels', # Adicionado
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 ROOT_URLCONF = 'esportefy.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -59,6 +73,8 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'esportefy.wsgi.application'
+ASGI_APPLICATION = 'esportefy.asgi.application'
+
 DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3','NAME': BASE_DIR / 'db.sqlite3',}}
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -111,6 +127,19 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
+
+
+# --- Configuração do Django Channels (para o Chat) ---
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)], # Para desenvolvimento local sem Docker
+        },
+    },
+}
+
+
 
 
 # --------------------------------------------------------------------------

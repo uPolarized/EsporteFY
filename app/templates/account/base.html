@@ -100,6 +100,54 @@
         });
         toastList.forEach(toast => toast.show());
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationSocket = new WebSocket(
+            (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/notifications/'
+        );
+
+        notificationSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+
+            if (data.type === 'new_message_notification') {
+                const remetente = data.remetente;
+                const conversaUrl = `/chat/${remetente}/`;
+
+                // 💡 VERIFICAÇÃO CRUCIAL ADICIONADA AQUI:
+                if (window.location.pathname.endsWith(conversaUrl)) {
+                    console.log("Mensagem recebida, mas a notificação foi suprimida pois o usuário já está na conversa.");
+                    return; // Sai da função sem mostrar a notificação
+                }
+                
+                const toastHTML = `
+                    <div class="toast new-message-toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+                        <div class="toast-header">
+                            <i class="bi bi-chat-dots-fill me-2"></i>
+                            <strong class="me-auto">Nova Mensagem!</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            Você recebeu uma nova mensagem de <strong>${data.remetente}</strong>.
+                            <div class="mt-2 pt-2 border-top">
+                                <a href="${data.conversa_url}" class="btn btn-primary btn-sm">Ver Mensagem</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const toastContainer = document.querySelector('.toast-container');
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                
+                const newToastEl = toastContainer.lastElementChild;
+                const newToast = new bootstrap.Toast(newToastEl);
+                newToast.show();
+            }
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.error('Socket de notificações fechado.');
+        };
+    });
 </script>
 
 {% block extra_js %}{% endblock %}

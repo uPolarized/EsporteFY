@@ -33,8 +33,51 @@ body {
     letter-spacing: 1px;
     margin: 0;
 }
+
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes glow { from { text-shadow:0 0 5px rgba(255,81,47,0.5),0 0 10px rgba(221,36,118,0.4); } to { text-shadow:0 0 15px rgba(255,81,47,0.8),0 0 25px rgba(221,36,118,0.6); } }
+
+
+/* ========================================= */
+/* --- NOVOS ESTILOS PARA O FEED DE ATIVIDADES (DARK MODE) --- */
+/* ========================================= */
+
+.post-card {
+    background-color: #2e2e2e; /* Fundo escuro para o card */
+    border: 1px solid #444;    /* Borda discreta */
+    color: #f1f1f1;           /* Texto claro */
+    border-radius: 0.75rem;
+    border-left: 4px solid #6c757d;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.post-card:hover {
+    background-color: #3a3a3a;
+}
+
+.post-card p, .post-card strong {
+    color: #f1f1f1; /* Garante que todo o texto seja claro */
+}
+
+.post-card a {
+    color: #ff6b6b; /* Cor de destaque para links, se houver */
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.post-card a:hover {
+    text-decoration: underline;
+}
+
+.post-card .text-muted {
+    color: #aaa !important; /* Torna o texto "x minutos atrás" mais suave */
+}
+
+
+
+
+
+
 
 /* ===== 2. BOTÕES ===== */
 .btn-primary { background: linear-gradient(135deg,#ff6b6b,#ff3b3b); border:none; box-shadow:0 4px 12px rgba(255,107,107,0.4); transition:all 0.3s ease; color:#fff; }
