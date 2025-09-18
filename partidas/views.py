@@ -22,13 +22,13 @@ class CriarPartidaView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Envia a lista de todas as quadras para o template
-        context['quadras'] = Quadra.objects.all()
+        # CORREÇÃO: Usamos prefetch_related para buscar todas as fotos de forma eficiente
+        context['quadras'] = Quadra.objects.all().prefetch_related('fotos').order_by('nome')
         return context
 
     def form_valid(self, form):
         form.instance.organizador = self.request.user
-        messages.success(self.request, "Sua partida foi criada e já está visível para outros jogadores!")
+        messages.success(self.request, "A sua partida foi criada e já está visível para outros jogadores!")
         response = super().form_valid(form)
         self.object.jogadores_confirmados.add(self.request.user)
         return response

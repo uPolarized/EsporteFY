@@ -1,0 +1,117 @@
+/* ============================
+   ESTILO PARA VER PERFIL
+   ============================ */
+
+/* Wrapper principal */
+.profile-layout-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 30px;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #0f172a, #1e293b);
+    color: #e2e8f0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Grid principal */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Colunas */
+.profile-left,
+.profile-center,
+.profile-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Cards Glass */
+.side-card,
+.card-glass,
+.right-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+
+.side-card:hover,
+.card-glass:hover,
+.right-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-3px);
+}
+
+/* Texto */
+h2, h3 {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #f1f5f9;
+}
+
+p, li {
+    color: #cbd5e1;
+    font-size: 15px;
+}
+
+/* Lista de preferências */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
+/* Divisor */
+.divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #3b82f6, transparent);
+    margin: 15px 0;
+}
+
+/* Botões */
+.btn {
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #2563eb, #3b82f6);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #1d4ed8, #2563eb);
+    transform: scale(1.05);
+}
+
+.btn-outline-primary {
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+}
+
+.btn-outline-primary:hover {
+    background: #3b82f6;
+    color: #fff;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,146 @@
+/* conversa.css - Tema escuro, moderno, estilo redes sociais */
+
+/* Variáveis de tema */
+:root {
+    --bg-main: #18191a;
+    --bg-chat: #242526;
+    --bg-incoming: #3a3b3c;
+    --bg-outgoing: #005fff;
+    --text-main: #e4e6eb;
+    --text-muted: #b0b3b8;
+    --accent: #005fff;
+    --border-radius: 12px;
+}
+
+/* Corpo e container */
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 800px;
+}
+
+/* Card principal */
+.card {
+    background-color: var(--bg-chat);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* Header */
+.card-header {
+    background-color: var(--bg-chat);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+/* Chat log */
+#chat-log {
+    height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    scroll-behavior: smooth;
+}
+
+/* Mensagens */
+.message-row {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Avatar */
+.message-row img {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Balões de mensagem */
+.message-row .d-inline-block {
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    line-height: 1.3rem;
+    position: relative;
+}
+
+/* Mensagens recebidas */
+.message-row:not(.flex-row-reverse) .d-inline-block {
+    background-color: var(--bg-incoming);
+    color: var(--text-main);
+    border-radius: var(--border-radius)  var(--border-radius)  var(--border-radius) 0;
+}
+
+/* Mensagens enviadas */
+.message-row.flex-row-reverse .d-inline-block {
+    background-color: var(--bg-outgoing);
+    color: #fff;
+    border-radius: var(--border-radius) var(--border-radius) 0 var(--border-radius);
+}
+
+/* Nome do remetente */
+.d-inline-block small {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+/* Timestamp */
+.d-inline-block .text-end {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Formulário de envio */
+.card-footer {
+    background-color: var(--bg-chat);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 0.75rem 1rem;
+}
+
+#chat-message-input {
+    border-radius: var(--border-radius);
+    border: none;
+    background-color: #3a3b3c;
+    color: var(--text-main);
+}
+
+#chat-message-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #0047d1;
+}
+
+/* Scrollbar moderna */
+#chat-log::-webkit-scrollbar {
+    width: 8px;
+}
+#chat-log::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+#chat-log::-webkit-scrollbar-track {
+    background: transparent;
+}

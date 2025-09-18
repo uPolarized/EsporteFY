@@ -17,9 +17,11 @@ class Atividade(models.Model):
         blank=True, 
         related_name='atividades_relacionadas'
     )
+    
 class Conversa(models.Model):
     participantes = models.ManyToManyField(User, related_name='conversas')
     criada_em = models.DateTimeField(auto_now_add=True)
+
 
 class Mensagem(models.Model):
     conversa = models.ForeignKey(Conversa, on_delete=models.CASCADE, related_name='mensagens')
@@ -29,15 +31,11 @@ class Mensagem(models.Model):
 
     class Meta:
         ordering = ['timestamp']
-
-    class Meta:
-        ordering = ['-timestamp']
-        verbose_name = "Atividade"
-        verbose_name_plural = "Atividades"
+        verbose_name = "Mensagem"
+        verbose_name_plural = "Mensagens"
 
     def __str__(self):
-        if self.alvo:
-            return f'{self.ator.username} {self.verbo} {self.alvo}'
-        return f'{self.ator.username} {self.verbo}'
+        return f'{self.remetente.username}: {self.conteudo[:30]}'
+
     
     

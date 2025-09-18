@@ -17,7 +17,7 @@ class Perfil(models.Model):
     nivel_habilidade = models.CharField(max_length=50, choices=NIVEL_HABILIDADE_CHOICES, blank=True, null=True, verbose_name="Nível de Habilidade")
     idade = models.PositiveIntegerField(blank=True, null=True, verbose_name="Idade")
     foto = models.ImageField(upload_to='fotos_perfil/', null=True, blank=True, default='fotos_perfil/default.jpg', verbose_name="Foto de Perfil")
-    
+    verbose_name="Foto de Perfil"
     # --- CAMPOS CORRIGIDOS ---
     mini_bio = models.TextField(max_length=500, blank=True, verbose_name="Sobre Mim")
     cidade = models.CharField(max_length=100, blank=True, null=True, verbose_name="Cidade")

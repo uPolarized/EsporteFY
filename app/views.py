@@ -10,6 +10,7 @@ from conteudo.api_client import buscar_noticias_esportivas
 from partidas.models import Partida
 from quadras.models import Quadra
 from social.models import Atividade
+from conteudo.api_client import buscar_noticias_esportivas, buscar_clima_marica
 
 class HomeView(View):
     template_name = "home.html"
@@ -19,6 +20,7 @@ class HomeView(View):
         return render(request, self.template_name)
 
 class FeedView(LoginRequiredMixin, View):
+    
     template_name = 'feed.html'
     
     def get(self, request, *args, **kwargs):
@@ -27,9 +29,13 @@ class FeedView(LoginRequiredMixin, View):
 
     def get_context_data(self, **kwargs):
         context = {}
+
+        context['clima_atual'] = buscar_clima_marica()
         context['noticias'] = buscar_noticias_esportivas()
 
         uma_semana_atras = timezone.now() - timedelta(days=7)
+
+
         
         # 3. Busca apenas as atividades que aconteceram DEPOIS daquela data
         context['atividades'] = Atividade.objects.filter(
@@ -45,8 +51,14 @@ class FeedView(LoginRequiredMixin, View):
         context['bairros_disponiveis'] = Quadra.BAIRRO_CHOICES
         context['bairro_atual'] = bairro_filtrado
         context['bairro_atual_nome'] = dict(Quadra.BAIRRO_CHOICES).get(bairro_filtrado, 'Todos')
+
         
         # Lógica do Feed de Atividades
-        context['atividades'] = Atividade.objects.all().select_related('ator__perfil')[:20]
+        # 1. Calcula a data de 7 dias atrás a partir de hoje
+        uma_semana_atras = timezone.now() - timedelta(days=7)
+
+        context['atividades'] = Atividade.objects.filter(
+            timestamp__gte=uma_semana_atras
+        ).select_related('ator__perfil')[:20]
         
         return context

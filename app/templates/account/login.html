@@ -1,5 +1,5 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags socialaccount %} {# 🚨 GARANTA QUE ESSA LINHA ESTÁ AQUI 🚨 #}
+{% load crispy_forms_tags socialaccount %}
 
 {% block title %}Login - EsporteFY{% endblock %}
 
@@ -7,7 +7,6 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/login/loginaccount.css' %}">
 {% endblock %}
-
 
 {% block content %}
 <div class="container login-container">
@@ -21,15 +20,15 @@
                         {% csrf_token %}
                         {{ form|crispy }}
                         <div class="d-grid mt-3">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
+                            <button type="submit" class="btn btn-primary mb-3">Entrar</button>
                         </div>
                     </form>
-                    
-                    <div class="text-center text-muted my-3">ou</div>
 
                     <div class="text-center">
                         <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary w-100">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 10px; vertical-align: middle;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" 
+                                 alt="Google logo" 
+                                 style="width: 20px; margin-right: 10px; vertical-align: middle;">
                             Entrar com Google
                         </a>
                     </div>

@@ -7,40 +7,24 @@ body {
     padding: 0;
 }
 
-/* Saudação */
-.welcome-container {
-    background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
-    border: 2px solid #ff6b6b;
-    border-radius: 1.5rem;
-    padding: 2rem 1.5rem;
-    margin: 2rem auto;
-    max-width: 700px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(255,107,107,0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.welcome-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(255,107,107,0.5);
-}
-.welcome-header {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, #c4c1c1, #f85252);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeInUp 1s ease, glow 2s ease-in-out infinite alternate;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes glow { from { text-shadow:0 0 5px rgba(255,81,47,0.5),0 0 10px rgba(221,36,118,0.4); } to { text-shadow:0 0 15px rgba(255,81,47,0.8),0 0 25px rgba(221,36,118,0.6); } }
 
 
 /* ========================================= */
 /* --- NOVOS ESTILOS PARA O FEED DE ATIVIDADES (DARK MODE) --- */
 /* ========================================= */
+
+/* Card de "nenhuma atividade" seguindo paleta do site */
+.no-activity-card {
+    background: #2e2e2e;           /* fundo escuro */
+    border: 1px solid #444;        /* borda discreta */
+    border-radius: 1rem;
+    text-align: center;
+    color: #f1f1f1;                /* texto claro */
+    padding: 1rem 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+}
+
 
 .post-card {
     background-color: #2e2e2e; /* Fundo escuro para o card */

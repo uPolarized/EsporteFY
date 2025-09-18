@@ -7,6 +7,7 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
+OPENWEATHER_API_KEY = env('OPENWEATHER_API_KEY', default=None)
 NEWS_API_KEY = env('NEWS_API_KEY', default=None)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
@@ -84,9 +85,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'pt-br'
+USE_TZ = True
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
-USE_TZ = True
+
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]

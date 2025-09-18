@@ -2,41 +2,64 @@
 
 {% block title %}{{ perfil_usuario.username }}{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3 text-center">
-                    {% if perfil_usuario.perfil.foto %}
-                        <img src="{{ perfil_usuario.perfil.foto.url }}" class="img-fluid rounded-circle mb-3" alt="Foto de Perfil" style="width: 150px; height: 150px; object-fit: cover;">
-                    {% endif %}
-                    
-                    {% if ja_sao_amigos %}
-                        <a href="{% url 'perfis:remover_amigo' user_id=perfil_usuario.id %}" class="btn btn-danger btn-sm w-100 mb-2">Remover Amigo</a>
-                    {% elif pedido_enviado %}
-                        <button class="btn btn-secondary btn-sm w-100 mb-2" disabled>Pedido Enviado</button>
-                    {% elif pedido_recebido %}
-                        <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-sm w-100 mb-2">Responder Pedido</a>
-                    {% else %}
-                         <a href="{% url 'perfis:enviar_solicitacao' receptor_id=perfil_usuario.id %}" class="btn btn-primary btn-sm w-100 mb-2">Adicionar Amigo</a>
-                    {% endif %}
-                    <a href="{% url 'social:conversa' username=perfil_usuario.username %}" class="btn btn-outline-primary btn-sm w-100">Enviar Mensagem</a>
+{% load static %}
 
-                </div>
-                <div class="col-md-9">
-                    <h2>{{ perfil_usuario.username }}</h2>
-                    <hr>
-                    <h4>Sobre Mim</h4>
-                    <p>{{ perfil_usuario.perfil.bio|default:"Nenhuma informação." }}</p>
-                    <h4>Preferências</h4>
-                    <ul>
-                        <li><strong>Esporte:</strong> {{ perfil_usuario.perfil.esportes_preferidos|default:"Não definido" }}</li>
-                        <li><strong>Nível:</strong> {{ perfil_usuario.perfil.nivel_habilidade|default:"Não definido" }}</li>
-                    </ul>
-                </div>
+
+
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/ver_perfil.css' %}">
+<div class="profile-layout-wrapper">
+    <div class="profile-layout">
+        
+        <!-- Coluna Esquerda (foto + ações) -->
+        <div class="profile-left">
+            <div class="side-card text-center">
+                {% if perfil_usuario.perfil.foto %}
+                    <img src="{{ perfil_usuario.perfil.foto.url }}" class="img-fluid rounded-circle mb-3" alt="Foto de Perfil" style="width: 150px; height: 150px; object-fit: cover;">
+                {% endif %}
+                
+                <h2 class="mt-2">{{ perfil_usuario.username }}</h2>
+                <hr class="divider">
+
+                {% if ja_sao_amigos %}
+                    <a href="{% url 'perfis:remover_amigo' user_id=perfil_usuario.id %}" class="btn btn-danger btn-sm w-100 mb-2">Remover Amigo</a>
+                {% elif pedido_enviado %}
+                    <button class="btn btn-secondary btn-sm w-100 mb-2" disabled>Pedido Enviado</button>
+                {% elif pedido_recebido %}
+                    <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-sm w-100 mb-2">Responder Pedido</a>
+                {% else %}
+                    <a href="{% url 'perfis:enviar_solicitacao' receptor_id=perfil_usuario.id %}" class="btn btn-primary btn-sm w-100 mb-2">Adicionar Amigo</a>
+                {% endif %}
+                
+                <a href="{% url 'social:conversa' username=perfil_usuario.username %}" class="btn btn-outline-primary btn-sm w-100">Enviar Mensagem</a>
             </div>
         </div>
+
+        <!-- Coluna Central (bio + preferências) -->
+        <div class="profile-center">
+            <div class="card-glass">
+                <h3>Sobre Mim</h3>
+                <p>{{ perfil_usuario.perfil.bio|default:"Nenhuma informação." }}</p>
+            </div>
+
+            <div class="card-glass mt-3">
+                <h3>Preferências</h3>
+                <ul>
+                    <li><strong>Esporte:</strong> {{ perfil_usuario.perfil.esportes_preferidos|default:"Não definido" }}</li>
+                    <li><strong>Nível:</strong> {{ perfil_usuario.perfil.nivel_habilidade|default:"Não definido" }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Coluna Direita (futuro: amigos em comum, sugestões, etc) -->
+        <div class="profile-right">
+            <div class="right-card">
+                <h3>Amigos em comum</h3>
+                <p>⚡ Em breve você pode listar aqui amigos compartilhados.</p>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

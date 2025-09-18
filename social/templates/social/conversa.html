@@ -1,33 +1,44 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags %}
+{% load i18n tz %}
 
 {% block title %}Conversa com {{ outro_usuario.username }}{% endblock %}
 
+{% block extra_head %}
+    {% load static %}
+<link rel="stylesheet" href="{% static 'css/login/conversa.css' %}">
+
+{% endblock %}
+
+
+
+
+
 {% block content %}
+
+
+
 <div class="container my-5">
     <div class="card">
         <div class="card-header">
             <h3>Conversa com {{ outro_usuario.username }}</h3>
         </div>
-        <div id="chat-log" class="card-body" style="height: 50vh; overflow-y: auto;">
+        <div id="chat-log" class="card-body">
             {% for mensagem in mensagens %}
-                <div class="mb-2 {% if mensagem.remetente == request.user %}text-end{% endif %}">
-                    <small class="text-muted">{{ mensagem.remetente.username }} - {{ mensagem.timestamp|date:"H:i" }}</small>
-                    <div class="d-inline-block p-2 rounded-3 {% if mensagem.remetente == request.user %}bg-primary text-white{% else %}bg-light{% endif %}">
+                <div class="d-flex mb-2 message-row {% if mensagem.remetente == request.user %}flex-row-reverse{% endif %}">
+                    <img src="{{ mensagem.remetente.perfil.foto.url }}" class="rounded-circle mx-2" width="40" height="40" style="object-fit: cover;">
+                    <div class="d-inline-block p-2 rounded-3 {% if mensagem.remetente == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}">
+                        <small class="d-block {% if mensagem.remetente != request.user %}fw-bold{% endif %}">{{ mensagem.remetente.username }}</small>
                         {{ mensagem.conteudo }}
+                        <small class="d-block text-end mt-1" style="font-size: 0.7rem;">{{ mensagem.timestamp|localtime|date:"H:i" }}</small>
                     </div>
                 </div>
             {% endfor %}
         </div>
         <div class="card-footer">
-            {% if user.is_authenticated %}
             <form id="chat-form" class="d-flex">
                 <input type="text" id="chat-message-input" class="form-control me-2" placeholder="Digite a sua mensagem..." autocomplete="off">
                 <button type="submit" class="btn btn-primary">Enviar</button>
             </form>
-            {% else %}
-                <p>Você precisa estar logado para enviar mensagens.</p>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -37,7 +48,6 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if user.is_authenticated %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const outroUsuarioUsername = JSON.parse(document.getElementById('json-outro-usuario-username').textContent);
@@ -46,34 +56,34 @@
         const messageInput = document.querySelector('#chat-message-input');
         const chatForm = document.querySelector('#chat-form');
 
-       // --- CORREÇÃO DO SCROLL AQUI ---
-        // Rola a caixa de chat para a mensagem mais recente assim que a página carrega
-        chatLog.scrollTop = chatLog.scrollHeight;
-        // --------------------------------
+        function scrollToBottom() {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+        scrollToBottom();
 
-       const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const chatSocket = new WebSocket(
-    ws_protocol + '//' + window.location.host + '/ws/chat/' + encodeURIComponent(outroUsuarioUsername) + '/'
-);
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + outroUsuarioUsername + '/');
+
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('mb-2');
-            if (data.username === meuUsuarioUsername) {
-                messageDiv.classList.add('text-end');
-            }
-            messageDiv.innerHTML = `
-                <small class="text-muted">${data.username} - ${data.timestamp}</small>
-                <div class="d-inline-block p-2 rounded-3 ${data.username === meuUsuarioUsername ? 'bg-primary text-white' : 'bg-light'}">
-                    ${data.message}
-                </div>
-            `;
-            chatLog.appendChild(messageDiv);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        };
 
-        chatSocket.onclose = function(e) {
-            console.error('Socket de chat fechado inesperadamente.');
+            if (data.type === 'chat_message') {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('d-flex', 'mb-2', 'message-row');
+                if (data.username === meuUsuarioUsername) {
+                    messageDiv.classList.add('flex-row-reverse');
+                }
+                const avatarImg = `<img src="${data.user_avatar_url}" class="rounded-circle mx-2" width="40" height="40" style="object-fit: cover;">`;
+                messageDiv.innerHTML = `
+                    ${avatarImg}
+                    <div class="d-inline-block p-2 rounded-3 ${data.username === meuUsuarioUsername ? 'bg-primary text-white' : 'bg-light text-dark'}">
+                        <small class="d-block ${data.username !== meuUsuarioUsername ? 'fw-bold' : ''}">${data.username}</small>
+                        ${data.message}
+                        <small class="d-block text-end mt-1" style="font-size: 0.7rem;">${data.timestamp}</small>
+                    </div>
+                `;
+                chatLog.appendChild(messageDiv);
+                scrollToBottom();
+            }
         };
 
         chatForm.addEventListener('submit', function(e) {
@@ -84,8 +94,6 @@ const chatSocket = new WebSocket(
                 messageInput.value = '';
             }
         });
-        messageInput.focus();
     });
 </script>
-{% endif %}
 {% endblock %}
