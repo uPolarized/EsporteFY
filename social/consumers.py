@@ -25,13 +25,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data.get('message')
-        is_typing = data.get('is_typing')
 
         if message:
-            # A função save_message_and_get_data já prepara o "pacote" completo
             message_data = await self.save_message_and_get_data(message)
-            
-            # Envia o pacote para o grupo
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -39,31 +35,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message_data': message_data
                 }
             )
-        
-        elif is_typing is not None:
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'typing_status',
-                    'username': self.meu_usuario.username,
-                    'is_typing': is_typing
-                }
-            )
 
     async def chat_message(self, event):
-        # Pega o pacote de dados de dentro do evento
         message_data = event['message_data']
-        # Envia o pacote completo para o JavaScript
         await self.send(text_data=json.dumps(message_data))
 
-    async def typing_status(self, event):
-        # Envia o status de "a digitar" para o JavaScript
-        await self.send(text_data=json.dumps(event))
-
+    # --- FUNÇÃO ATUALIZADA E SIMPLIFICADA ---
     @database_sync_to_async
     def save_message_and_get_data(self, message_content):
         outro_usuario = User.objects.get(username=self.outro_usuario_username)
-        conversa, _ = Conversa.objects.filter(participantes=self.meu_usuario).filter(participantes=outro_usuario).get_or_create()
+        
+        # Procura por uma conversa que contenha ambos os utilizadores.
+        # Esta é uma forma mais robusta de encontrar a conversa correta.
+        conversa_qs = Conversa.objects.filter(
+            participantes=self.meu_usuario
+        ).filter(
+            participantes=outro_usuario
+        )
+
+        if conversa_qs.exists():
+            conversa = conversa_qs.first()
+        else:
+            # Se não existir, cria uma nova e adiciona os dois participantes.
+            conversa = Conversa.objects.create()
+            conversa.participantes.add(self.meu_usuario, outro_usuario)
         
         mensagem = Mensagem.objects.create(
             conversa=conversa,
@@ -73,7 +68,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         timestamp_local = mensagem.timestamp.astimezone(timezone.get_current_timezone())
         
-        # Prepara o "pacote" completo de dados para o frontend
         return {
             'type': 'chat_message',
             'message': mensagem.conteudo,
@@ -81,7 +75,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'user_avatar_url': mensagem.remetente.perfil.foto.url,
             'timestamp': timestamp_local.strftime('%H:%M'),
         }
-# --- NOVO CONSUMER PARA NOTIFICAÇÕES GLOBAIS ---
+# --- Consumer para Notificações Globais ---
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
@@ -89,22 +83,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Cada utilizador entra num grupo individual
         self.room_group_name = f'notifications_user_{self.user.id}'
-
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
-    # Função que é chamada para enviar a notificação para o frontend
     async def send_notification(self, event):
         await self.send(text_data=json.dumps({
             'type': 'new_message_notification',

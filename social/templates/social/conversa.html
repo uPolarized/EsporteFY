@@ -17,31 +17,52 @@
 
 
 
-<div class="container my-5">
-    <div class="card">
-        <div class="card-header">
-            <h3>Conversa com {{ outro_usuario.username }}</h3>
+<div class="messenger-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4>Conversas</h4>
         </div>
-        <div id="chat-log" class="card-body">
+        <div class="conversation-list">
+            <!-- Exemplo de conversa -->
+            <div class="conversation-item active">
+                <img src="{{ outro_usuario.perfil.foto.url }}" alt="Foto" class="avatar">
+                <div>
+                    <strong>{{ outro_usuario.username }}</strong>
+                    <p>Última mensagem...</p>
+                </div>
+            </div>
+            <!-- Outras conversas -->
+        </div>
+    </div>
+
+    <!-- Área de chat -->
+    <div class="chat-area">
+        <div class="chat-header">
+            <img src="{{ outro_usuario.perfil.foto.url }}" class="avatar">
+            <h5>{{ outro_usuario.username }}</h5>
+        </div>
+
+        <div id="chat-log" class="chat-body">
             {% for mensagem in mensagens %}
-                <div class="d-flex mb-2 message-row {% if mensagem.remetente == request.user %}flex-row-reverse{% endif %}">
-                    <img src="{{ mensagem.remetente.perfil.foto.url }}" class="rounded-circle mx-2" width="40" height="40" style="object-fit: cover;">
-                    <div class="d-inline-block p-2 rounded-3 {% if mensagem.remetente == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}">
-                        <small class="d-block {% if mensagem.remetente != request.user %}fw-bold{% endif %}">{{ mensagem.remetente.username }}</small>
+                <div class="message-row {% if mensagem.remetente == request.user %}me{% else %}other{% endif %}">
+                    <div class="message-bubble">
                         {{ mensagem.conteudo }}
-                        <small class="d-block text-end mt-1" style="font-size: 0.7rem;">{{ mensagem.timestamp|localtime|date:"H:i" }}</small>
+                        <span class="message-time">{{ mensagem.timestamp|localtime|date:"H:i" }}</span>
                     </div>
                 </div>
             {% endfor %}
         </div>
-        <div class="card-footer">
-            <form id="chat-form" class="d-flex">
-                <input type="text" id="chat-message-input" class="form-control me-2" placeholder="Digite a sua mensagem..." autocomplete="off">
-                <button type="submit" class="btn btn-primary">Enviar</button>
+
+        <div class="chat-footer">
+            <form id="chat-form">
+                <input type="text" id="chat-message-input" placeholder="Digite uma mensagem...">
+                <button type="submit">Enviar</button>
             </form>
         </div>
     </div>
 </div>
+
 
 {{ outro_usuario.username|json_script:"json-outro-usuario-username" }}
 {{ request.user.username|json_script:"json-meu-usuario-username" }}
@@ -61,7 +82,12 @@
         }
         scrollToBottom();
 
-        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + outroUsuarioUsername + '/');
+        const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const chatSocket = new WebSocket(
+            ws_protocol + '//' +
+            window.location.host +
+            '/ws/chat/' + outroUsuarioUsername + '/'
+        );
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);

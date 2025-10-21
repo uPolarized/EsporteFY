@@ -13,15 +13,11 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
 
-# esportefy/settings.py
-ALLOWED_HOSTS = ['*']
 
-# esportefy/settings.py
-
-CSRF_TRUSTED_ORIGINS = ["https://localhost:8000", "http://localhost:3000", 'https://*.ngrok-free.app']
-
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-
+# --- Configurações para Ngrok (Ambiente Local) ---
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 INSTALLED_APPS = [

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import Conversa, Mensagem
 from .forms import MensagemForm
+from django.views.generic import DetailView
 
 class CaixaDeEntradaView(LoginRequiredMixin, View):
     """
@@ -63,3 +64,5 @@ class ConversaView(LoginRequiredMixin, View):
         
         # Redireciona de volta para a mesma página, que agora mostrará a nova mensagem
         return redirect('social:conversa', username=username)
+
+

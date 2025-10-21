@@ -7,6 +7,37 @@ body {
     padding: 0;
 }
 
+/* ===== SAUDAÇÃO DINÂMICA ===== */
+.welcome-header {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: #ff6b6b; /* vermelho de destaque */
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+    animation: fadeInDown 0.8s ease;
+}
+
+/* Animação de entrada suave */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .welcome-header {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+}
 
 
 /* ========================================= */
@@ -215,3 +246,4 @@ body {
     .btn{width:100%;}
     .match-card, .news-card, .action-card{margin-bottom:1rem;}
 }
+

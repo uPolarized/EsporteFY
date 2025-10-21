@@ -12,47 +12,57 @@
 
 {% block content %}
 <div class="container-fluid my-4">
-
-    
     <div class="row gx-4">
-        <!-- COLUNA DA ESQUERDA (FEED DE ATIVIDADES) -->
-        <div class="col-lg-3">
+        
+        <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none"> {# Hidden on large, shown on smaller #}
+            <div class="text-center">
+                {% now "H" as hora_atual %}
+                <h1 class="mb-0 welcome-header">
+                    {% if hora_atual|add:"0" < 12 %}☀️Bom dia
+                    {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
+                    {% else %}🌙Boa noite
+                    {% endif %}
+                    !
+                </h1>
+            </div>
+        </div>
+
+        <div class="col-lg-3 order-md-2 order-lg-1">
             <h2 class="section-title"><i class="bi bi-activity"></i>Feed de Atividades</h2>
             {% for atividade in atividades %}
-            <div class="card shadow-sm mb-3 post-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        {% if atividade.ator.perfil.foto %}
-                            <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
-                        {% else %}
-                            <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
-                                <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+                <div class="card shadow-sm mb-3 post-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            {% if atividade.ator.perfil.foto %}
+                                <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                    <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <p class="mb-0 lh-sm small">
+                                    <strong>{{ atividade.ator.username }}</strong>
+                                    {{ atividade.verbo }}
+                                    {% if atividade.alvo %}
+                                        <strong>"{{ atividade.alvo }}"</strong>
+                                    {% endif %}
+                                </p>
+                                <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
                             </div>
-                        {% endif %}
-                        <div>
-                            <p class="mb-0 lh-sm small">
-                                <strong>{{ atividade.ator.username }}</strong>
-                                {{ atividade.verbo }}
-                                {% if atividade.alvo %}
-                                    <strong>"{{ atividade.alvo }}"</strong>
-                                {% endif %}
-                            </p>
-                            <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
                         </div>
                     </div>
                 </div>
-            </div>
-            {{% empty %}
-<div class="no-activity-card">
-    Nenhuma atividade na comunidade ainda.
-</div>
-{% endfor %}
-
+            {% empty %}
+                <div class="no-activity-card">
+                    Nenhuma atividade na comunidade ainda.
+                </div>
+            {% endfor %}
         </div>
 
-        <!-- COLUNA CENTRAL (PARTIDAS) -->
-        <div class="col-lg-6">
-            <div class="text-center">
+        <div class="col-lg-6 order-md-1 order-lg-2">
+            {# A saudação para desktop permanece aqui, visível apenas em telas grandes #}
+            <div class="text-center d-none d-lg-block"> 
                 {% now "H" as hora_atual %}
                 <h1 class="mb-4 welcome-header">
                     {% if hora_atual|add:"0" < 12 %}☀️Bom dia
@@ -154,39 +164,37 @@
             {% endfor %}
         </div>
 
-        <!-- COLUNA DA DIREITA (NOTÍCIAS) -->
-       <div class="col-lg-3">
-
-    {% if clima_atual %}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body text-center">
-            <h5 class="card-title">Tempo em Maricá Agora</h5>
-            <img src="https://openweathermap.org/img/wn/{{ clima_atual.icone }}@2x.png" alt="{{ clima_atual.descricao }}">
-            <p class="h3">{{ clima_atual.temperatura }}°C</p>
-            <p class="text-muted">{{ clima_atual.descricao }}</p>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="news-sidebar">
-        <h2 class="section-title text-center"><i class="bi bi-newspaper"></i>Notícias</h2>
-        {% for noticia in noticias %}
-        <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
-            <div class="card shadow-sm mb-3 news-card">
-                {% if noticia.urlToImage %}
-                    <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>
-                    <small class="news-source">{{ noticia.source.name }}</small>
+        <div class="col-lg-3 order-md-3 order-lg-3">
+            {% if clima_atual %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Tempo em Maricá Agora</h5>
+                    <img src="https://openweathermap.org/img/wn/{{ clima_atual.icone }}@2x.png" alt="{{ clima_atual.descricao }}">
+                    <p class="h3">{{ clima_atual.temperatura }}°C</p>
+                    <p class="text-muted">{{ clima_atual.descricao }}</p>
                 </div>
             </div>
-        </a>
-        {% empty %}
-        <div class="card"><div class="card-body text-muted">Não foi possível carregar as notícias.</div></div>
-        {% endfor %}
+            {% endif %}
+
+            <div class="news-sidebar">
+                <h2 class="section-title text-center"><i class="bi bi-newspaper"></i>Notícias</h2>
+                {% for noticia in noticias %}
+                <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
+                    <div class="card shadow-sm mb-3 news-card">
+                        {% if noticia.urlToImage %}
+                            <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>
+                            <small class="news-source">{{ noticia.source.name }}</small>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="card"><div class="card-body text-muted">Não foi possível carregar as notícias.</div></div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    
-</div>  
-       
+</div>
 {% endblock %}
