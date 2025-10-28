@@ -1,6 +1,7 @@
 /*
  * editar_perfil.css
  * Mantém cores e estilo da tela de perfil (glass, escuro, hover suave)
+ * *** VERSÃO CORRIGIDA ***
  */
 
 /* Variáveis de tema (mesmas da tela de perfil) */
@@ -172,8 +173,8 @@
     color: var(--text);
 }
 
-.form-control,
-.form-select {
+/* Separei .form-control e .form-select para a correção */
+.form-control {
     background: rgba(28, 28, 30, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text);
@@ -182,18 +183,61 @@
     border-radius: 8px;
 }
 
+/* *** CORREÇÃO DROPDOWN (visual) *** */
+.form-select {
+    background: rgba(28, 28, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+
+    /* Oculta seta padrão e adiciona seta SVG clara */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23eef1f3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Cor --text */
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+}
+
+/* *** CORREÇÃO FOCO (Texto preto) *** */
 .form-control:focus,
 .form-select:focus {
     background: rgba(28, 28, 30, 0.5);
     border-color: var(--accent);
     box-shadow: 0 0 0 0.25rem rgba(229, 57, 53, 0.25);
+    color: var(--text) !important; /* Força o texto a ser claro */
+    outline: none; /* Remove anel de foco extra do navegador */
 }
+
+/* *** CORREÇÃO DROPDOWN (Opções claras) *** */
+.form-select option {
+    background: #2c2c2e; /* Fundo sólido escuro */
+    color: var(--text);
+}
+
+/* Bônus: Correção de autofill do Chrome */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus,
+.form-control:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px rgba(28, 28, 30, 0.5) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    caret-color: var(--text) !important;
+}
+
 
 .form-label {
     color: var(--text);
 }
 
 /* file input */
+input[type="file"] {
+    /* *** CORREÇÃO ***: Garante que o texto do input de arquivo seja legível */
+    color: var(--muted);
+}
 input[type="file"]::file-selector-button {
     background-color: var(--accent);
     color: white;
@@ -241,4 +285,113 @@ input[type="file"]::file-selector-button:hover {
 /* espaçamento das seções / card do form */
 .profile-section {
     margin-bottom: 2rem;
+}
+
+
+/* ============================================== */
+/* === ESTILOS PARA A SEÇÃO DE FOTO DE PERFIL === */
+/* ============================================== */
+
+.profile-photo-upload-section {
+    margin-bottom: 2rem; /* Espaçamento da seção */
+}
+
+.photo-preview-thumbnail {
+    width: 90px;  /* Tamanho da pré-visualização */
+    height: 90px;
+    border-radius: 50%; /* Redondo */
+    object-fit: cover;
+    border: 2px solid var(--glass-border); /* Borda sutil */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0; /* Não encolher em telas pequenas */
+}
+
+.current-photo-link {
+    color: var(--muted); /* Cor de texto secundária */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.current-photo-link:hover {
+    color: var(--accent); /* Destacar no hover */
+    text-decoration: underline;
+}
+
+.upload-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Para quebra de linha em telas pequenas */
+}
+
+.custom-file-upload {
+    /* Estilo do botão "Escolher Arquivo" */
+    display: inline-block;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px; /* Mais arredondado */
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.1);
+}
+
+.custom-file-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(229, 57, 53, 0.2);
+}
+
+.file-name-display {
+    font-size: 0.9rem;
+    white-space: nowrap; /* Evita que o nome do arquivo quebre */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adiciona "..." se o nome for muito longo */
+    max-width: 180px; /* Limite de largura para o nome do arquivo */
+    padding-left: 0.5rem; /* Espaçamento com o botão */
+}
+
+.remove-photo-btn {
+    /* Estilo do botão "Remover" */
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--muted);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.remove-photo-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsividade para a seção de upload */
+@media (max-width: 576px) {
+    .profile-photo-upload-section .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .photo-preview-thumbnail {
+        margin-bottom: 1rem;
+    }
+    .upload-controls {
+        width: 100%; /* Ocupa toda a largura */
+        flex-direction: column; /* Empilha os controles */
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+    .file-name-display {
+        max-width: none; /* Remove limite para ocupar a linha */
+        padding-left: 0;
+    }
+    .custom-file-upload {
+        width: 100%;
+        text-align: center;
+    }
+    .remove-photo-btn {
+        width: 100%;
+        margin-left: 0 !important; /* Remove ms-auto */
+    }
 }

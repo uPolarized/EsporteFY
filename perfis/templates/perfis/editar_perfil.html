@@ -1,5 +1,5 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags static %}
+{% load crispy_forms_tags static custom_filters %}
 
 {% block title %}Editar Perfil - EsporteFY{% endblock %}
 
@@ -42,15 +42,40 @@
                     {% csrf_token %}
                     
                     <div class="row g-3">
-                        <div class="col-12">
-                            <label for="{{ form.foto.id_for_label }}" class="form-label">Foto de Perfil</label>
-                            {% if form.foto.value %}
-                                <p class="small text-muted mb-2">
-                                    Imagem atual: <a href="{{ form.foto.value.url }}" target="_blank">{{ form.foto.value.name }}</a>
-                                </p>
-                            {% endif %}
-                            {{ form.foto }}
+                        <div class="col-12 profile-photo-upload-section">
+                            <label class="form-label">Foto de Perfil</label>
+                            
+                            <div>
+                                {% if form.foto.value %}
+                                    <p class="small text-muted mb-0">
+                                        Atualmente: <a href="{{ form.foto.value.url }}" target="_blank" class="current-photo-link">{{ form.foto.value.name|filename }}</a>
+                                    </p>
+                                {% else %}
+                                    <p class="small text-muted mb-0">Nenhuma imagem definida.</p>
+                                {% endif %}
+
+                                <div class="upload-controls d-flex gap-2 mt-2">
+                                    <input type="file" id="id_foto" name="foto" class="d-none">
+                                    <label for="id_foto" class="btn btn-sm btn-primary custom-file-upload">Escolher Arquivo</label>
+                                    
+                                    <span id="file-name-display" class="file-name-display text-muted">Nenhum arquivo escolhido</span>
+
+                                    {% if form.foto.value %}
+                                        <button type="button" class="btn btn-sm btn-outline-secondary remove-photo-btn ms-auto">Remover</button>
+                                        <input type="hidden" name="foto-clear" id="id_foto-clear" value="">
+                                    {% endif %}
+                                </div>
+                                
+                                {% if form.foto.errors %}
+                                    <div class="invalid-feedback d-block mt-2">
+                                        {% for error in form.foto.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
+                        
                         <div class="col-md-6">
                             {{ form.mini_bio|as_crispy_field }}
                         </div>
@@ -77,4 +102,52 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Removemos as variáveis da pré-visualização da foto
+        const fileInput = document.getElementById('id_foto');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const removePhotoBtn = document.querySelector('.remove-photo-btn');
+        const clearPhotoInput = document.getElementById('id_foto-clear');
+
+        // Função para atualizar o nome do arquivo
+        function updateFileName(file) {
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                if (clearPhotoInput) {
+                    clearPhotoInput.value = ''; // Desmarca limpar se um novo arquivo é escolhido
+                }
+            } else {
+                fileNameDisplay.textContent = 'Nenhum arquivo escolhido';
+            }
+        }
+
+        // Event listener para quando um arquivo é selecionado
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                updateFileName(this.files[0]);
+            });
+        }
+
+        // Event listener para o botão "Remover"
+        if (removePhotoBtn && clearPhotoInput) {
+            removePhotoBtn.addEventListener('click', function() {
+                fileInput.value = ''; // Limpa o input file
+                updateFileName(null); // Reseta o nome do arquivo
+                clearPhotoInput.value = 'true'; // Marca o campo para limpar no backend
+            });
+        }
+
+        // Tenta inicializar o display com o nome do arquivo atual
+        const currentFileText = document.querySelector('.current-photo-link');
+        if (currentFileText && fileInput && !fileInput.files.length) {
+            fileNameDisplay.textContent = currentFileText.textContent.trim();
+        }
+
+    });
+</script>
 {% endblock %}

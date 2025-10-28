@@ -10,154 +10,138 @@
 {% block content %}
 <div class="profile-page">
 
-  {# Usamos container-fluid para aproveitar largura e o grid do layout #}
-  <div class="container-fluid profile-layout-wrapper py-4">
+ {# Usamos container-fluid para aproveitar largura e o grid do layout #}
+ <div class="container-fluid profile-layout-wrapper py-4">
 
-    <div class="profile-layout">
+   <div class="profile-layout">
 
-      <aside class="profile-left">
-        <div class="side-card">
-          <div class="avatar-wrap">
-            {% if object.foto %}
-              <img src="{{ object.foto.url }}" alt="Avatar {{ object.user.username }}" class="avatar">
-            {% else %}
-              <div class="avatar placeholder">
-                <span>{{ object.user.username|first|upper }}</span>
-              </div>
-            {% endif %}
-          </div>
+     <aside class="profile-left">
+       <div class="side-card">
+         <div class="avatar-wrap">
+           {% if object.foto %}
+             <img src="{{ object.foto.url }}" alt="Avatar {{ object.user.username }}" class="avatar">
+           {% else %}
+             <div class="avatar placeholder">
+               <span>{{ object.user.username|first|upper }}</span>
+             </div>
+           {% endif %}
+         </div>
 
-          <h3 class="username">{{ object.user.username }}</h3>
-          <p class="email text-muted">{{ object.user.email }}</p>
+         <h3 class="username">{{ object.user.username }}</h3>
+         <p class="email text-muted">{{ object.user.email }}</p>
 
-          <div class="side-actions">
-            {% if request.user == object.user %}
-              <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
-            {% else %}
-              <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
-            {% endif %}
-          </div>
-          <div class="side-stats mt-3">
-  <div class="stat">
-    <span class="num">{{ total_partidas|default:"0" }}</span>
-    <span class="label text-muted">Partidas</span>
-  </div>
-  <div class="stat">
-    <span class="num">{{ total_amigos|default:"0" }}</span>
-    <span class="label text-muted">Amigos</span>
-  </div>
-</div>
+         <div class="side-actions">
+           {% if request.user == object.user %}
+             <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+           {% else %}
+             <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
+           {% endif %}
+         </div>
+         <div class="side-stats mt-3">
+           <div class="stat">
+             <span class="num">{{ total_partidas|default:"0" }}</span>
+             <span class="label text-muted">Partidas</span>
+           </div>
+           <div class="stat">
+             <span class="num">{{ total_amigos|default:"0" }}</span>
+             <span class="label text-muted">Amigos</span>
+           </div>
+         </div>
 
-          <hr>
+         <hr>
 
-          <nav class="side-menu">
-            <a href="#" class="side-link">Atividade</a>
-            <a href="{% url 'perfis:meu_perfil' %}" class="side-link">Sobre</a>
-            
-          </nav>
-        </div>
-      </aside>
+        
+       </div>
+     </aside>
 
-      <main class="profile-center">
-        <div class="center-header card-glass">
-          <div class="center-meta">
-            <h1 class="name">{{ object.user.username }}</h1>
-            <p class="muted">{{ object.user.email }}</p>
-          </div>
+     <main class="profile-center">
+       
+       <div class="cards-grid">
+         <section class="card-glass about-card">
+           <h3>Sobre Mim</h3>
+           {% if user.perfil.mini_bio %}
+             <p>{{ user.perfil.mini_bio|linebreaksbr }}</p>
+           {% else %}
+             <p class="text-muted">Nenhuma informação adicionada ainda.</p>
+           {% endif %}
+         </section>
 
-          <div class="center-actions">
-            {% if request.user == object.user %}
-              
-            {% else %}
-              <a href="#" class="btn btn-outline">Seguir</a>
-            {% endif %}
-          </div>
-          </div>
+         <section class="card-glass prefs-card">
+           <h4>Preferências de Jogo</h4>
+           <ul class="prefs-list small muted">
+             <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
+             <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
+             <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
+             
+             <li><strong>Cidade:</strong> {{ object.cidade|default:"Não definida" }}</li>
+           </ul>
+         </section>
 
-        <div class="cards-grid">
-          <section class="card-glass about-card">
-            <h4>Sobre Mim</h4>
-            <p class="muted small">
-              {{ object.bio|default:"Nenhuma informação adicionada ainda." }}
-            </p>
-          </section>
+         <section class="card-glass activity-card full-width">
+           <h4>Atividade</h4>
 
-          <section class="card-glass prefs-card">
-  <h4>Preferências de Jogo</h4>
-  <ul class="prefs-list small muted">
-    <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
-    <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
-    <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
-    
-    <li><strong>Cidade:</strong> {{ object.cidade|default:"Não definida" }}</li>
-    </ul>
-</section>
+           {# Se tiver uma variável activities, iterar; caso contrário placeholder #}
+           {% if activities %}
+             <div class="activity-list">
+               {% for a in activities %}
+                 <div class="activity-item">
+                   <div class="act-left">
+                     <div class="dot"></div>
+                   </div>
+                   <div class="act-body">
+                     <div class="act-title">{{ a.title }}</div>
+                     <div class="act-meta small muted">{{ a.timestamp }}</div>
+                   </div>
+                 </div>
+               {% endfor %}
+             </div>
+           {% else %}
+             <div class="empty-activity muted">
+               Nenhuma atividade recente. Jogue uma partida, publique algo ou conecte-se com amigos!
+             </div>
+           {% endif %}
+         </section>
+       </div>
+     </main>
 
-          <section class="card-glass activity-card full-width">
-            <h4>Atividade</h4>
+     <aside class="profile-right">
+       <div class="right-card card-glass">
+         <h5>Pedidos Pendentes</h5>
 
-            {# Se tiver uma variável activities, iterar; caso contrário placeholder #}
-            {% if activities %}
-              <div class="activity-list">
-                {% for a in activities %}
-                  <div class="activity-item">
-                    <div class="act-left">
-                      <div class="dot"></div>
-                    </div>
-                    <div class="act-body">
-                      <div class="act-title">{{ a.title }}</div>
-                      <div class="act-meta small muted">{{ a.timestamp }}</div>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="empty-activity muted">
-                Nenhuma atividade recente. Jogue uma partida, publique algo ou conecte-se com amigos!
-              </div>
-            {% endif %}
-          </section>
-        </div>
-      </main>
+         {% if solicitacoes_pendentes %}
+           <div class="pending-list">
+             {% for solicitacao in solicitacoes_pendentes %}
+               <div class="pending-item">
+                 <div class="p-left">
+                   {% if solicitacao.solicitante.perfil.foto %}
+                     <img src="{{ solicitacao.solicitante.perfil.foto.url }}" class="mini-avatar" alt="">
+                   {% else %}
+                     <div class="mini-avatar placeholder">{{ solicitacao.solicitante.username|first|upper }}</div>
+                   {% endif %}
+                 </div>
+                 <div class="p-body">
+                   <strong>{{ solicitacao.solicitante.username }}</strong>
+                   <div class="small muted">quer ser seu amigo</div>
+                 </div>
+                 <div class="p-actions">
+                   <a href="{% url 'perfis:aceitar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-success">✓</a>
+                   <a href="{% url 'perfis:recusar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-danger">✗</a>
+                 </div>
+               </div>
+             {% endfor %}
+           </div>
+         {% else %}
+           <div class="muted small">Nenhum pedido pendente</div>
+         {% endif %}
+       </div>
 
-      <aside class="profile-right">
-        <div class="right-card card-glass">
-          <h5>Pedidos Pendentes</h5>
+       <div class="right-card card-glass mt-3">
+         <h5>Sugestões</h5>
+         <div class="suggestions muted small">Sugira amigos e times aqui — recurso futuro.</div>
+       </div>
+     </aside>
 
-          {% if solicitacoes_pendentes %}
-            <div class="pending-list">
-              {% for solicitacao in solicitacoes_pendentes %}
-                <div class="pending-item">
-                  <div class="p-left">
-                    {% if solicitacao.solicitante.perfil.foto %}
-                      <img src="{{ solicitacao.solicitante.perfil.foto.url }}" class="mini-avatar" alt="">
-                    {% else %}
-                      <div class="mini-avatar placeholder">{{ solicitacao.solicitante.username|first|upper }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="p-body">
-                    <strong>{{ solicitacao.solicitante.username }}</strong>
-                    <div class="small muted">quer ser seu amigo</div>
-                  </div>
-                  <div class="p-actions">
-                    <a href="{% url 'perfis:aceitar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-success">✓</a>
-                    <a href="{% url 'perfis:recusar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-danger">✗</a>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="muted small">Nenhum pedido pendente</div>
-          {% endif %}
-        </div>
-
-        <div class="right-card card-glass mt-3">
-          <h5>Sugestões</h5>
-          <div class="suggestions muted small">Sugira amigos e times aqui — recurso futuro.</div>
-        </div>
-      </aside>
-
-    </div>
-  </div>
+   </div>
+ </div>
 </div>
 {% endblock %}

@@ -101,6 +101,30 @@ body {
     padding: 1.5rem;
 }
 
+
+/* ============================================== */
+/* ===   Centralizar Menu 'Atividade/Sobre'   === */
+/* ============================================== */
+
+.side-menu .side-link {
+    text-align: center;
+}
+
+/* ============================================== */
+/* ===   Centralizar Botão de Editar Perfil   === */
+/* ============================================== */
+
+.side-card .btn {
+    display: block;      /* Faz o botão ocupar a própria linha */
+    width: fit-content;  /* Faz o botão ter a largura do seu texto */
+    margin-left: auto;   /* Mágica para centralizar (auto) */
+    margin-right: auto;  /* Mágica para centralizar (auto) */
+    
+    /* Adiciona um espaçamento para respirar */
+    margin-top: 1rem;
+    margin-bottom: 1.5rem; 
+}
+
 /* avatar */
 .avatar-wrap {
     text-align: center;
@@ -277,4 +301,103 @@ input[type="file"]::file-selector-button:hover {
 .profile-section .info {
     margin-top: 0.6rem;
     line-height: 1.6;
+}
+
+
+/* ============================================== */
+/* ===  AJUSTES PARA PEDIDOS PENDENTES (v2)   === */
+/* ============================================== */
+
+/* Ajusta o container do pedido pendente */
+.pending-item {
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    padding: 0.75rem 0; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
+
+.pending-item:last-child {
+    border-bottom: none;
+}
+
+/* Garante que o mini-avatar tenha um tamanho fixo */
+.mini-avatar {
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    flex-shrink: 0; 
+    border: 1px solid rgba(255,255,255,0.08); 
+}
+
+/* Estilo para o placeholder do mini-avatar */
+.mini-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #424242; 
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem; 
+}
+
+/* * *** A CORREÇÃO ESTÁ AQUI ***
+ * Removemos o 'white-space: nowrap' do container
+ */
+.pending-item .p-body {
+    flex-grow: 1; /* Permite que o corpo ocupe o espaço */
+    min-width: 0; /* Ajuda o flexbox a encolher corretamente */
+}
+
+/* * E aplicamos o '...' APENAS no nome do usuário (<strong>)
+ * se ele for muito longo.
+ */
+.pending-item .p-body strong {
+    display: block; /* Faz o nome ter sua própria linha */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Agora o 'div.small.muted' (quer ser seu amigo)
+   vai para a linha de baixo e fica 100% visível.
+*/
+.pending-item .p-body .small {
+    white-space: normal; /* Garante que este texto possa quebrar linha */
+}
+
+
+/* Botões de ação (aceitar/recusar) */
+.pending-item .p-actions {
+    display: flex;
+    gap: 0.4rem; 
+    flex-shrink: 0; 
+}
+
+/* Ajuste para os botões dentro de p-actions */
+.pending-item .p-actions .btn {
+    width: 30px; 
+    height: 30px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+    font-size: 0.9rem; 
+    line-height: 1; 
+}
+
+/* (Opcional) Largura da coluna da direita */
+.profile-right {
+    flex-basis: 300px; 
+    max-width: 350px; 
+    width: 100%; 
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 991.98px) { 
+    .profile-right {
+        max-width: none; 
+        margin-top: 1.5rem; 
+    }
 }

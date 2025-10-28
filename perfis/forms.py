@@ -43,7 +43,7 @@ class PerfilForm(forms.ModelForm):
             'cidade',
         ]
         labels = {
-            'mini_bio': 'Mini Biografia',
+            'mini_bio': 'Sobre Mim',
             'esportes_preferidos': 'Esportes Preferidos',
             'nivel_habilidade': 'Nível de Habilidade',
             'idade': 'Idade',

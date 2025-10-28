@@ -1,7 +1,7 @@
 /* ============================
-   Lista de Usuários - Tema Escuro
-   Seguro para o template fornecido
-   ============================ */
+ * Lista de Usuários - Tema Escuro
+ * Seguro para o template fornecido
+ * ============================ */
 
 /* ---- Variáveis de tema ---- */
 :root{
@@ -64,6 +64,15 @@ html, body {
     .card-body { padding: 1.25rem 1.5rem; }
 }
 
+/* * *** CORREÇÃO 1: Rótulos legíveis ***
+ * Define a cor dos labels (ex: "Buscar por nome")
+ */
+.form-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
 /* ---- Inputs e selects (crispy/bootstrap) ---- */
 .form-control,
 .form-select {
@@ -76,8 +85,13 @@ html, body {
     -webkit-appearance: none;
 }
 
-/* Mantém o placeholder mais suave */
-.form-control::placeholder { color: rgba(255,255,255,0.35); }
+/* * *** CORREÇÃO 2: Placeholder legível ***
+ * Aumenta a opacidade do placeholder de 0.35 para 0.8
+ */
+.form-control::placeholder { 
+    color: var(--muted);
+    opacity: 0.8; 
+}
 
 /* Foco claro e acessível */
 .form-control:focus,
@@ -275,7 +289,6 @@ html, body {
     color: #fff;
 }
 
-/* ---- Pequenos ajustes visuais ---- */
 /* ---- Pequenos ajustes visuais ---- */
 /* Garante contraste do link de perfil (se houver) */
 a { 
