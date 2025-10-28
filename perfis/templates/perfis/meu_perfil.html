@@ -4,7 +4,7 @@
 {% block title %}{{ object.user.username }} — Perfil{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/login/perfil.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,6 @@
 
     <div class="profile-layout">
 
-      <!-- LEFT SIDEBAR -->
       <aside class="profile-left">
         <div class="side-card">
           <div class="avatar-wrap">
@@ -32,50 +31,50 @@
           <p class="email text-muted">{{ object.user.email }}</p>
 
           <div class="side-actions">
-            <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
-            <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
+            {% if request.user == object.user %}
+              <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+            {% else %}
+              <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
+            {% endif %}
           </div>
-
           <div class="side-stats mt-3">
-            <div class="stat">
-              <span class="num">42</span>
-              <span class="label text-muted">Partidas</span>
-            </div>
-            <div class="stat">
-              <span class="num">128</span>
-              <span class="label text-muted">Amigos</span>
-            </div>
-            <div class="stat">
-              <span class="num">Lvl 3</span>
-              <span class="label text-muted">Nível</span>
-            </div>
-          </div>
+  <div class="stat">
+    <span class="num">{{ total_partidas|default:"0" }}</span>
+    <span class="label text-muted">Partidas</span>
+  </div>
+  <div class="stat">
+    <span class="num">{{ total_amigos|default:"0" }}</span>
+    <span class="label text-muted">Amigos</span>
+  </div>
+</div>
 
           <hr>
 
           <nav class="side-menu">
             <a href="#" class="side-link">Atividade</a>
             <a href="{% url 'perfis:meu_perfil' %}" class="side-link">Sobre</a>
-           
+            
           </nav>
         </div>
       </aside>
 
-      <!-- CENTER FEED (perfil + feed) -->
       <main class="profile-center">
         <div class="center-header card-glass">
           <div class="center-meta">
             <h1 class="name">{{ object.user.username }}</h1>
             <p class="muted">{{ object.user.email }}</p>
           </div>
+
           <div class="center-actions">
-            <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary">Editar</a>
-            <a href="#" class="btn btn-outline">Seguir</a>
+            {% if request.user == object.user %}
+              
+            {% else %}
+              <a href="#" class="btn btn-outline">Seguir</a>
+            {% endif %}
           </div>
-        </div>
+          </div>
 
         <div class="cards-grid">
-          <!-- Sobre -->
           <section class="card-glass about-card">
             <h4>Sobre Mim</h4>
             <p class="muted small">
@@ -83,17 +82,17 @@
             </p>
           </section>
 
-          <!-- Preferências -->
           <section class="card-glass prefs-card">
-            <h4>Preferências de Jogo</h4>
-            <ul class="prefs-list small muted">
-              <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
-              <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
-              <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
-            </ul>
-          </section>
+  <h4>Preferências de Jogo</h4>
+  <ul class="prefs-list small muted">
+    <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
+    <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
+    <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
+    
+    <li><strong>Cidade:</strong> {{ object.cidade|default:"Não definida" }}</li>
+    </ul>
+</section>
 
-          <!-- Atividade / Feed -->
           <section class="card-glass activity-card full-width">
             <h4>Atividade</h4>
 
@@ -121,7 +120,6 @@
         </div>
       </main>
 
-      <!-- RIGHT COLUMN (pendentes / sugeridos) -->
       <aside class="profile-right">
         <div class="right-card card-glass">
           <h5>Pedidos Pendentes</h5>
@@ -159,8 +157,7 @@
         </div>
       </aside>
 
-    </div> <!-- /profile-layout -->
-
-  </div> <!-- /container-fluid -->
-</div> <!-- /profile-page -->
+    </div>
+  </div>
+</div>
 {% endblock %}

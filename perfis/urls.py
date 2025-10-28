@@ -9,7 +9,7 @@ urlpatterns = [
     path('meu/', views.MeuPerfilView.as_view(), name='meu_perfil'),
     
      # Ex: /perfil/meu/ -> Mostra o perfil do próprio utilizador
-    path('meu/', views.MeuPerfilView.as_view(), name='meu_perfil'),
+    
     
     # Ex: /perfil/usuario/joao_victor/ -> Mostra o perfil público do joao_victor
     path('usuario/<str:username>/', views.VerPerfilView.as_view(), name='ver_perfil'),

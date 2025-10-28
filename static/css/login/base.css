@@ -40,22 +40,36 @@ body {
 }
 
 
-/* Navbar: alinhar imagem e nome do usuário */
-.navbar .nav-link.dropdown-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem; /* Espaço entre foto e nome */
-    padding: 0.25rem 0.5rem; /* Ajusta altura da navbar */
+/* ================================================== */
+/* === Forçar Estilo Escuro (Custom) no Dropdown === */
+/* ================================================== */
+
+/* 1. Força o fundo escuro, a cor do texto e as bordas */
+.navbar .dropdown-menu {
+    background-color: #2c2c2e !important; /* Fundo cinza-escuro, como na imagem */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Borda clara sutil */
+    border-radius: 0.5rem !important; /* Bordas arredondadas */
+    color: #f0f0f5 !important; /* Cor do texto principal clara */
 }
 
-.navbar .nav-link.dropdown-toggle img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+/* 2. Força a cor dos links (itens) do menu */
+.navbar .dropdown-item {
+    color: #f0f0f5 !important;
+    background-color: transparent !important;
 }
 
+/* 3. Força o estilo do item ao passar o mouse (hover) */
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Um leve brilho no hover */
+}
+
+/* 4. Força a cor do divisor (a linha) */
+.navbar .dropdown-divider {
+    /* Usa a mesma cor da borda para consistência */
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
 
 /* Garante que o texto de links use a variável */
 a {

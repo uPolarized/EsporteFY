@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',  # <- Adicione isto
     'crispy_forms',
     'crispy_bootstrap5',
 ]
@@ -72,7 +73,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'esportefy.wsgi.application'
 ASGI_APPLICATION = 'esportefy.asgi.application'
 
-DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3','NAME': BASE_DIR / 'db.sqlite3',}}
+DATABASES = {'default': env.db('DATABASE_URL')}
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -86,8 +88,17 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+# --- Arquivos estáticos ---
+STATIC_URL = '/static/'
+
+# Local onde o Django vai reunir todos os estáticos (admin, apps, etc.)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Pasta de arquivos estáticos do projeto (customizados)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -108,9 +119,9 @@ LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True # O username será pedido no nosso formulário, não exigido pelo allauth
 ACCOUNT_LOGIN_METHODS = ['username', 'email']
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = True
-
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
 # ESTA É A MUDANÇA: em vez de herdar, apontamos para um formulário simples.
 ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.forms.CustomSignupForm' 
 
@@ -132,7 +143,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)], # Para desenvolvimento local sem Docker
+            "hosts": [("redis", 6379)], 
         },
     },
 }
@@ -161,3 +172,5 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 # --- Configuração de Arquivos de Mídia (Uploads dos Usuários)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+

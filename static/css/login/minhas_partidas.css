@@ -103,11 +103,19 @@ a {
     transition: color 0.3s ease;
 }
 
-a:hover {
-    color: #ff3b3b;
-    text-decoration: underline;
+/* ---- Pequenos ajustes visuais ---- */
+/* Garante contraste do link de perfil (se houver) */
+a { 
+    color: var(--accent-2); 
+    text-decoration: none; /* Mantém sem sublinhado */
+}
+a:hover { 
+    text-decoration: none; /* <<< CORRIGIDO (não sublinha ao passar o mouse) */
+    color: #ff8b8b;      /* Mantém a mudança de cor no hover */
 }
 
+/* Garante que os componentes flutuantes não cortem sombra */
+.list-group, .card { overflow: visible; }
 /* ========================================= */
 /* ===== 5. DIVISÓRIAS ===== */
 /* ========================================= */

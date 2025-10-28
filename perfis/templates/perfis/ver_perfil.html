@@ -1,65 +1,126 @@
 {% extends "account/base.html" %}
-
-{% block title %}{{ perfil_usuario.username }}{% endblock %}
-
 {% load static %}
 
+{% block title %}{{ object.username }} — Perfil{% endblock %} {# Mudança aqui #}
 
-
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/ver_perfil.css' %}">
-<div class="profile-layout-wrapper">
+<div class="profile-page">
+  <div class="container-fluid profile-layout-wrapper py-4">
     <div class="profile-layout">
-        
-        <!-- Coluna Esquerda (foto + ações) -->
-        <div class="profile-left">
-            <div class="side-card text-center">
-                {% if perfil_usuario.perfil.foto %}
-                    <img src="{{ perfil_usuario.perfil.foto.url }}" class="img-fluid rounded-circle mb-3" alt="Foto de Perfil" style="width: 150px; height: 150px; object-fit: cover;">
-                {% endif %}
-                
-                <h2 class="mt-2">{{ perfil_usuario.username }}</h2>
-                <hr class="divider">
 
-                {% if ja_sao_amigos %}
-                    <a href="{% url 'perfis:remover_amigo' user_id=perfil_usuario.id %}" class="btn btn-danger btn-sm w-100 mb-2">Remover Amigo</a>
-                {% elif pedido_enviado %}
-                    <button class="btn btn-secondary btn-sm w-100 mb-2" disabled>Pedido Enviado</button>
-                {% elif pedido_recebido %}
-                    <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-sm w-100 mb-2">Responder Pedido</a>
-                {% else %}
-                    <a href="{% url 'perfis:enviar_solicitacao' receptor_id=perfil_usuario.id %}" class="btn btn-primary btn-sm w-100 mb-2">Adicionar Amigo</a>
-                {% endif %}
-                
-                <a href="{% url 'social:conversa' username=perfil_usuario.username %}" class="btn btn-outline-primary btn-sm w-100">Enviar Mensagem</a>
-            </div>
+      <aside class="profile-left">
+        <div class="side-card">
+          <div class="avatar-wrap">
+            {% if object.perfil.foto %} {# Mudança aqui #}
+              <img src="{{ object.perfil.foto.url }}" alt="Avatar {{ object.username }}" class="avatar"> {# Mudança aqui #}
+            {% else %}
+              <div class="avatar placeholder">
+                <span>{{ object.username|first|upper }}</span> {# Mudança aqui #}
+              </div>
+            {% endif %}
+          </div>
+
+          <h3 class="username">{{ object.username }}</h3> {# Mudança aqui #}
+          <p class="email text-muted">{{ object.email }}</p> {# Mudança aqui #}
+
+          <div class="side-actions">
+            {% if request.user == object %} {# Mudança aqui #}
+              <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+            {% else %}
+              {% if ja_sao_amigos %}
+                <a href="{% url 'perfis:remover_amigo' user_id=object.id %}" class="btn btn-danger btn-block">Remover Amigo</a> {# Mudança aqui #}
+              {% elif pedido_enviado %}
+                <button class="btn btn-secondary btn-block" disabled>Pedido Enviado</button>
+              {% elif pedido_recebido %}
+                 <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-block">Responder Pedido</a>
+              {% else %}
+                <a href="{% url 'perfis:enviar_solicitacao' receptor_id=object.id %}" class="btn btn-primary btn-block">Adicionar Amigo</a> {# Mudança aqui #}
+              {% endif %}
+                <a href="{% url 'social:conversa' username=object.username %}" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a> {# Mudança aqui #}
+            {% endif %}
+          </div>
+
+          <div class="side-stats mt-3">
+              <div class="stat">
+                <span class="num">{{ total_partidas|default:"0" }}</span>
+                <span class="label text-muted">Partidas</span>
+              </div>
+              <div class="stat">
+                <span class="num">{{ total_amigos|default:"0" }}</span>
+                <span class="label text-muted">Amigos</span>
+              </div>
+          </div>
+
+          <hr>
+
+          <nav class="side-menu">
+            <a href="#" class="side-link">Atividade</a>
+            <a href="{% url 'perfis:ver_perfil' username=object.username %}" class="side-link">Sobre</a> {# Mudança aqui #}
+          </nav>
         </div>
+      </aside>
 
-        <!-- Coluna Central (bio + preferências) -->
-        <div class="profile-center">
-            <div class="card-glass">
-                <h3>Sobre Mim</h3>
-                <p>{{ perfil_usuario.perfil.bio|default:"Nenhuma informação." }}</p>
-            </div>
+      <main class="profile-center">
+         <div class="center-header card-glass">
+             <div class="center-meta">
+                 <h1 class="name">{{ object.username }}</h1> {# Mudança aqui #}
+                 <p class="muted">{{ object.email }}</p> {# Mudança aqui #}
+             </div>
+             </div>
 
-            <div class="card-glass mt-3">
-                <h3>Preferências</h3>
-                <ul>
-                    <li><strong>Esporte:</strong> {{ perfil_usuario.perfil.esportes_preferidos|default:"Não definido" }}</li>
-                    <li><strong>Nível:</strong> {{ perfil_usuario.perfil.nivel_habilidade|default:"Não definido" }}</li>
-                </ul>
-            </div>
+        <div class="cards-grid">
+          <section class="card-glass about-card">
+            <h4>Sobre Mim</h4>
+            <p class="muted small">
+              {{ object.perfil.bio|default:"Nenhuma informação adicionada ainda." }} {# Mudança aqui #}
+            </p>
+          </section>
+
+          <section class="card-glass prefs-card">
+            <h4>Preferências de Jogo</h4>
+            <ul class="prefs-list small muted">
+              <li><strong>Esporte:</strong> {{ object.perfil.esportes_preferidos|default:"Não definido" }}</li> {# Mudança aqui #}
+              <li><strong>Nível:</strong> {{ object.perfil.nivel_habilidade|default:"Não definido" }}</li> {# Mudança aqui #}
+              <li><strong>Idade:</strong> {{ object.perfil.idade|default:"Não definida" }}</li> {# Mudança aqui #}
+              <li><strong>Cidade:</strong> {{ object.perfil.cidade|default:"Não definida" }}</li> {# Mudança aqui #}
+            </ul>
+          </section>
+
+          <section class="card-glass activity-card">
+            <h4>Atividade</h4>
+             {% if activities %}
+              <div class="activity-list">
+                {% for a in activities %}
+                  <div class="activity-item">
+                    <div class="act-left"><div class="dot"></div></div>
+                    <div class="act-body">
+                      <div class="act-title">{{ a.title }}</div>
+                      <div class="act-meta small muted">{{ a.timestamp }}</div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty-activity muted">
+                Nenhuma atividade recente.
+              </div>
+            {% endif %}
+          </section>
         </div>
+      </main>
 
-        <!-- Coluna Direita (futuro: amigos em comum, sugestões, etc) -->
-        <div class="profile-right">
-            <div class="right-card">
-                <h3>Amigos em comum</h3>
-                <p>⚡ Em breve você pode listar aqui amigos compartilhados.</p>
-            </div>
+      <aside class="profile-right">
+        <div class="right-card card-glass">
+            <h5>Sugestões</h5>
+            <div class="suggestions muted small">Recurso futuro.</div>
         </div>
+      </aside>
 
     </div>
+  </div>
 </div>
 {% endblock %}

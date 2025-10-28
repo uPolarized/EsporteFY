@@ -1,0 +1,78 @@
+{% extends "account/base.html" %}
+{% load static allauth i18n %}
+{% load socialaccount %}
+
+{% block title %}
+    {% trans "Account Connections" %} - EsporteFY
+{% endblock title %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/email_change.css' %}">
+{% endblock extra_head %}
+
+{% block content %}
+<div class="manage-account-layout">
+
+    <div class="account-menu-container">
+        <ul class="account-menu">
+            <li><a href="{% url 'account_email' %}">{% trans "Alterar e-mail" %}</a></li>
+            <li><a href="{% url 'account_change_password' %}">{% trans "Alterar senha" %}</a></li>
+            <li><a href="{% url 'socialaccount_connections' %}" class="active">{% trans "Conexões de conta" %}</a></li>
+            <li><a href="{% url 'account_logout' %}">{% trans "Sair" %}</a></li>
+        </ul>
+    </div>
+
+    <div class="email-container">
+        <div class="email-card">
+            <h2>{% trans "Account Connections" %}</h2>
+
+            {% if form.accounts %}
+                <p>{% trans 'The following social accounts are connected to your account:' %}</p>
+
+                <form method="post" class="email-list-form">
+                    {% csrf_token %}
+                    <ul class="email-list">
+                        {% for account in form.accounts %}
+                        <li>
+                            <label>
+                                <input type="radio" name="account" value="{{ account.id }}">
+                                <span>{{ account }}</span>
+                            </label>
+                            <div class="email-statuses">
+                                <span class="email-status status-verified">{{ account.get_provider.name }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="form-actions">
+                        <button type="submit" name="action_remove" class="btn btn-outline">{% trans 'Remove' %}</button>
+                    </div>
+                </form>
+
+            {% else %}
+                <p>{% trans 'You currently have no social accounts connected.' %}</p>
+            {% endif %}
+
+            <hr>
+            <h2>{% trans "Add a Social Account" %}</h2>
+
+            {% if socialaccount_providers %}
+                <p>{% trans 'You can connect any of the following accounts:' %}</p>
+                
+                <div class="provider-list">
+                    {% for provider in socialaccount_providers %}
+                        <a title="{{ provider.name }}" class="btn btn-provider provider-{{ provider.id }}" 
+                           href="{% provider_login_url provider.id process='connect' %}">
+                            {{ provider.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{% trans 'No social account providers are configured.' %}</p>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

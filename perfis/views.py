@@ -8,6 +8,10 @@ from django.urls import reverse_lazy
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm, FiltroUsuarioForm
 
+# Importamos o modelo Partida para poder contar as partidas
+from partidas.models import Partida 
+# (Se o seu app de partidas tiver um nome diferente, apenas corrija a importação)
+
 class ListaUsuariosView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'perfis/lista_usuarios.html'
@@ -76,27 +80,56 @@ def recusar_solicitacao(request, solicitacao_id):
 
 class MeuPerfilView(LoginRequiredMixin, DetailView):
     model = Perfil
-    template_name = 'perfis/meu_perfil.html'
+    template_name = 'perfis/meu_perfil.html' 
+    context_object_name = 'object' # Adicionado para corresponder ao template
+    
     def get_object(self):
         return self.request.user.perfil
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # self.object já é o Perfil, pego pelo get_object()
+        perfil_logado = self.object 
+
         context['solicitacoes_pendentes'] = SolicitacaoAmizade.objects.filter(receptor=self.request.user, aceito=False)
+        
+        # --- ATUALIZADO ---
+        # Contagem de amigos (presumindo M2M 'amigos' no modelo Perfil)
+        context['total_amigos'] = perfil_logado.amigos.count()
+        
+        # CORREÇÃO: Usando 'jogadores_confirmados' como o erro indicou
+        context['total_partidas'] = Partida.objects.filter(jogadores_confirmados=perfil_logado.user).count()
+        # --- FIM DA ATUALIZAÇÃO ---
+
         return context
 
 class VerPerfilView(LoginRequiredMixin, DetailView):
     model = User
-    template_name = 'perfis/ver_perfil.html'
-    context_object_name = 'perfil_usuario'
+    template_name = 'perfis/ver_perfil.html' # Este template precisa ser ajustado
+    context_object_name = 'object' # Mudado de 'perfil_usuario' para 'object'
     slug_field = 'username'
     slug_url_kwarg = 'username'
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        perfil_visitado = self.get_object()
-        context['ja_sao_amigos'] = user.perfil.amigos.filter(id=perfil_visitado.id).exists()
-        context['pedido_enviado'] = SolicitacaoAmizade.objects.filter(solicitante=user, receptor=perfil_visitado).exists()
-        context['pedido_recebido'] = SolicitacaoAmizade.objects.filter(solicitante=perfil_visitado, receptor=user).exists()
+        user_logado = self.request.user
+        
+        # self.object agora é o User (devido ao model = User)
+        perfil_visitado_user = self.get_object() 
+        perfil_visitado_perfil = perfil_visitado_user.perfil 
+        
+        context['ja_sao_amigos'] = user_logado.perfil.amigos.filter(id=perfil_visitado_user.id).exists()
+        context['pedido_enviado'] = SolicitacaoAmizade.objects.filter(solicitante=user_logado, receptor=perfil_visitado_user).exists()
+        context['pedido_recebido'] = SolicitacaoAmizade.objects.filter(solicitante=perfil_visitado_user, receptor=user_logado).exists()
+
+        # --- ATUALIZADO ---
+        # Contagens para o perfil que está sendo visitado
+        context['total_amigos'] = perfil_visitado_perfil.amigos.count()
+        
+        # CORREÇÃO: Usando 'jogadores_confirmados' aqui também
+        context['total_partidas'] = Partida.objects.filter(jogadores_confirmados=perfil_visitado_user).count()
+        # --- FIM DA ATUALIZAÇÃO ---
+
         return context
 
 class EditarPerfilView(LoginRequiredMixin, UpdateView):
