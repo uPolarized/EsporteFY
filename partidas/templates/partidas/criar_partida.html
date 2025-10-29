@@ -5,9 +5,56 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/login/criar_partida.css' %}">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+    <style>
+        #mapa-modal {
+            height: 450px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        .map-popup-card {
+            width: 250px;
+            border: none;
+        }
+        .map-popup-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .map-popup-card-body {
+            padding: 10px;
+        }
+        .map-popup-card-body h5 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .map-popup-card-body p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        /* Spinner de Loading */
+        #map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001; /* Acima do mapa */
+        }
+    </style>
 {% endblock %}
 
-{% block body_class %}criar-partida-page{% endblock %} {# Aplica a classe para o fundo escuro #}
+{% block body_class %}criar-partida-page{% endblock %}
 
 {% block content %}
 <div class="container criar-partida-container">
@@ -21,7 +68,6 @@
                     {{ form.titulo|as_crispy_field }}
                     {{ form.esporte|as_crispy_field }}
 
-                    <!-- SELETOR DE QUADRA CUSTOMIZADO -->
                     <div class="mb-3">
                         <label for="id_quadra_display" class="form-label requiredField">Quadra<span class="asteriskField">*</span></label>
                         <div class="input-group">
@@ -43,30 +89,24 @@
     </div>
 </div>
 
-<!-- MODAL PARA SELECIONAR A QUADRA -->
 <div class="modal fade" id="selecionarQuadraModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Selecione uma Quadra</h5>
+                <h5 class="modal-title">Selecione uma Quadra no Mapa</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row g-3">
-                    {% for quadra in quadras %}
-                    <div class="col-md-6">
-                        <div class="card quadra-selector-card" onclick="selecionarQuadra('{{ quadra.id }}', '{{ quadra.nome }} ({{ quadra.get_bairro_display }})')">
-                            {% if quadra.foto_principal %}
-                                <img src="{{ quadra.foto_principal.imagem.url }}" class="card-img-top" alt="{{ quadra.nome }}">
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ quadra.nome }}</h5>
-                                <p class="card-text text-muted">{{ quadra.get_bairro_display }}</p>
-                            </div>
-                        </div>
+            <div class="modal-body" style="position: relative;">
+                
+                <div id="map-loading" class="text-center" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando quadras...</span>
                     </div>
-                    {% endfor %}
+                    <p class="mt-2">Carregando quadras...</p>
                 </div>
+
+                <div id="mapa-modal"></div>
+                
             </div>
         </div>
     </div>
@@ -74,20 +114,112 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
 <script>
+// SUA FUNÇÃO ORIGINAL (perfeita, sem alterações)
 function selecionarQuadra(quadraId, quadraNome) {
     document.getElementById('id_quadra_display').value = quadraNome;
     document.getElementById('id_quadra').value = quadraId;
-    document.querySelectorAll('.quadra-selector-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    event.currentTarget.classList.add('selected');
+    
     var modalEl = document.getElementById('selecionarQuadraModal');
     var modal = bootstrap.Modal.getInstance(modalEl);
     if (!modal) {
         modal = new bootstrap.Modal(modalEl);
     }
     modal.hide();
+}
+
+
+// --- NOVO SCRIPT DO MAPA ---
+
+const modalEl = document.getElementById('selecionarQuadraModal');
+const loadingEl = document.getElementById('map-loading');
+let map; // Variável para guardar a instância do mapa
+
+// Escuta o evento de "antes de abrir o modal"
+modalEl.addEventListener('show.bs.modal', async function (event) {
+    
+    // Se o mapa já foi iniciado, apenas ajusta o tamanho e sai
+    if (map) {
+        setTimeout(() => map.invalidateSize(), 10);
+        return;
+    }
+
+    // 1. Mostra o loading
+    loadingEl.style.display = 'block';
+
+    // 2. Inicia o mapa (Centralizado em Maricá)
+    //    Usamos setTimeout para garantir que o modal está visível antes de iniciar o mapa
+    setTimeout(() => {
+        try {
+            map = L.map('mapa-modal').setView([-22.9189, -42.8239], 13); // Coordenadas de Maricá
+
+            // Adiciona o "chão" do mapa (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // 3. Busca as quadras na nossa API
+            fetchQuadras();
+
+        } catch (e) {
+            console.error("Erro ao iniciar o mapa:", e);
+            loadingEl.innerHTML = "Erro ao carregar o mapa.";
+        }
+    }, 200); // 200ms de delay para garantir que o CSS do modal foi aplicado
+});
+
+async function fetchQuadras() {
+    try {
+        // ATENÇÃO: Confirme se esta URL está correta!
+        const response = await fetch('/api/quadras/'); 
+        const data = await response.json();
+
+        if (!data.quadras || data.quadras.length === 0) {
+            loadingEl.innerHTML = "Nenhuma quadra com localização encontrada.";
+            return;
+        }
+
+        // 4. Adiciona os "pins" (markers) no mapa
+        data.quadras.forEach(quadra => {
+            if (quadra.latitude && quadra.longitude) {
+                const marker = L.marker([quadra.latitude, quadra.longitude]).addTo(map);
+                
+                // Formata o nome para ser seguro no JS
+                const quadraNomeCompleto = `${quadra.nome} (${quadra.bairro})`;
+                
+                // Cria o conteúdo do Popup (o card que abre ao clicar)
+                const popupContent = `
+                    <div class="map-popup-card">
+                        <img src="${quadra.foto_url || '{% static "images/default_quadra.jpg" %}'}" alt="${quadra.nome}">
+                        <div class="map-popup-card-body">
+                            <h5>${quadra.nome}</h5>
+                            <p>${quadra.bairro}</p>
+                            <button type="button" class="btn btn-primary btn-sm w-100" 
+                                onclick="selecionarQuadra('${quadra.id}', '${quadraNomeCompleto.replace(/'/g, "\\'")}')">
+                                Selecionar esta Quadra
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent, { minWidth: 250 });
+            }
+        });
+
+        // 5. Esconde o loading
+        loadingEl.style.display = 'none';
+
+        // 6. Ajusta o tamanho do mapa
+        map.invalidateSize();
+
+    } catch (error) {
+        console.error('Erro ao buscar quadras:', error);
+        loadingEl.innerHTML = "Erro ao carregar as quadras. Tente novamente.";
+    }
 }
 </script>
 {% endblock %}

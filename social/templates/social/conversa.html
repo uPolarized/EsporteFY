@@ -10,21 +10,13 @@
 {% endblock %}
 
 
-
-
-
 {% block content %}
-
-
-
 <div class="messenger-container">
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h4>Conversas</h4>
         </div>
         <div class="conversation-list">
-            <!-- Exemplo de conversa -->
             <div class="conversation-item active">
                 <img src="{{ outro_usuario.perfil.foto.url }}" alt="Foto" class="avatar">
                 <div>
@@ -32,11 +24,9 @@
                     <p>Última mensagem...</p>
                 </div>
             </div>
-            <!-- Outras conversas -->
-        </div>
+            </div>
     </div>
 
-    <!-- Área de chat -->
     <div class="chat-area">
         <div class="chat-header">
             <img src="{{ outro_usuario.perfil.foto.url }}" class="avatar">
@@ -52,7 +42,7 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+            </div>
 
         <div class="chat-footer">
             <form id="chat-form">
@@ -80,7 +70,7 @@
         function scrollToBottom() {
             chatLog.scrollTop = chatLog.scrollHeight;
         }
-        scrollToBottom();
+        scrollToBottom(); // Rola para o fim ao carregar
 
         const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const chatSocket = new WebSocket(
@@ -89,25 +79,48 @@
             '/ws/chat/' + outroUsuarioUsername + '/'
         );
 
+        /* * =============================================
+         * === CORREÇÃO DO JAVASCRIPT APLICADA AQUI ===
+         * =============================================
+         * Este código agora cria o HTML EXATAMENTE
+         * igual ao do seu template Django, para que
+         * o CSS funcione corretamente.
+         */
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
 
             if (data.type === 'chat_message') {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('d-flex', 'mb-2', 'message-row');
+                
+                // 1. Cria a linha da mensagem: <div class="message-row me/other">
+                const messageRow = document.createElement('div');
+                messageRow.classList.add('message-row');
                 if (data.username === meuUsuarioUsername) {
-                    messageDiv.classList.add('flex-row-reverse');
+                    messageRow.classList.add('me');
+                } else {
+                    messageRow.classList.add('other');
                 }
-                const avatarImg = `<img src="${data.user_avatar_url}" class="rounded-circle mx-2" width="40" height="40" style="object-fit: cover;">`;
-                messageDiv.innerHTML = `
-                    ${avatarImg}
-                    <div class="d-inline-block p-2 rounded-3 ${data.username === meuUsuarioUsername ? 'bg-primary text-white' : 'bg-light text-dark'}">
-                        <small class="d-block ${data.username !== meuUsuarioUsername ? 'fw-bold' : ''}">${data.username}</small>
-                        ${data.message}
-                        <small class="d-block text-end mt-1" style="font-size: 0.7rem;">${data.timestamp}</small>
-                    </div>
-                `;
-                chatLog.appendChild(messageDiv);
+
+                // 2. Cria o balão da mensagem: <div class="message-bubble">
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('message-bubble');
+
+                // 3. Cria o texto da hora: <span class="message-time">
+                const messageTime = document.createElement('span');
+                messageTime.classList.add('message-time');
+                messageTime.textContent = data.timestamp; // O timestamp do websocket já vem formatado
+
+                // 4. Adiciona o conteúdo (texto) e a hora ao balão
+                // (Usar createTextNode é mais seguro contra XSS)
+                messageBubble.appendChild(document.createTextNode(data.message));
+                messageBubble.appendChild(messageTime);
+
+                // 5. Adiciona o balão à linha
+                messageRow.appendChild(messageBubble);
+
+                // 6. Adiciona a linha da mensagem ao log do chat
+                chatLog.appendChild(messageRow);
+                
+                // 7. Rola para o fundo para ver a nova mensagem
                 scrollToBottom();
             }
         };

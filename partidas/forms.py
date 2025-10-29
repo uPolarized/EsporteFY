@@ -4,16 +4,19 @@ from .models import Partida, AvaliacaoQuadra, AvaliacaoJogador
 from quadras.models import Quadra
 
 class PartidaForm(forms.ModelForm):
-    # Transforma a relação com o modelo Quadra num dropdown amigável
+    
+    # --- MUDANÇA PRINCIPAL AQUI ---
+    # Nós ainda definimos o campo, mas dizemos ao Django para 
+    # usar um widget "escondido" (HiddenInput).
+    # O mapa cuidará de preencher o valor deste campo.
     quadra = forms.ModelChoiceField(
-        queryset=Quadra.objects.all().order_by('nome'),
-        label="Escolha a Quadra",
-        empty_label="--- Selecione uma quadra disponível ---"
+        queryset=Quadra.objects.all(),
+        widget=forms.HiddenInput(),  # <-- ESTA É A CORREÇÃO!
+        required=True
     )
     
     class Meta:
         model = Partida
-        # CORREÇÃO: Substituímos 'bairro' e 'local' pelo novo campo 'quadra'
         fields = [
             'titulo',
             'esporte',
@@ -25,7 +28,7 @@ class PartidaForm(forms.ModelForm):
             'data_hora': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
 
-    # CORREÇÃO: A função de validação foi movida para DENTRO da classe
+    # Sua validação de data está perfeita, mantenha ela
     def clean_data_hora(self):
         data_partida = self.cleaned_data.get('data_hora')
         if data_partida and data_partida < timezone.now():

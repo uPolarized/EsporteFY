@@ -20,12 +20,7 @@ class CriarPartidaView(LoginRequiredMixin, CreateView):
     template_name = 'partidas/criar_partida.html'
     success_url = reverse_lazy('feed')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # CORREÇÃO: Usamos prefetch_related para buscar todas as fotos de forma eficiente
-        context['quadras'] = Quadra.objects.all().prefetch_related('fotos').order_by('nome')
-        return context
-
+    
     def form_valid(self, form):
         form.instance.organizador = self.request.user
         messages.success(self.request, "A sua partida foi criada e já está visível para outros jogadores!")

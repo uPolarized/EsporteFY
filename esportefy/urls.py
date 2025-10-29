@@ -10,6 +10,7 @@ urlpatterns = [
     path('perfis/', include('perfis.urls')),
     path('partidas/', include('partidas.urls')),
     path('social/', include('social.urls')),
+    path('api/quadras/', include('quadras.urls', namespace='api_quadras')),
     
     # Você não incluiu as URLs de 'quadras' e 'conteudo'
     # Se você ainda as usa, adicione-as aqui:

@@ -1,8 +1,45 @@
+/* ============================================== */
+/* ===         CORREÇÕES DO LAYOUT            === */
+/* ============================================== */
+
+/* * 1. Remove a barra de rolagem da página principal, 
+ * pois o chat terá sua própria rolagem.
+ */
+body {
+    overflow: hidden;
+}
+
+/* * 2. Remove a linha/sombra branca que fica
+ * embaixo da sua navbar vermelha.
+ */
+.navbar {
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* ============================================== */
+/* ===         SEU CSS (MODIFICADO)           === */
+/* ============================================== */
+
 .messenger-container {
     display: flex;
-    height: 90vh;
+
+    /* * 3. CORREÇÃO PRINCIPAL (Layout)
+     * Removemos o 'height: 90vh' e usamos 'position: fixed'
+     * para "pregar" o chat na tela, ignorando o padding do base.html.
+     */
+    position: fixed;
+    top: 70px;  /* <<< AJUSTE AQUI (altura da sua navbar) */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto; /* Deixa o top/bottom controlarem a altura */
+    
     background: #18191a; /* fundo escuro */
-    border-radius: 10px;
+    
+    /* Removemos o radius pois agora é tela cheia */
+    border-radius: 0; 
+    
     overflow: hidden;
 }
 
