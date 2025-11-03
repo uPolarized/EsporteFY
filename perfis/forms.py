@@ -1,36 +1,15 @@
 from django import forms
 from .models import Perfil
 
-# --- Formulário para Cadastro (com os campos extras) ---
-class CustomSignupForm(forms.Form):
-    username = forms.CharField(max_length=30, label='Nome de Usuário')
+# Importação agora é SEGURA, pois o CustomSignupForm não está mais aqui
+from allauth.account.forms import SetPasswordForm
+from django_recaptcha.fields import ReCaptchaField  # <--- CORRIGIDO
+from django_recaptcha.widgets import ReCaptchaV2Checkbox  # <--- CORRIGIDO
 
-    email = forms.EmailField(label="E-mail", required=True)
-    
-    esporte_preferido = forms.ChoiceField(
-        choices=Perfil.ESPORTES_CHOICES,
-        label="Qual seu esporte principal?",
-        required=False
-    )
+# --- Formulário para Cadastro FOI MOVIDO PARA 'perfis/signup_form.py' ---
 
-    nivel_habilidade = forms.ChoiceField(
-        choices=Perfil.NIVEL_HABILIDADE_CHOICES,
-        label="Qual seu nível de habilidade?",
-        required=False
-    )
-    idade = forms.IntegerField(label="Idade", required=False)
 
-    def signup(self, request, user):
-        user.username = self.cleaned_data['username']
-        perfil = user.perfil
-        perfil.esportes_preferidos = self.cleaned_data['esporte_preferido']
-        perfil.nivel_habilidade = self.cleaned_data['nivel_habilidade']
-        perfil.idade = self.cleaned_data.get('idade')
-        
-        user.save()
-        perfil.save()
-
-# --- Formulário para Editar o Perfil (estava faltando) ---
+# --- Formulário para Editar o Perfil ---
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = Perfil
@@ -49,7 +28,6 @@ class PerfilForm(forms.ModelForm):
             'idade': 'Idade',
             'cidade': 'Cidade',
         }
-
 
 class FiltroUsuarioForm(forms.Form):
     # Campo de busca por nome, não obrigatório
@@ -72,3 +50,6 @@ class FiltroUsuarioForm(forms.Form):
         required=False,
         choices=[('', 'Todos os Níveis')] + Perfil.NIVEL_HABILIDADE_CHOICES
     )
+
+class SetPasswordCaptchaForm(SetPasswordForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())

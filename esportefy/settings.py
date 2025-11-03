@@ -12,6 +12,7 @@ NEWS_API_KEY = env('NEWS_API_KEY', default=None)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
+RECAPTCHA_REQUIRED_SCORE = 0.5
 
 
 # --- Configurações para Ngrok (Ambiente Local) ---
@@ -22,7 +23,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'daphne',   # Adicionado para o Channels
-    'channels', # Adicionado
+    'channels',
+    'django_recaptcha',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,6 +66,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.template.context_processors.debug',
+                'esportefy.context_processors.recaptcha_keys', 
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -100,6 +104,9 @@ STATICFILES_DIRS = [
 ]
 
 
+
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
@@ -123,12 +130,21 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
 # ESTA É A MUDANÇA: em vez de herdar, apontamos para um formulário simples.
-ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.forms.CustomSignupForm' 
+ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.signup_form.CustomSignupForm'
+
+# --- Configuração do Google reCAPTCHA ---
+RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default='')
+RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PRIVATE_KEY', default='')
+
+RECAPTCHA_USE_SSL = True
 
 
-# settings.py
+ACCOUNT_FORMS = {
+    'set_password': 'perfis.forms.SetPasswordCaptchaForm',
+}
 
-# ... (restante do código)
+
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

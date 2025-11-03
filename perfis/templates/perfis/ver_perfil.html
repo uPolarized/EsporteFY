@@ -28,21 +28,41 @@
           <p class="email text-muted">{{ object.email }}</p> {# Mudança aqui #}
 
           <div class="side-actions">
-            {% if request.user == object %} {# Mudança aqui #}
-              <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
-            {% else %}
-              {% if ja_sao_amigos %}
-                <a href="{% url 'perfis:remover_amigo' user_id=object.id %}" class="btn btn-danger btn-block">Remover Amigo</a> {# Mudança aqui #}
-              {% elif pedido_enviado %}
-                <button class="btn btn-secondary btn-block" disabled>Pedido Enviado</button>
-              {% elif pedido_recebido %}
-                 <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-block">Responder Pedido</a>
-              {% else %}
-                <a href="{% url 'perfis:enviar_solicitacao' receptor_id=object.id %}" class="btn btn-primary btn-block">Adicionar Amigo</a> {# Mudança aqui #}
-              {% endif %}
-                <a href="{% url 'social:conversa' username=object.username %}" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a> {# Mudança aqui #}
-            {% endif %}
-          </div>
+  {% if request.user == object %}
+      <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+  {% else %}
+      {% if ja_sao_amigos %}
+          <a href="{% url 'perfis:remover_amigo' user_id=object.id %}" class="btn btn-danger btn-block">
+              Remover Amigo
+          </a>
+          <a href="{% url 'social:conversa' username=object.username %}" class="btn btn-outline btn-block mt-2">
+              Enviar Mensagem
+          </a>
+      {% elif pedido_enviado %}
+          <button class="btn btn-secondary btn-block" disabled>
+              Pedido Enviado
+          </button>
+          <button class="btn btn-outline btn-block mt-2" disabled>
+              Aguardando amizade
+          </button>
+      {% elif pedido_recebido %}
+          <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-block">
+              Responder Pedido
+          </a>
+          <button class="btn btn-outline btn-block mt-2" disabled>
+              Aguardando resposta
+          </button>
+      {% else %}
+          <a href="{% url 'perfis:enviar_solicitacao' receptor_id=object.id %}" class="btn btn-primary btn-block">
+              Adicionar Amigo
+          </a>
+          <button class="btn btn-outline btn-block mt-2" disabled>
+              Aguardando amizade
+          </button>
+      {% endif %}
+  {% endif %}
+</div>
+
 
           <div class="side-stats mt-3">
               <div class="stat">

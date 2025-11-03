@@ -19,6 +19,76 @@ body {
     animation: fadeInDown 0.8s ease;
 }
 
+
+/* ===== TÍTULOS DAS SEÇÕES ===== */
+
+.section-header {
+    position: relative;
+    text-align: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.centered-title {
+    color: #ff4b4b;
+    font-weight: 700;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.centered-title i {
+    font-size: 1.4rem;
+    vertical-align: middle;
+}
+
+.centered-title:hover {
+    color: #ff6b6b;
+    text-shadow: 0 0 12px rgba(255, 50, 50, 0.5);
+}
+
+/* Dropdown ajustado */
+.section-header .dropdown {
+    display: inline-block;
+}
+
+.section-header .btn {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    padding: 0.35rem 0.75rem;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column !important;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .centered-title {
+        font-size: 1.4rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .section-header .dropdown {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .section-header .btn {
+        width: auto;
+    }
+}
+
+
 /* Animação de entrada suave */
 @keyframes fadeInDown {
     from {
@@ -236,6 +306,137 @@ body {
     text-decoration: underline;
 }
 
+
+.post-card .bi-people-fill {
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+
+.post-card strong {
+  color: #fff;
+}
+
+.post-card p.small {
+  color: #ddd;
+}
+
+.post-card .text-success {
+  color: #00d084 !important;
+}
+
+
+/* === CLIMA / WEATHER CARD === */
+
+.weather-card {
+    background: linear-gradient(180deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.9));
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(255, 50, 50, 0.15);
+    padding: 1.5rem;
+    color: #fff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.weather-card:hover {
+    box-shadow: 0 0 25px rgba(255, 50, 50, 0.35), 0 0 50px rgba(255, 50, 50, 0.2);
+    transform: translateY(-3px);
+}
+
+/* título centralizado */
+.weather-title {
+    font-weight: 600;
+    color: #ff4b4b;
+    text-align: center;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+/* ícone principal na direita do título */
+.weather-icon-wrapper-right {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* ícone visual e flutuante */
+.weather-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.floating-icon {
+    animation: floatIcon 4s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+}
+
+/* corpo */
+.weather-body {
+    margin-top: 1.2rem;
+}
+
+.temp {
+    font-size: 2.8rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.desc {
+    font-size: 1rem;
+    color: #b8b8b8;
+    margin-bottom: 1rem;
+}
+
+/* dica */
+.weather-tip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    color: #ddd;
+    font-size: 0.95rem;
+    padding: 0.9rem 1rem;
+    line-height: 1.5;
+    animation: fadeIn 1s ease;
+}
+
+/* alertas */
+.weather-alert {
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    text-align: center;
+    transition: 0.3s ease;
+}
+
+.weather-alert.rainy {
+    background: rgba(0, 105, 255, 0.15);
+    color: #6db6ff;
+    border: 1px solid rgba(0, 105, 255, 0.25);
+}
+
+.weather-alert.clear {
+    background: rgba(255, 213, 0, 0.15);
+    color: #ffe46d;
+    border: 1px solid rgba(255, 213, 0, 0.25);
+}
+
+.sunny { color: #ffd54f; }
+.rainy { color: #4da6ff; }
+.cloudy { color: #aab2bd; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 
 /* ===== 7. RESPONSIVIDADE ===== */

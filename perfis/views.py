@@ -5,13 +5,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy
+
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm, FiltroUsuarioForm
+from partidas.models import Partida  # Certifique-se de que o app "partidas" está correto
 
-# Importamos o modelo Partida para poder contar as partidas
-from partidas.models import Partida 
-# (Se o seu app de partidas tiver um nome diferente, apenas corrija a importação)
 
+# ============================================================
+# LISTAGEM DE USUÁRIOS
+# ============================================================
 class ListaUsuariosView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'perfis/lista_usuarios.html'
@@ -21,40 +23,58 @@ class ListaUsuariosView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = User.objects.exclude(id=self.request.user.id).select_related('perfil')
         form = FiltroUsuarioForm(self.request.GET)
+
         if form.is_valid():
             nome = form.cleaned_data.get('nome_usuario')
             esporte = form.cleaned_data.get('esporte')
             nivel = form.cleaned_data.get('nivel')
+
             if nome:
                 queryset = queryset.filter(username__icontains=nome)
             if esporte:
                 queryset = queryset.filter(perfil__esportes_preferidos=esporte)
             if nivel:
                 queryset = queryset.filter(perfil__nivel_habilidade=nivel)
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['filtro_form'] = FiltroUsuarioForm(self.request.GET or None)
+
         amigos = user.perfil.amigos.all()
         solicitacoes_enviadas_qs = SolicitacaoAmizade.objects.filter(solicitante=user)
         solicitacoes_recebidas_qs = SolicitacaoAmizade.objects.filter(receptor=user)
+
         context['amigos_lista'] = list(amigos)
         context['enviadas_lista'] = [s.receptor for s in solicitacoes_enviadas_qs]
         context['recebidas_lista'] = [s.solicitante for s in solicitacoes_recebidas_qs]
+
         return context
 
+
+# ============================================================
+# SOLICITAÇÕES DE AMIZADE
+# ============================================================
 @login_required
 def enviar_solicitacao_amizade(request, receptor_id):
     receptor = get_object_or_404(User, id=receptor_id)
     solicitante = request.user
-    if not SolicitacaoAmizade.objects.filter(solicitante=solicitante, receptor=receptor).exists() and not SolicitacaoAmizade.objects.filter(solicitante=receptor, receptor=solicitante).exists():
+
+    ja_existe = (
+        SolicitacaoAmizade.objects.filter(solicitante=solicitante, receptor=receptor).exists() or
+        SolicitacaoAmizade.objects.filter(solicitante=receptor, receptor=solicitante).exists()
+    )
+
+    if not ja_existe:
         SolicitacaoAmizade.objects.create(solicitante=solicitante, receptor=receptor)
         messages.success(request, f'Pedido de amizade enviado para {receptor.username}.')
     else:
         messages.warning(request, f'Já existe uma solicitação ou amizade com {receptor.username}.')
+
     return redirect('perfis:lista_usuarios')
+
 
 @login_required
 def aceitar_solicitacao(request, solicitacao_id):
@@ -66,7 +86,9 @@ def aceitar_solicitacao(request, solicitacao_id):
         messages.success(request, f"Você e {solicitacao.solicitante.username} agora são amigos!")
     else:
         messages.error(request, "Você não tem permissão para realizar esta ação.")
-    return redirect('perfis:meu_perfil') # <-- CORRIGIDO AQUI
+
+    return redirect('perfis:meu_perfil')
+
 
 @login_required
 def recusar_solicitacao(request, solicitacao_id):
@@ -76,75 +98,103 @@ def recusar_solicitacao(request, solicitacao_id):
         messages.info(request, f"Pedido de amizade de {solicitacao.solicitante.username} recusado.")
     else:
         messages.error(request, "Você não tem permissão para realizar esta ação.")
-    return redirect('perfis:meu_perfil') # <-- CORRIGIDO AQUI
 
-class MeuPerfilView(LoginRequiredMixin, DetailView):
-    model = Perfil
-    template_name = 'perfis/meu_perfil.html' 
-    context_object_name = 'object' # Adicionado para corresponder ao template
-    
-    def get_object(self):
-        return self.request.user.perfil
-        
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # self.object já é o Perfil, pego pelo get_object()
-        perfil_logado = self.object 
+    return redirect('perfis:meu_perfil')
 
-        context['solicitacoes_pendentes'] = SolicitacaoAmizade.objects.filter(receptor=self.request.user, aceito=False)
-        
-        # --- ATUALIZADO ---
-        # Contagem de amigos (presumindo M2M 'amigos' no modelo Perfil)
-        context['total_amigos'] = perfil_logado.amigos.count()
-        
-        # CORREÇÃO: Usando 'jogadores_confirmados' como o erro indicou
-        context['total_partidas'] = Partida.objects.filter(jogadores_confirmados=perfil_logado.user).count()
-        # --- FIM DA ATUALIZAÇÃO ---
-
-        return context
-
-class VerPerfilView(LoginRequiredMixin, DetailView):
-    model = User
-    template_name = 'perfis/ver_perfil.html' # Este template precisa ser ajustado
-    context_object_name = 'object' # Mudado de 'perfil_usuario' para 'object'
-    slug_field = 'username'
-    slug_url_kwarg = 'username'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user_logado = self.request.user
-        
-        # self.object agora é o User (devido ao model = User)
-        perfil_visitado_user = self.get_object() 
-        perfil_visitado_perfil = perfil_visitado_user.perfil 
-        
-        context['ja_sao_amigos'] = user_logado.perfil.amigos.filter(id=perfil_visitado_user.id).exists()
-        context['pedido_enviado'] = SolicitacaoAmizade.objects.filter(solicitante=user_logado, receptor=perfil_visitado_user).exists()
-        context['pedido_recebido'] = SolicitacaoAmizade.objects.filter(solicitante=perfil_visitado_user, receptor=user_logado).exists()
-
-        # --- ATUALIZADO ---
-        # Contagens para o perfil que está sendo visitado
-        context['total_amigos'] = perfil_visitado_perfil.amigos.count()
-        
-        # CORREÇÃO: Usando 'jogadores_confirmados' aqui também
-        context['total_partidas'] = Partida.objects.filter(jogadores_confirmados=perfil_visitado_user).count()
-        # --- FIM DA ATUALIZAÇÃO ---
-
-        return context
-
-class EditarPerfilView(LoginRequiredMixin, UpdateView):
-    model = Perfil
-    form_class = PerfilForm
-    template_name = 'perfis/editar_perfil.html'
-    success_url = reverse_lazy('perfis:meu_perfil') # <-- CORRIGIDO AQUI
-    def get_object(self):
-        return self.request.user.perfil
 
 @login_required
 def remover_amigo(request, user_id):
     amigo_a_remover = get_object_or_404(User, id=user_id)
     usuario_logado = request.user
+
     usuario_logado.perfil.amigos.remove(amigo_a_remover)
     amigo_a_remover.perfil.amigos.remove(usuario_logado)
+
     messages.info(request, f"Você não é mais amigo(a) de {amigo_a_remover.username}.")
     return redirect('perfis:ver_perfil', username=amigo_a_remover.username)
+
+
+# ============================================================
+# PERFIL DO USUÁRIO LOGADO
+# ============================================================
+class MeuPerfilView(LoginRequiredMixin, DetailView):
+    model = Perfil
+    template_name = 'perfis/meu_perfil.html'
+    context_object_name = 'object'
+
+    def get_object(self):
+        return self.request.user.perfil
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        perfil_logado = self.object
+
+        context['solicitacoes_pendentes'] = SolicitacaoAmizade.objects.filter(
+            receptor=self.request.user,
+            aceito=False
+        )
+        context['total_amigos'] = perfil_logado.amigos.count()
+        context['total_partidas'] = Partida.objects.filter(
+            jogadores_confirmados=perfil_logado.user
+        ).count()
+
+        return context
+
+
+# ============================================================
+# VISUALIZAR PERFIL DE OUTROS USUÁRIOS
+# ============================================================
+class VerPerfilView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = 'perfis/ver_perfil.html'
+    context_object_name = 'object'
+    slug_field = 'username'
+    slug_url_kwarg = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_logado = self.request.user
+        perfil_visitado_user = self.get_object()
+        perfil_visitado_perfil = perfil_visitado_user.perfil
+
+        # --- RELAÇÕES DE AMIZADE ---
+        context['ja_sao_amigos'] = user_logado.perfil.amigos.filter(
+            id=perfil_visitado_user.id
+        ).exists()
+
+        context['pedido_enviado'] = SolicitacaoAmizade.objects.filter(
+            solicitante=user_logado,
+            receptor=perfil_visitado_user
+        ).exists()
+
+        context['pedido_recebido'] = SolicitacaoAmizade.objects.filter(
+            solicitante=perfil_visitado_user,
+            receptor=user_logado
+        ).exists()
+
+        # --- DADOS DO PERFIL VISITADO ---
+        context['total_amigos'] = perfil_visitado_perfil.amigos.count()
+        context['total_partidas'] = Partida.objects.filter(
+            jogadores_confirmados=perfil_visitado_user
+        ).count()
+
+        # --- EXEMPLO: atividades (futuro recurso) ---
+        # context['activities'] = Atividade.objects.filter(user=perfil_visitado_user).order_by('-timestamp')[:10]
+
+        return context
+
+
+# ============================================================
+# EDITAR PERFIL
+# ============================================================
+class EditarPerfilView(LoginRequiredMixin, UpdateView):
+    model = Perfil
+    form_class = PerfilForm
+    template_name = 'perfis/editar_perfil.html'
+    success_url = reverse_lazy('perfis:meu_perfil')
+
+    def get_object(self):
+        return self.request.user.perfil
+
+
+

@@ -491,3 +491,12 @@ body {
         box-sizing: border-box;
     }
 }
+
+/* Centraliza o reCAPTCHA na página */
+.g-recaptcha {
+    display: flex;
+    justify-content: center;
+    margin: 1rem auto; /* espaçamento suave acima e abaixo */
+    transform: scale(1.05); /* leve aumento opcional para harmonia visual */
+    transform-origin: center;
+}

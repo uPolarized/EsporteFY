@@ -10,11 +10,11 @@
 {% block content %}
 <div class="profile-page">
 
- {# Usamos container-fluid para aproveitar largura e o grid do layout #}
  <div class="container-fluid profile-layout-wrapper py-4">
 
    <div class="profile-layout">
 
+     <!-- ===================== LADO ESQUERDO ===================== -->
      <aside class="profile-left">
        <div class="side-card">
          <div class="avatar-wrap">
@@ -37,6 +37,7 @@
              <a href="#" class="btn btn-outline btn-block mt-2">Enviar Mensagem</a>
            {% endif %}
          </div>
+
          <div class="side-stats mt-3">
            <div class="stat">
              <span class="num">{{ total_partidas|default:"0" }}</span>
@@ -44,16 +45,15 @@
            </div>
            <div class="stat">
              <span class="num">{{ total_amigos|default:"0" }}</span>
-             <span class="label text-muted">Amigos</span>
+             <span class="label text-muted amigos-btn" onclick="abrirModalAmigos()">Amigos</span>
            </div>
          </div>
 
          <hr>
-
-        
        </div>
      </aside>
 
+     <!-- ===================== CONTEÚDO CENTRAL ===================== -->
      <main class="profile-center">
        
        <div class="cards-grid">
@@ -72,7 +72,6 @@
              <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
              <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
              <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
-             
              <li><strong>Cidade:</strong> {{ object.cidade|default:"Não definida" }}</li>
            </ul>
          </section>
@@ -80,7 +79,6 @@
          <section class="card-glass activity-card full-width">
            <h4>Atividade</h4>
 
-           {# Se tiver uma variável activities, iterar; caso contrário placeholder #}
            {% if activities %}
              <div class="activity-list">
                {% for a in activities %}
@@ -104,6 +102,7 @@
        </div>
      </main>
 
+     <!-- ===================== LADO DIREITO ===================== -->
      <aside class="profile-right">
        <div class="right-card card-glass">
          <h5>Pedidos Pendentes</h5>
@@ -144,4 +143,50 @@
    </div>
  </div>
 </div>
+
+<!-- ===================== MODAL DE AMIGOS ===================== -->
+<div id="modalAmigos" class="amigos-modal">
+  <div class="amigos-modal-content card-glass">
+    <span class="fechar" onclick="fecharModalAmigos()">&times;</span>
+    <h3>Amigos de {{ object.user.username }}</h3>
+
+    {% if object.amigos.all %}
+      <ul class="amigos-lista">
+        {% for amigo in object.amigos.all %}
+          <li class="amigo-item">
+            {% if amigo.perfil.foto %}
+              <img src="{{ amigo.perfil.foto.url }}" class="mini-avatar" alt="">
+            {% else %}
+              <div class="mini-avatar placeholder">{{ amigo.username|first|upper }}</div>
+            {% endif %}
+            <a href="{% url 'perfis:ver_perfil' username=amigo.username %}" class="amigo-nome">
+              {{ amigo.username }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted small">Nenhum amigo ainda.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ===================== SCRIPT DO MODAL ===================== -->
+<script>
+function abrirModalAmigos() {
+  document.getElementById("modalAmigos").style.display = "flex";
+}
+
+function fecharModalAmigos() {
+  document.getElementById("modalAmigos").style.display = "none";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("modalAmigos");
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+};
+</script>
+
 {% endblock %}

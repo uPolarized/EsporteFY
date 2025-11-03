@@ -394,6 +394,89 @@ input[type="file"]::file-selector-button:hover {
     width: 100%; 
 }
 
+
+/* ==== Botão de amigos ==== */
+.amigos-btn {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.amigos-btn:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ==== Modal estilizado ==== */
+.amigos-modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.75);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+
+.amigos-modal-content {
+  background: rgba(30, 30, 30, 0.9);
+  padding: 1.5rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.amigos-modal-content h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.amigos-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.amigo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.amigo-item .amigo-nome {
+  color: #fff;
+  text-decoration: none;
+}
+
+.amigo-item .amigo-nome:hover {
+  text-decoration: underline;
+}
+
+.amigos-modal .fechar {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #aaa;
+  transition: 0.2s;
+}
+
+.amigos-modal .fechar:hover {
+  color: #fff;
+}
+
+
 /* Responsividade para telas menores */
 @media (max-width: 991.98px) { 
     .profile-right {

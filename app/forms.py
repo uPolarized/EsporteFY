@@ -1,9 +1,10 @@
 from django import forms
 from allauth.account.forms import SignupForm
 from perfis.models import Perfil
-# Imports do Crispy Forms
-# from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout
+from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV3
 
 class CustomSignupForm(SignupForm):
     # Nossos campos customizados continuam aqui
@@ -30,6 +31,7 @@ class CustomSignupForm(SignupForm):
             'esporte_preferido',
             'password',
             'password2',
+            'captcha',
         )
 
     # O método save continua o mesmo
@@ -40,3 +42,6 @@ class CustomSignupForm(SignupForm):
         user.save()
         user.perfil.save()
         return user
+    
+class CustomSetPasswordForm(SetPasswordForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV3())

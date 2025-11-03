@@ -31,28 +31,36 @@
             <h2 class="section-title"><i class="bi bi-activity"></i>Feed de Atividades</h2>
             {% for atividade in atividades %}
                 <div class="card shadow-sm mb-3 post-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            {% if atividade.ator.perfil.foto %}
-                                <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
-                            {% else %}
-                                <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
-                                    <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
-                                </div>
-                            {% endif %}
-                            <div>
-                                <p class="mb-0 lh-sm small">
-                                    <strong>{{ atividade.ator.username }}</strong>
-                                    {{ atividade.verbo }}
-                                    {% if atividade.alvo %}
-                                        <strong>"{{ atividade.alvo }}"</strong>
-                                    {% endif %}
-                                </p>
-                                <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="card-body">
+    <div class="d-flex align-items-center">
+      {% if atividade.ator.perfil.foto %}
+        <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+      {% else %}
+        <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+          <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+        </div>
+      {% endif %}
+
+      <div>
+        {% if "agora são amigos" in atividade.verbo %}
+          <p class="mb-0 lh-sm small">
+            <i class="bi bi-people-fill text-success me-1"></i>
+            <strong>{{ atividade.verbo }}</strong>
+          </p>
+        {% else %}
+          <p class="mb-0 lh-sm small">
+            <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+            {% if atividade.alvo %}
+              <strong>"{{ atividade.alvo }}"</strong>
+            {% endif %}
+          </p>
+        {% endif %}
+        <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
+      </div>
+    </div>
+  </div>
+</div>
+
             {% empty %}
                 <div class="no-activity-card">
                     Nenhuma atividade na comunidade ainda.
@@ -81,20 +89,25 @@
                 </div>
             </div>
             
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="section-title mb-0"><i class="bi bi-dribbble"></i>Partidas Abertas</h2>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Bairro: <strong>{{ bairro_atual_nome }}</strong>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
-                        {% for valor, nome in bairros_disponiveis %}
-                            <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
+            <div class="section-header text-center mb-4 position-relative flex-column flex-md-row d-flex justify-content-center align-items-center gap-2">
+    <h2 class="section-title centered-title m-0">
+        <i class="bi bi-dribbble me-2"></i>
+        Partidas Abertas
+    </h2>
+
+    <div class="dropdown ms-md-3 mt-2 mt-md-0">
+        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Bairro: <strong>{{ bairro_atual_nome }}</strong>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
+            {% for valor, nome in bairros_disponiveis %}
+                <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
             
             {% for partida in partidas %}
             <div class="card shadow-sm mb-3 match-card">
@@ -165,16 +178,52 @@
         </div>
 
         <div class="col-lg-3 order-md-3 order-lg-3">
-            {% if clima_atual %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Tempo em Maricá Agora</h5>
-                    <img src="https://openweathermap.org/img/wn/{{ clima_atual.icone }}@2x.png" alt="{{ clima_atual.descricao }}">
-                    <p class="h3">{{ clima_atual.temperatura }}°C</p>
-                    <p class="text-muted">{{ clima_atual.descricao }}</p>
-                </div>
-            </div>
+{% if clima_atual %}
+<div class="weather-card mb-4">
+    <div class="weather-header text-center position-relative">
+        <h5 class="weather-title mb-0">
+            Tempo em Maricá
+        </h5>
+
+        <div class="weather-icon-wrapper-right">
+            {% if "chuva" in clima_atual.descricao|lower %}
+                <i class="bi bi-cloud-rain-fill weather-icon rainy floating-icon"></i>
+            {% elif "nublado" in clima_atual.descricao|lower %}
+                <i class="bi bi-cloud-fill weather-icon cloudy floating-icon"></i>
+            {% else %}
+                <i class="bi bi-brightness-high-fill weather-icon sunny floating-icon"></i>
             {% endif %}
+        </div>
+    </div>
+
+    <div class="weather-body text-center">
+        <span class="temp display-5 fw-bold d-block mt-2">{{ clima_atual.temperatura }}°C</span>
+        <span class="desc text-muted mb-3 d-block">{{ clima_atual.descricao }}</span>
+
+        <div class="weather-tip p-3 rounded">
+            <i class="bi bi-info-circle me-2"></i>{{ clima_atual.mensagem }}
+        </div>
+
+        {% if previsao_chuva.vai_chover %}
+            <div class="weather-alert rainy mt-3">
+                <i class="bi bi-umbrella-fill me-1"></i>
+                <strong>Previsão de chuva hoje ({{ previsao_chuva.chuva_mm }} mm).</strong><br>
+                <span>Recomendado: quadras cobertas.</span>
+            </div>
+        {% else %}
+            <div class="weather-alert clear mt-3">
+                <i class="bi bi-sun-fill me-1"></i>
+                <strong>Sem chuva prevista hoje.</strong><br>
+                <span>Perfeito para jogos ao ar livre!</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+
+
+
 
             <div class="news-sidebar">
                 <h2 class="section-title text-center"><i class="bi bi-newspaper"></i>Notícias</h2>

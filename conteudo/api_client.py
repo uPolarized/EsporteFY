@@ -2,6 +2,8 @@ import requests
 from django.conf import settings
 from urllib.parse import quote
 from django.core.cache import cache
+from datetime import datetime
+
 
 def buscar_noticias_esportivas():
     """
@@ -59,57 +61,75 @@ def buscar_noticias_esportivas():
 
 def buscar_clima_marica():
     """
-    Busca os dados do clima atual para Maricá com mensagens de depuração.
+    Busca o clima atual em Maricá (RJ) usando a API OpenWeatherMap.
+    Retorna um dicionário com temperatura, descrição, ícone e mensagem personalizada.
     """
-    cache_key = 'clima_marica_atual'
-    clima_cache = cache.get(cache_key)
-    if clima_cache:
-        print("DEBUG (Clima): Dados do clima carregados do CACHE.")
-        return clima_cache
-
-    print("DEBUG (Clima): Cache vazio. A tentar buscar na API do OpenWeather...")
-    
-    # Verifica se a chave da API foi carregada do .env para o settings.py
-    api_key = getattr(settings, 'OPENWEATHER_API_KEY', None)
-    if not api_key:
-        print("DEBUG (Clima): ERRO - OPENWEATHER_API_KEY não foi encontrada nas configurações!")
-        return None
-
-    city_id = '3457963' # ID de Maricá
-    url = (
-        'https://api.openweathermap.org/data/2.5/weather?'
-        f'id={city_id}&'
-        f'appid={api_key}&'
-        'lang=pt_br&'
-        'units=metric'
-    )
-
-    print("DEBUG (Clima): A aceder à URL da API...")
-
     try:
+        api_key = settings.OPENWEATHER_API_KEY
+        cidade = "Maricá"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},BR&appid={api_key}&lang=pt_br&units=metric"
         response = requests.get(url, timeout=10)
-        print(f"DEBUG (Clima): Resposta da API recebida. Status Code: {response.status_code}")
-        
-        # Lança um erro para códigos 4xx/5xx (ex: 401 para chave inválida)
-        response.raise_for_status() 
-        data = response.json()
+        response.raise_for_status()
+        dados = response.json()
 
-        clima = {
-            'temperatura': round(data['main']['temp']),
-            'descricao': data['weather'][0]['description'].capitalize(),
-            'icone': data['weather'][0]['icon'],
-        }
-        
-        cache.set(cache_key, clima, timeout=600) # Cache de 10 minutos
-        print("DEBUG (Clima): Dados do clima obtidos e guardados em cache com sucesso.")
-        return clima
-        
-    except requests.exceptions.HTTPError as e:
-        if response.status_code == 401:
-            print("DEBUG (Clima): ERRO CRÍTICO - A sua chave da API do OpenWeather é INVÁLIDA ou está desativada. (Erro 401 Unauthorized)")
+        descricao = dados["weather"][0]["description"].capitalize()
+        temperatura = round(dados["main"]["temp"])
+        icone = dados["weather"][0]["icon"]
+
+        # 💬 Gera mensagem personalizada baseada na descrição
+        desc_lower = descricao.lower()
+        if "chuva forte" in desc_lower or "tempestade" in desc_lower:
+            mensagem = "⛈️ Chuva pesada chegando! Melhor optar por quadras cobertas ou descansar hoje."
+        elif "chuva" in desc_lower:
+            mensagem = "🌧️ Pode chover hoje. Prefira quadras cobertas!"
+        elif "nublado" in desc_lower:
+            mensagem = "☁️ O clima está fechado, mas ainda dá pra jogar tranquilo. Leve um agasalho leve."
+        elif "limpo" in desc_lower or "ensolarado" in desc_lower:
+            mensagem = "☀️ Ótimo dia para jogar bola! Lembre-se de beber água e usar protetor solar. 💧🧴"
+        elif "neblina" in desc_lower:
+            mensagem = "🌫️ Atenção com a visibilidade! Evite quadras muito abertas."
+        elif "vento" in desc_lower:
+            mensagem = "💨 Dia de ventania! Pode ser difícil controlar a bola em campo aberto."
         else:
-            print(f"DEBUG (Clima): ERRO HTTP ao aceder à API: {e}")
+            mensagem = "🌤️ Tempo agradável! Perfeito para jogar com os amigos."
+
+        return {
+            "temperatura": temperatura,
+            "descricao": descricao,
+            "icone": icone,
+            "mensagem": mensagem,  # 👈 ESSENCIAL
+        }
+
+    except Exception as e:
+        print(f"[ERRO] Falha ao buscar clima de Maricá: {e}")
         return None
-    except requests.exceptions.RequestException as e:
-        print(f"DEBUG (Clima): ERRO CRÍTICO de conexão à API: {e}")
-        return None
+
+    
+def buscar_previsao_chuva():
+    """Verifica se há previsão de chuva hoje em Maricá (com base na API OpenWeather)."""
+    try:
+        api_key = settings.OPENWEATHER_API_KEY
+        url = f"https://api.openweathermap.org/data/2.5/forecast?q=Maricá,BR&appid={api_key}&lang=pt_br&units=metric"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        dados = response.json()
+
+        hoje = datetime.now().date()
+        vai_chover = False
+        chuva_mm = 0
+
+        for entrada in dados["list"]:
+            data_prev = datetime.fromtimestamp(entrada["dt"]).date()
+            if data_prev == hoje:
+                if "rain" in entrada and entrada["rain"].get("3h", 0) > 0:
+                    vai_chover = True
+                    chuva_mm += entrada["rain"]["3h"]
+
+        return {
+            "vai_chover": vai_chover,
+            "chuva_mm": round(chuva_mm, 1)
+        }
+
+    except Exception as e:
+        print(f"[ERRO] Previsão de chuva: {e}")
+        return {"vai_chover": False, "chuva_mm": 0}

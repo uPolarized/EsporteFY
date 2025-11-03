@@ -1,146 +1,179 @@
-/* ========================================= */
-/* ===== 1. ESTILOS GERAIS ===== */
-/* ========================================= */
+/* ===========================
+   ESTILO GERAL
+=========================== */
 body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(145deg, #1f1f1f, #2c2c2c); /* fundo escuro */
-    color: #f1f1f1;
-    margin: 0;
-    padding: 0;
+  background: linear-gradient(145deg, #181818, #242424);
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
 }
 
-h1, h3 {
-    color: #ff6b6b;
-    text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+.page-title {
+  font-weight: 800;
+  font-size: 2.5rem;
+  text-align: center;
+  color: #ff6b6b;
+  text-shadow: 0 0 12px rgba(255,107,107,0.4);
+  margin-bottom: 3rem;
 }
 
-h1 {
-    font-weight: 800;
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
+/* ===========================
+   CENTRALIZAÇÃO DOS TÍTULOS
+=========================== */
+.section-heading {
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-h3 {
-    font-weight: 700;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+.section-heading i {
+  font-size: 1.4rem;
+  vertical-align: middle;
+  margin-right: 0.4rem;
 }
 
-/* ========================================= */
-/* ===== 2. CARDS DE PARTIDAS ===== */
-/* ========================================= */
-.card {
-    background: #2e2e2e;
-    border: 1px solid #444;
-    border-radius: 1rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* linha decorativa */
+.section-heading::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 3px;
+  margin: 0.6rem auto 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ff6b6b, #ffcc70);
+  box-shadow: 0 0 8px rgba(255,107,107,0.6);
 }
 
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+/* ===========================
+   CARDS
+=========================== */
+.partida-card {
+  border: none;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
 }
 
-.card-body {
-    padding: 1rem 1.5rem;
+.partida-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(255,107,107,0.3);
+}
+
+.partida-card.future {
+  border-left: 5px solid #4caf50;
+}
+
+.partida-card.past {
+  border-left: 5px solid #ffc107;
 }
 
 .card-title {
-    font-weight: 700;
-    color: #ff6b6b;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ff6b6b;
 }
 
 .card-text {
-    color: #ccc;
-    margin-bottom: 0.5rem;
+  color: #ccc;
+  margin-bottom: 0.3rem;
 }
 
-.text-muted {
-    color: #aaa !important;
+.badge {
+  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
 }
 
-/* ========================================= */
-/* ===== 3. BOTÕES ===== */
-/* ========================================= */
-.btn-danger {
-    background: linear-gradient(135deg, #ff6b6b, #d32f2f);
-    border: none;
-    color: #fff;
-    transition: all 0.3s ease;
+/* ===========================
+   BOTÕES
+=========================== */
+.btn-outline-danger {
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  transition: 0.3s;
 }
 
-.btn-danger:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255,107,107,0.5);
+.btn-outline-danger:hover {
+  background: #ff6b6b;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255,107,107,0.4);
 }
 
 .btn-outline-primary {
-    border-color: #ff6b6b;
-    color: #ff6b6b;
-    transition: all 0.3s ease;
+  color: #4da3ff;
+  border: 1px solid #4da3ff;
+  transition: 0.3s;
 }
 
 .btn-outline-primary:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: scale(1.03);
+  background: #4da3ff;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(77,163,255,0.4);
 }
 
-/* Botões pequenos */
-.btn-sm {
-    font-size: 0.85rem;
-    padding: 0.25rem 0.75rem;
+/* ===========================
+   ESTADO VAZIO
+=========================== */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  margin-top: 1rem;
 }
 
-/* ========================================= */
-/* ===== 4. LINKS ===== */
-/* ========================================= */
-a {
-    color: #ff6b6b;
-    text-decoration: none;
-    transition: color 0.3s ease;
+.empty-state .accent-link {
+  color: #ff6b6b;
+  font-weight: 600;
+  text-decoration: none;
 }
 
-/* ---- Pequenos ajustes visuais ---- */
-/* Garante contraste do link de perfil (se houver) */
-a { 
-    color: var(--accent-2); 
-    text-decoration: none; /* Mantém sem sublinhado */
-}
-a:hover { 
-    text-decoration: none; /* <<< CORRIGIDO (não sublinha ao passar o mouse) */
-    color: #ff8b8b;      /* Mantém a mudança de cor no hover */
+.empty-state .accent-link:hover {
+  color: #ff8b8b;
 }
 
-/* Garante que os componentes flutuantes não cortem sombra */
-.list-group, .card { overflow: visible; }
-/* ========================================= */
-/* ===== 5. DIVISÓRIAS ===== */
-/* ========================================= */
-hr {
-    border-top: 1px solid #444;
-    margin: 2rem 0;
+/* ===========================
+   ANIMAÇÃO
+=========================== */
+.partida-card {
+  animation: fadeInUp 0.5s ease both;
 }
 
-/* ========================================= */
-/* ===== 6. RESPONSIVIDADE ===== */
-/* ========================================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===========================
+   RESPONSIVIDADE
+=========================== */
 @media (max-width: 768px) {
-    h1 {
-        font-size: 2rem;
-    }
+  .page-title {
+    font-size: 2rem;
+  }
 
-    h3 {
-        font-size: 1.25rem;
-    }
+  .card-body {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
 
-    .card {
-        margin-bottom: 1rem;
-    }
-
-    .btn {
-        width: 100%;
-    }
+  .btn {
+    width: 100%;
+  }
 }

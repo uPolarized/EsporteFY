@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Mensagem, Conversa
 
+notificacoes_ativas = {}  # exemplo: { (destinatario_id, remetente_username): timestamp }
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.outro_usuario_username = self.scope['url_route']['kwargs']['username']
@@ -96,8 +98,26 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def send_notification(self, event):
+        """Evita spam de notificações idênticas em sequência"""
+        remetente = event['remetente']
+        conversa_url = event['conversa_url']
+        chave = (self.user.id, remetente)  # identifica o par usuário→remetente
+
+        # Verifica se já existe uma notificação ativa desse remetente para este usuário
+        if chave in notificacoes_ativas:
+            # Ignora se a notificação ainda está dentro do período de cooldown
+            return
+
+        # Marca como ativa
+        notificacoes_ativas[chave] = True
+
+        # Envia a notificação para o frontend
         await self.send(text_data=json.dumps({
             'type': 'new_message_notification',
-            'remetente': event['remetente'],
-            'conversa_url': event['conversa_url'],
+            'remetente': remetente,
+            'conversa_url': conversa_url,
         }))
+
+        # Espera alguns segundos antes de permitir nova notificação do mesmo remetente
+        await asyncio.sleep(5)
+        notificacoes_ativas.pop(chave, None)
