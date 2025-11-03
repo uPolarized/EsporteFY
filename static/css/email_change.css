@@ -492,11 +492,224 @@ body {
     }
 }
 
-/* Centraliza o reCAPTCHA na página */
+/* ======== Centralização e estilo do reCAPTCHA ======== */
+
+/* força o container crispy que envolve o captcha */
+form .mb-3,
+form .form-group {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* container direto do recaptcha */
 .g-recaptcha {
-    display: flex;
-    justify-content: center;
-    margin: 1rem auto; /* espaçamento suave acima e abaixo */
-    transform: scale(1.05); /* leve aumento opcional para harmonia visual */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 1.5rem auto !important;
+    transform: scale(1.05);
     transform-origin: center;
+}
+
+/* estilo da caixa escura */
+.rc-anchor-normal {
+    background-color: #1b1b1b !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(248, 113, 113, 0.3) !important;
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.15) !important;
+}
+
+/* footer do captcha */
+.rc-anchor-normal-footer {
+    color: #bdbdbd !important;
+    font-size: 0.85rem !important;
+}
+
+/* cor do "reCAPTCHA" */
+.rc-anchor-logo-text {
+    color: #f87171 !important;
+}
+
+/* remove o selo flutuante */
+.grecaptcha-badge {
+    visibility: hidden !important;
+}
+
+
+/* Bloco legal do Google — estilização discreta */
+.rc-anchor-normal-footer,
+.rc-anchor-pt,
+.rc-anchor-normal .rc-anchor-pt {
+    background: transparent !important;
+    color: #bcbcbc !important;
+    font-size: 0.8rem !important;
+    text-align: center !important;
+    margin-top: 4px !important;
+    line-height: 1.2rem !important;
+}
+
+/* Garante que o link clicável não invada o layout */
+.rc-anchor-normal-footer a {
+    color: #f87171 !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+}
+
+.rc-anchor-normal-footer a:hover {
+    text-decoration: underline !important;
+}
+
+/* Impede que a camada invisível fique sobre o botão */
+form .rc-anchor-normal {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Evita cliques fantasmas fora da área do reCAPTCHA */
+form {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+
+/* ====== MENU LATERAL ====== */
+.account-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.account-menu li {
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.account-menu li a {
+    color: #ddd;
+    text-decoration: none;
+    display: block;
+}
+
+.account-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.account-menu .disabled-link {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #999;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 6px;
+    font-style: italic;
+    opacity: 0.85;
+    transition: all 0.3s ease;
+}
+
+.account-menu .disabled-link:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    transform: scale(1.02);
+    color: #aaa;
+}
+
+/* ====== ALERTA DE CONTA GOOGLE ====== */
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    font-size: 0.95rem;
+    font-weight: 500;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ===== MENU LATERAL ===== */
+.account-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.account-menu li {
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.account-menu li a {
+    color: #ddd;
+    text-decoration: none;
+    display: block;
+}
+
+.account-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* ===== ITENS DESATIVADOS ===== */
+.account-menu .disabled-link {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #999;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-style: italic;
+    opacity: 0.85;
+    transition: all 0.3s ease;
+}
+
+.account-menu .disabled-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #aaa;
+    transform: scale(1.02);
+}
+
+/* ===== CONEXÕES DE CONTA ===== */
+.provider-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.provider-list .btn-provider {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+/* Botões específicos */
+.provider-google {
+    background: #DB4437;
+}
+.provider-google:hover {
+    background: #c23321;
+}
+
+.provider-github {
+    background: #333;
+}
+.provider-github:hover {
+    background: #222;
 }

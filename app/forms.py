@@ -45,3 +45,5 @@ class CustomSignupForm(SignupForm):
     
 class CustomSetPasswordForm(SetPasswordForm):
     captcha = ReCaptchaField(widget=ReCaptchaV3())
+
+

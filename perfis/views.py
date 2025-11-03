@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy
+from allauth.account.views import PasswordSetView
+from django.contrib import messages
 
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm, FiltroUsuarioForm
@@ -198,3 +200,11 @@ class EditarPerfilView(LoginRequiredMixin, UpdateView):
 
 
 
+class CustomPasswordSetView(PasswordSetView):
+    form_class = 'perfis.forms.SetPasswordCaptchaForm'
+
+    def form_valid(self, form):
+        if not form.cleaned_data.get('captcha'):
+            messages.error(self.request, "⚠️ Verificação reCAPTCHA falhou. Tente novamente.")
+            return self.form_invalid(form)
+        return super().form_valid(form)

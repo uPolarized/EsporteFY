@@ -1,9 +1,8 @@
 {% extends "account/base.html" %}
-{% load static allauth i18n %}
-{% load socialaccount %}
+{% load static allauth i18n socialaccount %}
 
 {% block title %}
-    {% trans "Account Connections" %} - EsporteFY
+    {% trans "Conexões de Conta" %} - EsporteFY
 {% endblock title %}
 
 {% block extra_head %}
@@ -13,23 +12,31 @@
 {% block content %}
 <div class="manage-account-layout">
 
+    <!-- MENU LATERAL PADRONIZADO -->
     <div class="account-menu-container">
         <ul class="account-menu">
-            <li><a href="{% url 'account_email' %}">{% trans "Alterar e-mail" %}</a></li>
-            <li><a href="{% url 'account_change_password' %}">{% trans "Alterar senha" %}</a></li>
-            <li><a href="{% url 'socialaccount_connections' %}" class="active">{% trans "Conexões de conta" %}</a></li>
-            <li><a href="{% url 'account_logout' %}">{% trans "Sair" %}</a></li>
+
+            {% if user.is_superuser or not user.socialaccount_set.exists %}
+                <li><a href="{% url 'account_email' %}"><i class="bi bi-envelope-fill me-1"></i> Alterar e-mail</a></li>
+                <li><a href="{% url 'account_change_password' %}"><i class="bi bi-key-fill me-1"></i> Alterar senha</a></li>
+            {% else %}
+                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar e-mail (desativado)</li>
+                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar senha (desativado)</li>
+            {% endif %}
+
+            <li><a href="{% url 'socialaccount_connections' %}" class="active"><i class="bi bi-people-fill me-1"></i> Conexões de conta</a></li>
+            <li><a href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right me-1"></i> Sair</a></li>
         </ul>
     </div>
 
+    <!-- CARD PRINCIPAL -->
     <div class="email-container">
         <div class="email-card">
-            <h2>{% trans "Account Connections" %}</h2>
+            <h2>{% trans "Conexões de Conta" %}</h2>
 
             {% if form.accounts %}
-                <p>{% trans 'The following social accounts are connected to your account:' %}</p>
-
-                <form method="post" class="email-list-form">
+                <p>As seguintes contas sociais estão vinculadas:</p>
+                <form method="post">
                     {% csrf_token %}
                     <ul class="email-list">
                         {% for account in form.accounts %}
@@ -44,22 +51,17 @@
                         </li>
                         {% endfor %}
                     </ul>
-                    
                     <div class="form-actions">
-                        <button type="submit" name="action_remove" class="btn btn-outline">{% trans 'Remove' %}</button>
+                        <button type="submit" name="action_remove" class="btn btn-outline">Remover</button>
                     </div>
                 </form>
-
             {% else %}
-                <p>{% trans 'You currently have no social accounts connected.' %}</p>
+                <p>Você ainda não possui contas sociais conectadas.</p>
             {% endif %}
 
             <hr>
-            <h2>{% trans "Add a Social Account" %}</h2>
-
+            <h2>Adicionar nova conexão</h2>
             {% if socialaccount_providers %}
-                <p>{% trans 'You can connect any of the following accounts:' %}</p>
-                
                 <div class="provider-list">
                     {% for provider in socialaccount_providers %}
                         <a title="{{ provider.name }}" class="btn btn-provider provider-{{ provider.id }}" 
@@ -69,9 +71,8 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <p>{% trans 'No social account providers are configured.' %}</p>
+                <p>Nenhum provedor social configurado.</p>
             {% endif %}
-
         </div>
     </div>
 </div>

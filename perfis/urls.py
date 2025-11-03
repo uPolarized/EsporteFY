@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from perfis.views import CustomPasswordSetView
 
 app_name = 'perfis'
 
@@ -25,4 +25,6 @@ urlpatterns = [
     path('solicitacao/recusar/<int:solicitacao_id>/', views.recusar_solicitacao, name='recusar_solicitacao'),
 
      path('remover-amigo/<int:user_id>/', views.remover_amigo, name='remover_amigo'),
+     path('accounts/password/set/', CustomPasswordSetView.as_view(), name='account_set_password'),
+
 ]

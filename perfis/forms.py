@@ -1,8 +1,9 @@
 from django import forms
 from .models import Perfil
-
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout
 # Importação agora é SEGURA, pois o CustomSignupForm não está mais aqui
-from allauth.account.forms import SetPasswordForm
+from allauth.account.forms import SetPasswordForm, ChangePasswordForm
 from django_recaptcha.fields import ReCaptchaField  # <--- CORRIGIDO
 from django_recaptcha.widgets import ReCaptchaV2Checkbox  # <--- CORRIGIDO
 
@@ -51,5 +52,30 @@ class FiltroUsuarioForm(forms.Form):
         choices=[('', 'Todos os Níveis')] + Perfil.NIVEL_HABILIDADE_CHOICES
     )
 
-class SetPasswordCaptchaForm(SetPasswordForm):
+class CustomSetPasswordForm(SetPasswordForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
+
+class SetPasswordCaptchaForm(SetPasswordForm):
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(attrs={
+            'data-theme': 'dark',
+            'data-size': 'normal',  # ou 'compact' se quiser menor
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            'new_password1',
+            'new_password2',
+            'captcha'
+        )
+class ChangePasswordCaptchaForm(ChangePasswordForm):
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(attrs={
+            'data-theme': 'dark',
+            'data-size': 'normal',
+        })
+    )

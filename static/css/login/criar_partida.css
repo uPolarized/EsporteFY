@@ -1,87 +1,129 @@
-/* static/css/partidas/criar_partida.css */
-
-/* Aplica o fundo escuro APENAS nesta página */
+/* === GLOBAL === */
 body.criar-partida-page {
-    background: #121212;
+    background: radial-gradient(circle at 20% 20%, #151515, #0d0d0d);
     color: #f1f1f1;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Container para centralizar o card */
+/* === CONTAINER PRINCIPAL === */
+/* === CONTAINER CENTRALIZADO === */
 .criar-partida-container {
-    min-height: calc(100vh - 56px); /* Altura da tela menos a navbar */
+    position: relative;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 2rem 0;
+    align-items: center;
+    min-height: calc(100vh - 56px); /* Ajuste preciso da navbar */
+    padding: 0;
 }
 
-/* Card principal com efeito de vidro */
 .criar-partida-card {
-    background: rgba(30, 30, 30, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid #333;
-    border-radius: 1rem;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.02);
+    width: 90%;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: cardFadeIn 0.8s ease-out forwards;
 }
 
+
+@keyframes cardFadeIn {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* === TÍTULO === */
 .criar-partida-card .card-title {
     font-weight: 700;
-    color: #ff6b6b; /* Vermelho para o título */
+    font-size: 1.8rem;
+    text-align: center;
+    background: linear-gradient(90deg, #ff6b6b, #ff3b3b, #ff8080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+    animation: glowPulse 3s ease-in-out infinite;
 }
 
-/* Estilos para os campos do formulário (Dark Mode) */
+@keyframes glowPulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 107, 107, 0.4); }
+    50% { text-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
+}
+
+/* === LABELS E INPUTS === */
 .criar-partida-card .form-label {
-    color: #bbb;
+    color: #ccc;
+    font-weight: 500;
 }
 
 .criar-partida-card .form-control,
 .criar-partida-card .form-select {
-    background-color: #1e1e1e;
-    border-color: #444;
-    color: #f1f1f1;
+    background-color: #181818;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 .criar-partida-card .form-control:focus,
 .criar-partida-card .form-select:focus {
-    background-color: #2c2c2c;
+    background-color: #1f1f1f;
     border-color: #ff6b6b;
-    box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
-    color: #f1f1f1;
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
 }
 
+/* Ícone de calendário */
 .criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Deixa o ícone do calendário branco */
+    filter: invert(1);
+    opacity: 0.8;
 }
 
-/* Botão "Escolher Quadra" */
+/* === BOTÕES === */
 .criar-partida-card .btn-outline-secondary {
     border-color: #555;
     color: #ccc;
+    border-radius: 10px;
+    transition: all 0.3s ease;
 }
 .criar-partida-card .btn-outline-secondary:hover {
     background-color: #333;
     color: #fff;
+    border-color: #ff6b6b;
 }
 
-/* Botão Principal "Publicar Partida" */
+/* === BOTÃO PRINCIPAL === */
 .criar-partida-card .btn-primary {
-    background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+    background: linear-gradient(90deg, #ff4b4b, #ff6b6b);
     border: none;
+    border-radius: 10px;
+    padding: 0.75rem;
     font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+    transition: all 0.25s ease;
 }
 
 .criar-partida-card .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 25px rgba(255, 75, 75, 0.6);
+    background: linear-gradient(90deg, #ff6b6b, #ff2b2b);
 }
 
-/* Modal de Seleção de Quadras */
+/* === MODAL === */
 .modal-content {
-    background-color: #2e2e2e;
+    background-color: #1e1e1e;
     border: 1px solid #444;
     color: #f1f1f1;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
 }
 .modal-header {
     border-bottom: 1px solid #444;
@@ -89,17 +131,161 @@ body.criar-partida-page {
 .btn-close {
     filter: invert(1);
 }
+
+/* === QUADRAS === */
 .quadra-selector-card {
-    background-color: #3a3a3a;
+    background: linear-gradient(145deg, #262626, #1b1b1b);
     border: 2px solid transparent;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    padding: 1rem;
 }
+
 .quadra-selector-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+    transform: translateY(-6px);
+    border-color: #ff6b6b;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
 }
+
 .quadra-selector-card.selected {
     border-color: #ff6b6b;
-    box-shadow: 0 0.5rem 1rem rgba(255, 107, 107, 0.3);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+}
+
+/* === SCROLLBAR (dark mode) === */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #151515;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ff6b6b;
+}
+
+
+/* === PLACEHOLDER LEGÍVEL === */
+::placeholder {
+    color: #aaa !important;
+    opacity: 1;
+}
+
+/* Corrige o texto do select “Nenhuma quadra selecionada” */
+.criar-partida-card select:invalid,
+.criar-partida-card select option[value=""] {
+    color: #999;
+}
+
+/* Força contraste visível no placeholder do campo Quadra */
+.criar-partida-card .form-select {
+    color: #f1f1f1;
+}
+.criar-partida-card .form-select:invalid {
+    color: #999;
+}
+
+/* === CALENDÁRIO (datetime-local) === */
+
+/* Estilo do campo */
+.criar-partida-card input[type="datetime-local"] {
+    background-color: #1b1b1b;
+    border: 1px solid #333;
+    color: #f1f1f1;
+    border-radius: 10px;
+    padding-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.criar-partida-card input[type="datetime-local"]:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+}
+
+/* Ícone de calendário */
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-color: #ff6b6b;
+    border-radius: 6px;
+    padding: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    background-color: #ff3b3b;
+}
+
+/* === POPUP DO CALENDÁRIO (Webkit browsers) === */
+/* Simula o estilo escuro do seletor */
+/* 🌙 Modo escuro para input datetime-local */
+input[type="datetime-local"] {
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="datetime-local"]:focus {
+    background-color: #222;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+    outline: none;
+}
+
+/* Ícone do calendário (no canto direito) */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-color: #ff6b6b;
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    background-color: #ff3b3b;
+    transform: scale(1.1);
+}
+
+/* Estilo do texto dentro do campo */
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+    color: #bbb;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field {
+    color: #f1f1f1;
+}
+
+/* Remove setas feias */
+input[type="datetime-local"]::-webkit-inner-spin-button {
+    display: none;
+}
+
+/* Remove botão de limpar */
+input[type="datetime-local"]::-webkit-clear-button {
+    display: none;
+}
+
+/* Ajuste para o placeholder (dd/mm/aaaa) */
+input[type="datetime-local"]::placeholder {
+    color: #999;
+}
+
+/* 🔥 Sombras suaves para o campo */
+input[type="datetime-local"]:hover {
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+}
+
+/* 🧭 Ajuste geral de tipografia */
+input[type="datetime-local"] {
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.4px;
 }

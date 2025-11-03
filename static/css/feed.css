@@ -42,6 +42,40 @@ body {
     transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
+
+/* === FEED DE ATIVIDADES === */
+
+.section-title {
+    color: #ff4b4b;
+    font-weight: 700;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem; /* 🔹 espaçamento abaixo do título */
+}
+
+.post-card,
+.no-activity-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1rem;
+}
+
+/* 🔹 aumenta o espaçamento no mobile */
+@media (max-width: 768px) {
+    .section-title {
+        margin-bottom: 1.2rem;
+    }
+    .no-activity-card {
+        margin-top: 0.5rem;
+        margin-bottom: 1.3rem;
+    }
+}
+
+
 .centered-title i {
     font-size: 1.4rem;
     vertical-align: middle;

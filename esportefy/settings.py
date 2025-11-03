@@ -140,9 +140,10 @@ RECAPTCHA_USE_SSL = True
 
 
 ACCOUNT_FORMS = {
-    'set_password': 'perfis.forms.SetPasswordCaptchaForm',
+    'signup': 'perfis.forms.CustomSignupForm',
+    'set_password': 'perfis.forms.CustomSetPasswordForm',
+    'change_password': 'perfis.forms.ChangePasswordCaptchaForm',
 }
-
 
 
 

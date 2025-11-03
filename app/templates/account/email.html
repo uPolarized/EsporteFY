@@ -1,33 +1,41 @@
-
 {% extends "account/base.html" %}
 {% load static allauth i18n %}
 
-{% block head_title %}
-    {% trans "Email Addresses" %}
-{% endblock head_title %}
+{% block title %}
+    {% trans "Gerenciar e-mail" %} - EsporteFY
+{% endblock title %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/email_change.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/email_change.css' %}">
 {% endblock extra_head %}
 
 {% block content %}
 <div class="manage-account-layout">
 
+    <!-- MENU LATERAL PADRONIZADO -->
     <div class="account-menu-container">
         <ul class="account-menu">
-            <li><a href="{% url 'account_email' %}" class="active">{% trans "Alterar e-mail" %}</a></li>
-            <li><a href="{% url 'account_change_password' %}">{% trans "Alterar senha" %}</a></li>
-            <li><a href="{% url 'socialaccount_connections' %}">{% trans "Conexões de conta" %}</a></li>
-            <li><a href="{% url 'account_logout' %}">{% trans "Sair" %}</a></li>
+
+            {% if user.is_superuser or not user.socialaccount_set.exists %}
+                <li><a href="{% url 'account_email' %}" class="active"><i class="bi bi-envelope-fill me-1"></i> Alterar e-mail</a></li>
+                <li><a href="{% url 'account_change_password' %}"><i class="bi bi-key-fill me-1"></i> Alterar senha</a></li>
+            {% else %}
+                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar e-mail (desativado)</li>
+                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar senha (desativado)</li>
+            {% endif %}
+
+            <li><a href="{% url 'socialaccount_connections' %}"><i class="bi bi-people-fill me-1"></i> Conexões de conta</a></li>
+            <li><a href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right me-1"></i> Sair</a></li>
         </ul>
     </div>
 
+    <!-- CARD PRINCIPAL -->
     <div class="email-container">
         <div class="email-card">
-            <h2>{% trans "Email Addresses" %}</h2>
+            <h2>{% trans "Gerenciar e-mails" %}</h2>
 
             {% if emailaddresses %}
-                <p>{% trans 'The following email addresses are associated with your account:' %}</p>
+                <p>Os e-mails abaixo estão associados à sua conta:</p>
 
                 {% url 'account_email' as email_url %}
                 <form method="post" action="{{ email_url }}" class="email-list-form">
@@ -42,12 +50,12 @@
                                     </label>
                                     <div class="email-statuses">
                                         {% if emailaddress.verified %}
-                                            <span class="email-status status-verified">{% trans "Verified" %}</span>
+                                            <span class="email-status status-verified">Verificado</span>
                                         {% else %}
-                                            <span class="email-status status-unverified">{% trans "Unverified" %}</span>
+                                            <span class="email-status status-unverified">Não verificado</span>
                                         {% endif %}
                                         {% if emailaddress.primary %}
-                                            <span class="email-status status-primary">{% trans "Primary" %}</span>
+                                            <span class="email-status status-primary">Principal</span>
                                         {% endif %}
                                     </div>
                                 </li>
@@ -56,26 +64,24 @@
                     </ul>
 
                     <div class="form-actions">
-                        <button type="submit" name="action_primary" class="btn btn-primary">{% trans 'Make Primary' %}</button>
-                        <button type="submit" name="action_send" class="btn btn-outline">{% trans 'Re-send Verification' %}</button>
-                        <button type="submit" name="action_remove" class="btn btn-outline">{% trans 'Remove' %}</button>
+                        <button type="submit" name="action_primary" class="btn btn-primary">Tornar principal</button>
+                        <button type="submit" name="action_send" class="btn btn-outline">Reenviar verificação</button>
+                        <button type="submit" name="action_remove" class="btn btn-outline">Remover</button>
                     </div>
                 </form>
             {% else %}
-                {% include "account/snippets/warn_no_email.html" %}
+                <p class="text-muted">Nenhum e-mail vinculado ainda.</p>
             {% endif %}
 
             {% if can_add_email %}
                 <hr>
-                <h2>{% trans "Add Email Address" %}</h2>
+                <h2>Adicionar novo e-mail</h2>
                 {% url 'account_email' as action_url %}
                 <form method="post" action="{{ action_url }}" class="add-email-form">
                     {% csrf_token %}
-                    
-                    {{ form.as_p }} 
-                    
+                    {{ form.as_p }}
                     <div class="form-actions">
-                        <button type="submit" name="action_add" class="btn btn-primary">{% trans "Add Email" %}</button>
+                        <button type="submit" name="action_add" class="btn btn-primary">Adicionar e-mail</button>
                     </div>
                 </form>
             {% endif %}
@@ -83,13 +89,3 @@
     </div>
 </div>
 {% endblock content %}
-
-{% block extra_body %}
-<script src="{% static 'account/js/account.js' %}"></script>
-<script src="{% static 'account/js/onload.js' %}"></script>
-<script data-allauth-onload="allauth.account.forms.manageEmailForm" type="application/json">
-{
-    "i18n": {"confirmDelete": "{% trans 'Do you really want to remove the selected email address?' %}"}
-}
-</script>
-{% endblock extra_body %}

@@ -10,6 +10,7 @@
 {% block content %}
 <div class="profile-layout-wrapper">
     <div class="profile-layout container py-4 py-md-5">
+        <!-- LADO ESQUERDO -->
         <div class="profile-left">
             <div class="side-card">
                 <div class="avatar-wrap">
@@ -26,29 +27,35 @@
 
                 <hr class="my-3">
 
+                <!-- MENU LATERAL ATUALIZADO -->
                 <div class="side-menu">
                     <a href="{% url 'perfis:meu_perfil' %}" class="side-link">Voltar para o Perfil</a>
-                    <a href="{% url 'account_set_password' %}" class="side-link">Alterar Senha</a>
-                    <a href="{% url 'account_email' %}" class="side-link">Gerenciar E-mail</a>
+                    <a href="{% url 'socialaccount_connections' %}" class="side-link">Conexões de Conta</a>
                     <a href="{% url 'account_logout' %}" class="side-link">Sair</a>
                 </div>
             </div>
         </div>
 
+        <!-- CENTRO -->
         <div class="profile-center">
             <div class="card-glass">
                 <h4 class="mb-4">Editar Perfil</h4>
+
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="row g-3">
+                        <!-- Foto -->
                         <div class="col-12 profile-photo-upload-section">
                             <label class="form-label">Foto de Perfil</label>
                             
                             <div>
                                 {% if form.foto.value %}
                                     <p class="small text-muted mb-0">
-                                        Atualmente: <a href="{{ form.foto.value.url }}" target="_blank" class="current-photo-link">{{ form.foto.value.name|filename }}</a>
+                                        Atualmente: 
+                                        <a href="{{ form.foto.value.url }}" target="_blank" class="current-photo-link">
+                                            {{ form.foto.value.name|filename }}
+                                        </a>
                                     </p>
                                 {% else %}
                                     <p class="small text-muted mb-0">Nenhuma imagem definida.</p>
@@ -58,10 +65,14 @@
                                     <input type="file" id="id_foto" name="foto" class="d-none">
                                     <label for="id_foto" class="btn btn-sm btn-primary custom-file-upload">Escolher Arquivo</label>
                                     
-                                    <span id="file-name-display" class="file-name-display text-muted">Nenhum arquivo escolhido</span>
+                                    <span id="file-name-display" class="file-name-display text-muted">
+                                        Nenhum arquivo escolhido
+                                    </span>
 
                                     {% if form.foto.value %}
-                                        <button type="button" class="btn btn-sm btn-outline-secondary remove-photo-btn ms-auto">Remover</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary remove-photo-btn ms-auto">
+                                            Remover
+                                        </button>
                                         <input type="hidden" name="foto-clear" id="id_foto-clear" value="">
                                     {% endif %}
                                 </div>
@@ -75,22 +86,13 @@
                                 {% endif %}
                             </div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            {{ form.mini_bio|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.esportes_preferidos|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.nivel_habilidade|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.idade|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.cidade|as_crispy_field }}
-                        </div>
+
+                        <!-- Campos do Perfil -->
+                        <div class="col-md-6">{{ form.mini_bio|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.esportes_preferidos|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.nivel_habilidade|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.idade|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.cidade|as_crispy_field }}</div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
@@ -104,50 +106,35 @@
 </div>
 {% endblock %}
 
-
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Removemos as variáveis da pré-visualização da foto
-        const fileInput = document.getElementById('id_foto');
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const removePhotoBtn = document.querySelector('.remove-photo-btn');
-        const clearPhotoInput = document.getElementById('id_foto-clear');
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_foto');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const removePhotoBtn = document.querySelector('.remove-photo-btn');
+    const clearPhotoInput = document.getElementById('id_foto-clear');
 
-        // Função para atualizar o nome do arquivo
-        function updateFileName(file) {
-            if (file) {
-                fileNameDisplay.textContent = file.name;
-                if (clearPhotoInput) {
-                    clearPhotoInput.value = ''; // Desmarca limpar se um novo arquivo é escolhido
-                }
-            } else {
-                fileNameDisplay.textContent = 'Nenhum arquivo escolhido';
-            }
-        }
+    function updateFileName(file) {
+        fileNameDisplay.textContent = file ? file.name : 'Nenhum arquivo escolhido';
+        if (clearPhotoInput && file) clearPhotoInput.value = '';
+    }
 
-        // Event listener para quando um arquivo é selecionado
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                updateFileName(this.files[0]);
-            });
-        }
+    if (fileInput) {
+        fileInput.addEventListener('change', () => updateFileName(fileInput.files[0]));
+    }
 
-        // Event listener para o botão "Remover"
-        if (removePhotoBtn && clearPhotoInput) {
-            removePhotoBtn.addEventListener('click', function() {
-                fileInput.value = ''; // Limpa o input file
-                updateFileName(null); // Reseta o nome do arquivo
-                clearPhotoInput.value = 'true'; // Marca o campo para limpar no backend
-            });
-        }
+    if (removePhotoBtn && clearPhotoInput) {
+        removePhotoBtn.addEventListener('click', function() {
+            fileInput.value = '';
+            updateFileName(null);
+            clearPhotoInput.value = 'true';
+        });
+    }
 
-        // Tenta inicializar o display com o nome do arquivo atual
-        const currentFileText = document.querySelector('.current-photo-link');
-        if (currentFileText && fileInput && !fileInput.files.length) {
-            fileNameDisplay.textContent = currentFileText.textContent.trim();
-        }
-
-    });
+    const currentFileText = document.querySelector('.current-photo-link');
+    if (currentFileText && !fileInput.files.length) {
+        fileNameDisplay.textContent = currentFileText.textContent.trim();
+    }
+});
 </script>
 {% endblock %}
