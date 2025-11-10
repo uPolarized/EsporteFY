@@ -20,11 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt /app/requirements.txt
 
 # 6. Instalar dependências Python COMO ROOT
-# ...
+
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir git+https://github.com/praekelt/django-recaptcha
-# ...
+
 
 # 7. Copiar o código do projeto
 COPY . .

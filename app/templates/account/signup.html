@@ -1,48 +1,39 @@
 {% extends "account/base.html" %}
-{% load crispy_forms_tags socialaccount %}
+{% load crispy_forms_tags socialaccount static %}
 
 {% block title %}Cadastro - EsporteFY{% endblock %}
 
 {% block extra_head %}
-    {# O CSS específico da página é carregado aqui #}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/login/signup.css' %}">
+<link rel="stylesheet" href="{% static 'css/login/signup.css' %}">
 {% endblock %}
 
-
 {% block content %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="card-title mb-4 text-center">Crie sua Conta</h3>
-                    
-                    <form class="signup" method="post" action="{% url 'account_signup' %}">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <div class="d-grid mt-4">
-                            {# Adicionado 'mb-3' para dar um espaço abaixo do botão de e-mail #}
-                            <button type="submit" class="btn btn-success mb-3">Cadastrar com E-mail</button>
-                        </div>
-                    </form>
+<div class="signup-page-dark">
+    <div class="signup-wrapper">
+        <div class="signup-card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Crie sua Conta</h3>
 
-                    {# A divisória "ou" e o hr foram removidos #}
-                    {# O botão de Google virá logo depois do botão de e-mail com o padding mb-3 #}
-
-                    <div class="text-center">
-                        <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-outline-secondary w-100">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 20px; margin-right: 10px; vertical-align: middle;">
-                            Cadastrar com Google
-                        </a>
+                <form class="signup" method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary mb-3">Cadastrar com E-mail</button>
                     </div>
-                    
-                    <hr class="my-4"> {# O hr foi mantido antes do link de Login #}
+                </form>
 
-                    <p class="text-center mt-2">
-                        Já tem conta? <a href="{% url 'account_login' %}">Login</a>
-                    </p>
+                <div class="text-center">
+                    <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-google w-100">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
+                        Cadastrar com Google
+                    </a>
                 </div>
+
+                <hr class="my-4">
+
+                <p class="text-center mt-2 text-muted">
+                    Já tem conta? <a href="{% url 'account_login' %}" class="link-light">Login</a>
+                </p>
             </div>
         </div>
     </div>

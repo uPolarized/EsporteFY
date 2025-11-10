@@ -7,15 +7,29 @@ from social.models import Atividade
 
 @receiver(post_save, sender=Partida)
 def criar_atividade_nova_partida(sender, instance, created, **kwargs):
-    """
-    Cria uma atividade sempre que uma NOVA partida é criada.
-    """
-    if created:
+    if not created:
+        return
+
+    from social.models import Atividade
+    from django.contrib.contenttypes.models import ContentType
+
+    content_type = ContentType.objects.get_for_model(instance)
+
+    # evita duplicar a criação
+    existe = Atividade.objects.filter(
+        ator=instance.organizador,
+        verbo__icontains="criou",
+        content_type=content_type,
+        object_id=instance.id,
+    ).exists()
+
+    if not existe:
         Atividade.objects.create(
             ator=instance.organizador,
-            verbo='criou a partida',
-            alvo=instance
+            verbo="criou uma nova partida",  # 👈 apenas o texto base
+            alvo=instance,  # 👈 o template renderiza o título
         )
+
 
 @receiver(m2m_changed, sender=Partida.jogadores_confirmados.through)
 def criar_atividade_novo_jogador(sender, instance, action, pk_set, **kwargs):

@@ -1,68 +1,197 @@
-/* Estilos para a página de cadastro */
+/* === TEMA ESCURO - CADASTRO === */
 
+/* Centraliza o conteúdo */
+.signup-page-dark {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px);
+    background: radial-gradient(circle at center, #181818 0%, #0e0e0e 100%);
+    color: #f1f1f1;
+    padding: 2rem;
+}
+
+/* Wrapper que mantém o card no centro */
+.signup-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Card principal */
 .signup-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+    background: rgba(25, 25, 25, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid #333;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.2rem;
+    animation: fadeInUp 0.6s ease forwards;
+    transform: translateY(20px);
+    opacity: 0;
 }
 
-.signup-card .card-body {
-    padding: 2.5rem; /* Espaçamento interno generoso */
+@keyframes fadeInUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-.signup-card .card-title {
+/* Título */
+.card-title {
+    color: #ff6b6b;
     font-weight: 700;
-    color: #212529; /* Título com cor escura e forte */
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
 }
 
-/* Estilo do botão de cadastro com e-mail */
-.btn-success {
-    background-color: #198754; /* Verde do Bootstrap */
-    border-color: #198754;
-    padding: 12px;
+/* Campos do formulário */
+.signup-card .form-control,
+.signup-card select {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    color: #f1f1f1;
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: all 0.3s ease;
+}
+
+.signup-card .form-control:focus,
+.signup-card select:focus {
+    background-color: #262626;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    color: #fff;
+}
+
+/* Remove os asteriscos (*) automáticos dos labels obrigatórios */
+label.required::after {
+    content: "";
+}
+
+/* Botão principal */
+.btn-primary {
+    background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+    border: none;
     font-weight: 600;
-    transition: background-color 0.2s ease-in-out;
+    padding: 12px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
 }
 
-.btn-success:hover {
-    background-color: #157347; /* Verde um pouco mais escuro no hover */
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff3b3b, #ff1a1a);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
 }
 
-/* Estilo do botão de cadastro com Google */
+/* Botão Google */
 .btn-google {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px; /* Espaço entre o logo e o texto */
-    padding: 12px;
+    gap: 10px;
     font-weight: 500;
-    border-color: #dee2e6; /* Borda cinza clara */
-    color: #495057; /* Texto cinza escuro */
-    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.btn-google:hover {
-    background-color: #f8f9fa; /* Fundo levemente acinzentado no hover */
-    border-color: #ced4da;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s ease;
 }
 
 .btn-google img {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+}
+
+.btn-google:hover {
+    background: #292929;
+    border-color: #ff6b6b;
+    color: #fff;
+    transform: scale(1.02);
 }
 
 /* Linha divisória */
 hr {
-    color: #dee2e6; /* Cor da linha */
+    border-color: #333;
+    margin: 1.5rem 0;
 }
 
-/* Aviso sobre preenchimento posterior */
-.profile-tip {
-    background-color: #e9ecef; /* Fundo cinza claro */
-    color: #495057;
-    border-radius: 8px;
-    padding: 10px 15px;
-    font-size: 0.875rem; /* Tamanho de fonte um pouco menor */
-    text-align: center;
+/* Texto e links */
+.text-muted {
+    color: #aaa !important;
+}
+
+.link-light {
+    color: #ff6b6b;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link-light:hover {
+    color: #ff3b3b;
+    text-decoration: underline;
+}
+
+
+/* === Correções de contraste do Allauth (validações e ajudas) === */
+
+/* Textos de ajuda (ex: regras de senha) */
+.signup-card .helptext,
+.signup-card .form-text {
+    color: #ccc !important;
+    font-size: 0.88rem;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+/* Itens de lista dentro da ajuda (usado nos validadores de senha) */
+.signup-card .helptext ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.signup-card .helptext li {
+    color: #bbb;
+    font-size: 0.86rem;
+    margin-bottom: 4px;
+    list-style-type: disc;
+}
+
+/* Mensagens de erro */
+.signup-card .errorlist {
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+}
+
+.signup-card .errorlist li {
+    color: #ff6b6b !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Ícone de erro do Bootstrap */
+.signup-card .invalid-feedback {
+    color: #ff6b6b !important;
+}
+
+/* Placeholder mais visível */
+.signup-card input::placeholder,
+.signup-card select::placeholder {
+    color: #888;
+}
+
+/* Labels obrigatórios com asterisco vermelho discreto (opcional) */
+.signup-card label.required::after {
+    content: " *";
+    color: #ff4d4d;
+    font-weight: 500;
 }

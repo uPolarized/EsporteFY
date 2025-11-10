@@ -224,3 +224,43 @@ a {
 .toast.new-message-toast .toast-body a:hover {
     background-color: #d32f2f;
 }
+
+
+
+/* ===========================================================
+   CORREÇÃO GLOBAL - Remove faixa branca no final da tela
+   =========================================================== */
+
+/* 🔹 Usa altura dinâmica que considera barras móveis */
+html, body {
+    min-height: 100dvh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden;
+    color: #f1f1f1;
+}
+
+/* 🔹 Fallback para iPhones antigos e navegadores legados */
+@supports not (height: 100dvh) {
+    html, body {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* 🔹 Camada fixa garante que o fundo cubra até o limite real da viewport */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    z-index: -1;
+}
+
+
+.bg-light {
+  background: transparent !important;
+}

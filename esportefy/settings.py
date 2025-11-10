@@ -16,8 +16,16 @@ RECAPTCHA_REQUIRED_SCORE = 0.5
 
 
 # --- Configurações para Ngrok (Ambiente Local) ---
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.ngrok-free.app']
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "a9b6a9e85d43.ngrok-free.app",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "https://a9b6a9e85d43.ngrok-free.app",
+]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
@@ -25,6 +33,8 @@ INSTALLED_APPS = [
     'daphne',   # Adicionado para o Channels
     'channels',
     'django_recaptcha',
+    'rest_framework',
+    'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -139,21 +149,19 @@ RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PRIVATE_KEY', default='')
 RECAPTCHA_USE_SSL = True
 
 
-ACCOUNT_FORMS = {
-    'signup': 'perfis.forms.CustomSignupForm',
-    'set_password': 'perfis.forms.CustomSetPasswordForm',
-    'change_password': 'perfis.forms.ChangePasswordCaptchaForm',
-}
-
 
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
     }
 }
-
 
 # --- Configuração do Django Channels (para o Chat) ---
 CHANNEL_LAYERS = {
@@ -191,3 +199,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,  # 20 quadras por página (ajustável)
+}

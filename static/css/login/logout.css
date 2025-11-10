@@ -1,28 +1,120 @@
-/* static/css/login/logout.css */
+/* =========================================
+ * Logout - Tema Escuro EsporteFY (ajuste de posição)
+ * ========================================= */
 
-.logout-container {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    background-attachment: fixed;
+    background-size: cover;
+    color: #eef1f3;
+    font-family: "Inter", "Segoe UI", Tahoma, system-ui, -apple-system, "Helvetica Neue", Arial;
 }
 
+/* Contêiner principal */
+.logout-page {
+    display: flex;
+    align-items: flex-start; /* Alinha mais para o topo */
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: 8vh; /* empurra o card levemente pra cima (ajuste fino) */
+    padding-bottom: 2rem;
+}
+
+/* Card glass dark */
 .logout-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, rgba(28, 28, 30, 0.85), rgba(22, 22, 24, 0.85));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    padding: 2.5rem 2rem;
     text-align: center;
+    color: #eef1f3;
+    max-width: 400px;
+    width: 100%;
+    animation: fadeInUp 0.8s ease;
 }
 
-.logout-card .card-body {
-    padding: 2.5rem;
-}
-
+/* Ícone */
 .logout-card .icon {
     font-size: 3.5rem;
-    color: #fd7e14; /* Laranja do Bootstrap para "alerta" */
+    color: #ff6b6b;
     margin-bottom: 1.5rem;
+    text-shadow: 0 0 12px rgba(255, 50, 50, 0.4);
 }
 
+/* Título */
 .logout-card .card-title {
     font-weight: 700;
-    color: #212529;
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+/* Texto */
+.logout-card p {
+    color: #b8b8b8;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Botões */
+.logout-card .btn {
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.65rem 1.4rem;
+    transition: all 0.3s ease;
+}
+
+/* Botão principal */
+.logout-card .btn-primary {
+    background: linear-gradient(90deg, #e53935, #ff6b6b);
+    border: none;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(229, 57, 53, 0.18);
+}
+.logout-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(229, 57, 53, 0.25);
+}
+
+/* Botão secundário */
+.logout-card .btn-outline-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ccc;
+}
+.logout-card .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Animação suave */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsivo */
+@media (max-width: 576px) {
+    .logout-page {
+        padding-top: 5vh;
+    }
+    .logout-card {
+        padding: 2rem 1.5rem;
+    }
+    .logout-card .icon {
+        font-size: 3rem;
+    }
 }

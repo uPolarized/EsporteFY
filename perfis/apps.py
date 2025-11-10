@@ -6,3 +6,4 @@ class PerfisConfig(AppConfig):
 
     def ready(self):
         import perfis.signals
+

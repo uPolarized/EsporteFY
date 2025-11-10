@@ -4,246 +4,320 @@
 {% block title %}Seu Feed - EsporteFY{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/feed.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="{% static 'css/feed.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid my-4">
-    <div class="row gx-4">
-        
-        <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none"> {# Hidden on large, shown on smaller #}
-            <div class="text-center">
-                {% now "H" as hora_atual %}
-                <h1 class="mb-0 welcome-header">
-                    {% if hora_atual|add:"0" < 12 %}☀️Bom dia
-                    {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
-                    {% else %}🌙Boa noite
-                    {% endif %}
-                    !
-                </h1>
-            </div>
-        </div>
+  <div class="row gx-4">
+    
+    <!-- SAUDAÇÃO MOBILE -->
+    <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none">
+      <div class="text-center">
+        {% now "H" as hora_atual %}
+        <h1 class="mb-0 welcome-header">
+          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
+          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
+          {% else %}🌙Boa noite
+          {% endif %}!
+        </h1>
+      </div>
+    </div>
 
-        <div class="col-lg-3 order-md-2 order-lg-1">
-            <h2 class="section-title"><i class="bi bi-activity"></i>Feed de Atividades</h2>
-            {% for atividade in atividades %}
-                <div class="card shadow-sm mb-3 post-card">
-  <div class="card-body">
-    <div class="d-flex align-items-center">
-      {% if atividade.ator.perfil.foto %}
-        <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
-      {% else %}
-        <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
-          <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
-        </div>
-      {% endif %}
-
-      <div>
-        {% if "agora são amigos" in atividade.verbo %}
-          <p class="mb-0 lh-sm small">
-            <i class="bi bi-people-fill text-success me-1"></i>
-            <strong>{{ atividade.verbo }}</strong>
-          </p>
-        {% else %}
-          <p class="mb-0 lh-sm small">
-            <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-            {% if atividade.alvo %}
-              <strong>"{{ atividade.alvo }}"</strong>
+    <!-- FEED DE ATIVIDADES -->
+    <div class="col-lg-3 order-md-2 order-lg-1">
+      <h2 class="section-title"><i class="bi bi-activity"></i> Feed de Atividades</h2>
+      {% for atividade in atividades %}
+      <div class="card shadow-sm mb-3 post-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            {% if atividade.ator.perfil.foto %}
+              <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-3" width="44" height="44" style="object-fit: cover;">
+            {% else %}
+              <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 44px; height: 44px;">
+                <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+              </div>
             {% endif %}
+
+            <div class="flex-grow-1">
+              <p class="mb-0 lh-sm small">
+                {% if "agora são amigos" in atividade.verbo %}
+                  <i class="bi bi-people-fill text-success me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> e {{ atividade.alvo }} agora são amigos 🤝
+                {% elif "criou" in atividade.verbo %}
+                  <i class="bi bi-dribbble text-primary me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                  {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🏟️
+                {% elif "entrou" in atividade.verbo %}
+                  <i class="bi bi-person-check-fill text-success me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                  {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ✅
+                {% elif "saiu" in atividade.verbo %}
+                  <i class="bi bi-door-open-fill text-warning me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                  {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🚪
+                {% elif "cancelou" in atividade.verbo %}
+                  <i class="bi bi-x-octagon-fill text-danger me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                  {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ❌
+                {% elif "avaliou" in atividade.verbo %}
+                  <i class="bi bi-star-fill text-warning me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }} ⭐
+                {% else %}
+                  <i class="bi bi-lightning-charge-fill text-info me-1"></i>
+                  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                  {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %}
+                {% endif %}
+              </p>
+
+              <small class="text-muted">
+                <i class="bi bi-clock me-1"></i>{{ atividade.timestamp|timesince }} atrás
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- MODAL DE JOGADORES CONFIRMADOS -->
+{% for partida in partidas %}
+<div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="jogadoresModalLabel{{ partida.id }}">
+          👥 Jogadores Confirmados — {{ partida.titulo }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        {% if partida.jogadores_confirmados.all %}
+          <ul class="list-group">
+            {% for jogador in partida.jogadores_confirmados.all %}
+            <li class="list-group-item d-flex align-items-center">
+              {% if jogador.perfil.foto %}
+                <img src="{{ jogador.perfil.foto.url }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+              {% else %}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                  {{ jogador.username|first|upper }}
+                </div>
+              {% endif %}
+              <span class="fw-semibold">{{ jogador.username }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted text-center mb-0">
+            <i class="bi bi-info-circle me-2"></i> Ainda não há jogadores confirmados.
           </p>
         {% endif %}
-        <small class="text-muted">{{ atividade.timestamp|timesince }} atrás</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+      {% empty %}
+      <div class="no-activity-card text-center text-muted">
+        Nenhuma atividade na comunidade ainda.
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- COLUNA CENTRAL -->
+    <div class="col-lg-6 order-md-1 order-lg-2">
+      <div class="text-center d-none d-lg-block">
+        {% now "H" as hora_atual %}
+        <h1 class="mb-4 welcome-header">
+          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
+          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
+          {% else %}🌙Boa noite
+          {% endif %}!
+        </h1>
+      </div>
+
+      <!-- ACESSO RÁPIDO -->
+      <div class="card shadow-sm mb-4 action-card">
+        <div class="card-header text-center">Acesso Rápido</div>
+        <div class="card-body d-flex flex-wrap gap-2">
+          <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1">
+            <i class="bi bi-plus-circle-fill me-2"></i>Criar Partida
+          </a>
+          <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1">
+            <i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas
+          </a>
+        </div>
+      </div>
+
+      <!-- PARTIDAS ABERTAS -->
+      <div class="section-header text-center mb-4">
+        <h2 class="section-title m-0">
+          <i class="bi bi-dribbble me-2"></i>Partidas Abertas
+        </h2>
+      </div>
+
+    <!-- 🎯 BARRA DE FILTROS (Ocultar + Bairro) -->
+<div class="filtro-bar d-flex justify-content-end align-items-center flex-wrap gap-2 mb-4">
+
+  <!-- BOTÃO: Ocultar Minhas Partidas -->
+  <button id="toggle-minhas-partidas" class="btn-filtro-ocultar">
+    <i class="bi bi-eye-slash me-1"></i> Ocultar minhas partidas
+  </button>
+
+  <!-- BOTÃO: Filtro de Bairro -->
+  <div class="dropdown">
+    <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
+      <i class="bi bi-geo-alt me-1"></i> Bairro: <strong>{{ bairro_atual_nome }}</strong>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
+      {% for valor, nome in bairros_disponiveis %}
+      <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+
+
+      <!-- LISTA DE PARTIDAS -->
+      {% for partida in partidas %}
+      <div class="card shadow-sm mb-3 match-card fade-card"
+           data-organizador="{% if partida.organizador == user %}true{% else %}false{% endif %}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title">{{ partida.titulo }}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">
+                <i class="bi bi-geo-alt"></i> {{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}
+              </h6>
+              <p class="card-text mb-2">
+                <i class="bi bi-calendar-event"></i> {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
+              </p>
+            </div>
+            <div class="text-end">
+              {% if partida.vagas_restantes == 1 %}
+              <span class="badge bg-danger fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% elif partida.vagas_restantes <= 3 %}
+              <span class="badge bg-warning text-dark fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% else %}
+              <span class="badge bg-primary fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% endif %}
+              <small class="d-block text-muted">Jogadores</small>
+            </div>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              {% if user == partida.organizador %}
+              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
+                Cancelar Partida
+              </button>
+              {% elif user in partida.jogadores_confirmados.all %}
+              <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-danger">Sair da Partida</a>
+              {% elif partida.vagas_restantes > 0 %}
+              <a href="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="btn btn-success">Participar</a>
+              {% else %}
+              <button class="btn btn-secondary" disabled>Lotado</button>
+              {% endif %}
+            </div>
+            <button type="button" class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#jogadoresModal{{ partida.id }}">
+              Ver jogadores confirmados ({{ partida.vagas_preenchidas }})
+            </button>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card no-match-card">
+        <div class="card-body text-center text-muted">
+          <i class="bi bi-emoji-frown me-2"></i> Nenhuma partida encontrada. Que tal <a href="{% url 'partidas:criar_partida' %}">criar uma</a>?
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- COLUNA DIREITA (CLIMA + NOTÍCIAS) -->
+    <div class="col-lg-3 order-md-3 order-lg-3">
+      {% if clima_atual %}
+      <div class="weather-card mb-4 text-center">
+        <div class="weather-header position-relative">
+          <h5 class="weather-title mb-0">Tempo em Maricá</h5>
+          <div class="weather-icon-wrapper-right">
+            {% if "chuva" in clima_atual.descricao|lower %}
+            <i class="bi bi-cloud-rain-fill weather-icon rainy"></i>
+            {% elif "nublado" in clima_atual.descricao|lower %}
+            <i class="bi bi-cloud-fill weather-icon cloudy"></i>
+            {% else %}
+            <i class="bi bi-brightness-high-fill weather-icon sunny"></i>
+            {% endif %}
+          </div>
+        </div>
+        <div class="weather-body">
+          <span class="temp display-5 fw-bold d-block mt-2">{{ clima_atual.temperatura }}°C</span>
+          <span class="desc text-muted mb-3 d-block">{{ clima_atual.descricao }}</span>
+          <div class="weather-tip p-3 rounded">
+            <i class="bi bi-info-circle me-2"></i>{{ clima_atual.mensagem }}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- NOTÍCIAS -->
+      <div class="news-sidebar">
+        <h2 class="section-title text-center mb-3"><i class="bi bi-newspaper me-2"></i>Notícias</h2>
+        {% for noticia in noticias %}
+        <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
+          <div class="card shadow-sm mb-3 news-card">
+            {% if noticia.urlToImage %}
+            <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>
+              <small class="news-source text-muted">{{ noticia.source.name }}</small>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <div class="card">
+          <div class="card-body text-center text-muted">
+            <i class="bi bi-wifi-off me-2"></i> Não foi possível carregar as notícias.
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 </div>
 
-            {% empty %}
-                <div class="no-activity-card">
-                    Nenhuma atividade na comunidade ainda.
-                </div>
-            {% endfor %}
-        </div>
+<!-- SCRIPT DE FILTRO -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('toggle-minhas-partidas');
+  const partidas = document.querySelectorAll('.match-card');
+  let ocultando = false;
 
-        <div class="col-lg-6 order-md-1 order-lg-2">
-            {# A saudação para desktop permanece aqui, visível apenas em telas grandes #}
-            <div class="text-center d-none d-lg-block"> 
-                {% now "H" as hora_atual %}
-                <h1 class="mb-4 welcome-header">
-                    {% if hora_atual|add:"0" < 12 %}☀️Bom dia
-                    {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
-                    {% else %}🌙Boa noite
-                    {% endif %}
-                    !
-                </h1>
-            </div>
-            
-            <div class="card shadow-sm mb-4 action-card">
-                <div class="card-header text-center">Acesso Rápido</div>
-                <div class="card-body d-flex flex-wrap gap-2">
-                    <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1"><i class="bi bi-plus-circle-fill me-2"></i>Criar Partida</a>
-                    <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas</a>
-                </div>
-            </div>
-            
-            <div class="section-header text-center mb-4 position-relative flex-column flex-md-row d-flex justify-content-center align-items-center gap-2">
-    <h2 class="section-title centered-title m-0">
-        <i class="bi bi-dribbble me-2"></i>
-        Partidas Abertas
-    </h2>
+  toggleBtn.addEventListener('click', () => {
+    ocultando = !ocultando;
 
-    <div class="dropdown ms-md-3 mt-2 mt-md-0">
-        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            Bairro: <strong>{{ bairro_atual_nome }}</strong>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
-            {% for valor, nome in bairros_disponiveis %}
-                <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
+    partidas.forEach(card => {
+      const ehMinha = card.dataset.organizador === 'true';
+      if (ehMinha) {
+        if (ocultando) {
+          card.classList.add('fade-out');
+          setTimeout(() => card.style.display = 'none', 200);
+        } else {
+          card.style.display = '';
+          card.classList.remove('fade-out');
+        }
+      }
+    });
 
-            
-            {% for partida in partidas %}
-            <div class="card shadow-sm mb-3 match-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="card-title">{{ partida.titulo }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">
-                                <i class="bi bi-geo-alt"></i> {{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}
-                            </h6>
-                            <p class="card-text mb-2"><i class="bi bi-calendar-event"></i> {{ partida.data_hora|date:"d/m/Y \à\s H:i" }}</p>
-                        </div>
-                        <div class="text-end">
-                            {% if partida.vagas_restantes == 1 %}<span class="badge bg-danger fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-                            {% elif partida.vagas_restantes <= 3 %}<span class="badge bg-warning text-dark fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-                            {% else %}<span class="badge bg-primary fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-                            {% endif %}
-                            <small class="d-block text-muted">Jogadores</small>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            {% if user == partida.organizador %}<a href="{% url 'partidas:cancelar_partida' partida_id=partida.id %}" class="btn btn-warning">Cancelar Partida</a>
-                            {% elif user in partida.jogadores_confirmados.all %}<a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-danger">Sair da Partida</a>
-                            {% elif partida.vagas_restantes > 0 %}<a href="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="btn btn-success">Participar</a>
-                            {% else %}<button class="btn btn-secondary" disabled>Lotado</button>
-                            {% endif %}
-                        </div>
-                        <button type="button" class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#jogadoresModal{{ partida.id }}">
-                            Ver jogadores confirmados ({{ partida.vagas_preenchidas }})
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="jogadoresModalLabel{{ partida.id }}">Jogadores Confirmados</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="list-group list-group-flush">
-                                {% for jogador in partida.jogadores_confirmados.all %}
-                                    <div class="list-group-item d-flex align-items-center">
-                                        {% if jogador.perfil.foto %}<img src="{{ jogador.perfil.foto.url }}" alt="" width="40" height="40" class="rounded-circle me-3" style="object-fit: cover;">
-                                        {% else %}<div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;"><span class="fw-bold">{{ jogador.username|first|upper }}</span></div>
-                                        {% endif %}
-                                        <span>{{ jogador.username }}</span>
-                                    </div>
-                                {% empty %}
-                                    <p class="text-muted">Seja o primeiro a participar!</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="card no-match-card">
-                <div class="card-body">
-                    <i class="bi bi-emoji-frown me-2"></i>
-                    Nenhuma partida encontrada. Que tal <a href="{% url 'partidas:criar_partida' %}">criar uma</a>?
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="col-lg-3 order-md-3 order-lg-3">
-{% if clima_atual %}
-<div class="weather-card mb-4">
-    <div class="weather-header text-center position-relative">
-        <h5 class="weather-title mb-0">
-            Tempo em Maricá
-        </h5>
-
-        <div class="weather-icon-wrapper-right">
-            {% if "chuva" in clima_atual.descricao|lower %}
-                <i class="bi bi-cloud-rain-fill weather-icon rainy floating-icon"></i>
-            {% elif "nublado" in clima_atual.descricao|lower %}
-                <i class="bi bi-cloud-fill weather-icon cloudy floating-icon"></i>
-            {% else %}
-                <i class="bi bi-brightness-high-fill weather-icon sunny floating-icon"></i>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="weather-body text-center">
-        <span class="temp display-5 fw-bold d-block mt-2">{{ clima_atual.temperatura }}°C</span>
-        <span class="desc text-muted mb-3 d-block">{{ clima_atual.descricao }}</span>
-
-        <div class="weather-tip p-3 rounded">
-            <i class="bi bi-info-circle me-2"></i>{{ clima_atual.mensagem }}
-        </div>
-
-        {% if previsao_chuva.vai_chover %}
-            <div class="weather-alert rainy mt-3">
-                <i class="bi bi-umbrella-fill me-1"></i>
-                <strong>Previsão de chuva hoje ({{ previsao_chuva.chuva_mm }} mm).</strong><br>
-                <span>Recomendado: quadras cobertas.</span>
-            </div>
-        {% else %}
-            <div class="weather-alert clear mt-3">
-                <i class="bi bi-sun-fill me-1"></i>
-                <strong>Sem chuva prevista hoje.</strong><br>
-                <span>Perfeito para jogos ao ar livre!</span>
-            </div>
-        {% endif %}
-    </div>
-</div>
-{% endif %}
-
-
-
-
-
-            <div class="news-sidebar">
-                <h2 class="section-title text-center"><i class="bi bi-newspaper"></i>Notícias</h2>
-                {% for noticia in noticias %}
-                <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
-                    <div class="card shadow-sm mb-3 news-card">
-                        {% if noticia.urlToImage %}
-                            <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>
-                            <small class="news-source">{{ noticia.source.name }}</small>
-                        </div>
-                    </div>
-                </a>
-                {% empty %}
-                <div class="card"><div class="card-body text-muted">Não foi possível carregar as notícias.</div></div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
+    toggleBtn.innerHTML = ocultando
+      ? '<i class="bi bi-eye"></i> Mostrar minhas partidas'
+      : '<i class="bi bi-eye-slash"></i> Ocultar minhas partidas';
+  });
+});
+</script>
 {% endblock %}

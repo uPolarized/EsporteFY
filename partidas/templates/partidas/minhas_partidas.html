@@ -23,7 +23,20 @@
         <div class="card-body d-flex justify-content-between align-items-start">
           <div>
             <h5 class="card-title">{{ partida.titulo }}</h5>
-            <p class="card-text mb-1"><i class="bi bi-geo-alt"></i> {{ partida.local }} — {{ partida.get_bairro_display }}</p>
+            {# Mostra endereço/quadra de forma robusta #}
+<p class="card-text mb-1">
+  <i class="bi bi-geo-alt"></i>
+  {% if partida.quadra %}
+    {{ partida.quadra.nome }}{% if partida.quadra.endereco %} — {{ partida.quadra.endereco }}{% elif partida.quadra.rua %} — {{ partida.quadra.rua }}{% endif %}
+  {% elif partida.local %}
+    {{ partida.local }}
+  {% elif partida.endereco %}
+    {{ partida.endereco }}
+  {% else %}
+    —  <!-- fallback -->
+  {% endif %}
+</p>
+
             <p class="card-text mb-0"><i class="bi bi-clock-history"></i> {{ partida.data_hora|date:"d/m/Y \à\s H:i" }}</p>
           </div>
           <div class="text-end">

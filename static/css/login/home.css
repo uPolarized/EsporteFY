@@ -93,34 +93,76 @@ body.home-page {
     box-shadow: 0 4px 15px rgba(13, 110, 253, 0.5);
 }
 
+/* ===== Seção Escura (Por que escolher o EsporteFY?) ===== */
 .dark-section {
-    background-color: #121212; /* fundo escuro elegante */
-    color: #f8f9fa; /* texto claro */
-    padding: 100px 0;
+    background-color: #121212;
+    color: #f8f9fa;
+    padding: 120px 0; /* 🔹 mais respiro vertical */
 }
 
 .dark-section .section-title {
     color: #ffffff;
+    margin-bottom: 80px; /* 🔹 mais espaço abaixo do título */
 }
 
-.dark-section p {
-    color: #d1d1d1; /* cinza suave para contraste */
-}
-
+/* ===== Itens de Destaque ===== */
 .dark-section .feature-item {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 30px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 16px;
+    padding: 45px 35px;
+    margin: 15px; /* 🔹 espaçamento entre os cards */
+    transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+/* Efeito hover mais suave e estável */
 .dark-section .feature-item:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
 }
 
+/* Ícones */
 .dark-section .feature-icon {
-    color: #0d6efd; /* mantém o azul do tema */
+    font-size: 3.8rem;
+    color: #0d6efd;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.dark-section .feature-item:hover .feature-icon {
+    transform: scale(1.15);
+    color: #7b2ff7;
+}
+
+/* Títulos e texto */
+.dark-section .feature-item h4 {
+    font-weight: 600;
+    color: #eaeaea;
+    margin-bottom: 15px;
+}
+
+.dark-section .feature-item p {
+    color: #bcbcbc;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 992px) {
+    .dark-section {
+        padding: 90px 0;
+    }
+
+    .dark-section .feature-item {
+        margin: 12px 0;
+        padding: 35px 25px;
+    }
+
+    .dark-section .feature-icon {
+        font-size: 3.2rem;
+    }
 }
 
 
@@ -149,16 +191,39 @@ body.home-page {
 }
 
 /* ===== Nossa Missão & CTA Final ===== */
+/* ===== Nossa Missão ===== */
 .mission-section {
-    padding-bottom: 0;
+    background-color: #121212;
+    color: #ffffff;
+    padding: 90px 0 60px 0;
+    text-align: center;
 }
 
+.mission-section .section-title {
+    color: #ffffff;
+    margin-bottom: 20px; /* 🔹 Aproxima o texto do título */
+}
+
+.mission-section p.lead {
+    text-align: justify; /* 🔹 Alinha dos dois lados */
+    text-justify: inter-word;
+    color: #ffffff; /* 🔹 Texto branco real */
+    line-height: 1.8; /* 🔹 Melhora a leitura */
+    font-size: 1.1rem; /* 🔹 Leve aumento do tamanho */
+    max-width: 800px;
+    margin: 0 auto;
+    letter-spacing: 0.3px;
+    font-weight: 400;
+}
+
+
 .cta-section {
-    background: linear-gradient(135deg, #f31818, #17122000);
+    background: linear-gradient(135deg, #a00000, #330033);
     text-align: center;
-    color: #fff;
+    color: #ffffff;
     padding: 80px 20px;
 }
+
 
 .cta-section h2 {
     font-size: 2.2rem;
@@ -176,6 +241,6 @@ body.home-page {
 }
 
 .cta-section a.btn:hover {
-    background: #121212;
+    background: #0847ce;
     color: #fff;
 }

@@ -1,58 +1,94 @@
 {% extends "account/base.html" %}
-{% load i18n tz %}
+{% load i18n tz static %}
 
 {% block title %}Conversa com {{ outro_usuario.username }}{% endblock %}
 
 {% block extra_head %}
-    {% load static %}
 <link rel="stylesheet" href="{% static 'css/login/conversa.css' %}">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
-
 
 {% block content %}
 <div class="messenger-container">
+    <!-- === SIDEBAR === -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h4>Conversas</h4>
-        </div>
+        <div class="sidebar-header">Conversas</div>
         <div class="conversation-list">
-            <div class="conversation-item active">
-                <img src="{{ outro_usuario.perfil.foto.url }}" alt="Foto" class="avatar">
-                <div>
-                    <strong>{{ outro_usuario.username }}</strong>
-                    <p>Última mensagem...</p>
+            {% for item in conversas_usuario %}
+            <a href="{% url 'social:conversa' item.outro.username %}" 
+               class="conversation-item {% if item.outro.username == outro_usuario.username %}active{% endif %}">
+                {% if item.outro.perfil.foto %}
+                    <img src="{{ item.outro.perfil.foto.url }}" class="avatar">
+                {% endif %}
+                <div class="conversation-info">
+                    <strong>{{ item.outro.username }}</strong>
+                    <p class="last-msg">
+                        {% if item.ultima_mensagem %}
+                            {{ item.ultima_mensagem.conteudo|truncatechars:25 }}
+                        {% else %}
+                            <i>Nova conversa</i>
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-            </div>
+            </a>
+            {% endfor %}
+        </div>
     </div>
 
+    {% if messages %}
+    <div class="alert alert-danger text-center mt-2">
+        {% for msg in messages %}
+            {{ msg }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- === CHAT === -->
     <div class="chat-area">
         <div class="chat-header">
-            <img src="{{ outro_usuario.perfil.foto.url }}" class="avatar">
+            {% if outro_usuario.perfil.foto %}
+                <img src="{{ outro_usuario.perfil.foto.url }}" class="avatar">
+            {% endif %}
             <h5>{{ outro_usuario.username }}</h5>
         </div>
 
         <div id="chat-log" class="chat-body">
             {% for mensagem in mensagens %}
-                <div class="message-row {% if mensagem.remetente == request.user %}me{% else %}other{% endif %}">
-                    <div class="message-bubble">
+            <div class="message-row {% if mensagem.remetente == request.user %}me{% else %}other{% endif %}">
+                <div class="message-bubble">
+                    {% if mensagem.imagem %}
+                        <img src="{{ mensagem.imagem.url }}" class="chat-image">
+                    {% endif %}
+                    {% if mensagem.conteudo %}
                         {{ mensagem.conteudo }}
-                        <span class="message-time">{{ mensagem.timestamp|localtime|date:"H:i" }}</span>
-                    </div>
+                    {% endif %}
+                    <span class="message-time">{{ mensagem.timestamp|localtime|date:"H:i" }}</span>
                 </div>
-            {% endfor %}
             </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pré-visualização da imagem -->
+        <div id="image-preview-container" class="image-preview-container" style="display: none;">
+            <div class="preview-wrapper">
+                <img id="image-preview" src="" alt="Pré-visualização" class="preview-thumb">
+                <button type="button" id="remove-image-btn" class="remove-image-btn">&times;</button>
+            </div>
+        </div>
 
         <div class="chat-footer">
-            <form id="chat-form">
-                <input type="text" id="chat-message-input" placeholder="Digite uma mensagem...">
-                <button type="submit">Enviar</button>
+            <form id="chat-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="id_imagem" class="upload-icon"><i class="bi bi-image"></i></label>
+                    <input type="file" id="id_imagem" name="imagem" accept="image/*">
+                    <textarea id="chat-message-input" name="conteudo" placeholder="Digite sua mensagem..."></textarea>
+                    <button type="submit" class="btn-send"><i class="bi bi-send-fill"></i></button>
+                </div>
             </form>
         </div>
     </div>
 </div>
-
 
 {{ outro_usuario.username|json_script:"json-outro-usuario-username" }}
 {{ request.user.username|json_script:"json-meu-usuario-username" }}
@@ -60,79 +96,205 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const outroUsuarioUsername = JSON.parse(document.getElementById('json-outro-usuario-username').textContent);
-        const meuUsuarioUsername = JSON.parse(document.getElementById('json-meu-usuario-username').textContent);
-        const chatLog = document.querySelector('#chat-log');
-        const messageInput = document.querySelector('#chat-message-input');
-        const chatForm = document.querySelector('#chat-form');
+document.addEventListener('DOMContentLoaded', () => {
+  const chatForm = document.getElementById('chat-form');
+  const messageInput = document.getElementById('chat-message-input');
+  const imageInput = document.getElementById('id_imagem');
+  const chatLog = document.getElementById('chat-log');
+  const previewContainer = document.getElementById('image-preview-container');
+  const previewImage = document.getElementById('image-preview');
+  const removeImageBtn = document.getElementById('remove-image-btn');
 
-        function scrollToBottom() {
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
-        scrollToBottom(); // Rola para o fim ao carregar
+  const outroUsuarioUsername = JSON.parse(document.getElementById('json-outro-usuario-username').textContent);
+  const meuUsuarioUsername = JSON.parse(document.getElementById('json-meu-usuario-username').textContent);
 
-        const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const chatSocket = new WebSocket(
-            ws_protocol + '//' +
-            window.location.host +
-            '/ws/chat/' + outroUsuarioUsername + '/'
-        );
+  // === 🧠 Atualização principal: WebSocket via FastAPI ===
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const chatHost = window.location.hostname;
+  const wsUrl = `${wsProtocol}//${chatHost}:8080/ws/chat/${encodeURIComponent(outroUsuarioUsername)}/?me=${encodeURIComponent(meuUsuarioUsername)}`;
 
-        /* * =============================================
-         * === CORREÇÃO DO JAVASCRIPT APLICADA AQUI ===
-         * =============================================
-         * Este código agora cria o HTML EXATAMENTE
-         * igual ao do seu template Django, para que
-         * o CSS funcione corretamente.
-         */
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
+  let chatSocket = null;
+  try {
+    chatSocket = new WebSocket(wsUrl);
+  } catch (err) {
+    console.error('❌ Erro ao criar WebSocket:', err);
+  }
 
-            if (data.type === 'chat_message') {
-                
-                // 1. Cria a linha da mensagem: <div class="message-row me/other">
-                const messageRow = document.createElement('div');
-                messageRow.classList.add('message-row');
-                if (data.username === meuUsuarioUsername) {
-                    messageRow.classList.add('me');
-                } else {
-                    messageRow.classList.add('other');
-                }
+  if (chatSocket) {
+    chatSocket.onopen = () => console.log('✅ WebSocket conectado:', wsUrl);
+    chatSocket.onclose = () => console.warn('⚠️ WebSocket desconectado');
+    chatSocket.onerror = (err) => console.error('⚠️ WebSocket erro', err);
 
-                // 2. Cria o balão da mensagem: <div class="message-bubble">
-                const messageBubble = document.createElement('div');
-                messageBubble.classList.add('message-bubble');
+    // Recebe mensagens em tempo real
+    chatSocket.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        appendMessageToDOM(data);
+      } catch (err) {
+        console.error('Erro parseando mensagem WS:', err);
+      }
+    };
+  }
 
-                // 3. Cria o texto da hora: <span class="message-time">
-                const messageTime = document.createElement('span');
-                messageTime.classList.add('message-time');
-                messageTime.textContent = data.timestamp; // O timestamp do websocket já vem formatado
+  // --- Helpers ---
+  function ensureAbsoluteUrl(url) {
+    if (!url) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) return window.location.origin + url;
+    return window.location.origin + '/' + url;
+  }
 
-                // 4. Adiciona o conteúdo (texto) e a hora ao balão
-                // (Usar createTextNode é mais seguro contra XSS)
-                messageBubble.appendChild(document.createTextNode(data.message));
-                messageBubble.appendChild(messageTime);
+  function scrollToBottom() {
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
 
-                // 5. Adiciona o balão à linha
-                messageRow.appendChild(messageBubble);
+  function appendMessageToDOM(payload) {
+    const username = payload.username || '';
+    const isMe = (meuUsuarioUsername && username === meuUsuarioUsername);
 
-                // 6. Adiciona a linha da mensagem ao log do chat
-                chatLog.appendChild(messageRow);
-                
-                // 7. Rola para o fundo para ver a nova mensagem
-                scrollToBottom();
-            }
-        };
+    const row = document.createElement('div');
+    row.className = 'message-row ' + (isMe ? 'me' : 'other');
 
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const message = messageInput.value;
-            if (message.trim() !== '') {
-                chatSocket.send(JSON.stringify({'message': message}));
-                messageInput.value = '';
-            }
-        });
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    if (payload.image_url) {
+      const img = document.createElement('img');
+      img.src = ensureAbsoluteUrl(payload.image_url);
+      img.className = 'chat-image';
+      img.alt = 'imagem enviada';
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', openImageModal);
+      bubble.appendChild(img);
+    }
+
+    if (payload.message) {
+      const p = document.createElement('p');
+      p.textContent = payload.message;
+      bubble.appendChild(p);
+    }
+
+    const time = document.createElement('span');
+    time.className = 'message-time';
+    time.textContent = payload.timestamp || '';
+    bubble.appendChild(time);
+
+    row.appendChild(bubble);
+    chatLog.appendChild(row);
+    scrollToBottom();
+  }
+
+  // --- Modal de imagem ---
+  function openImageModal(e) {
+    const src = e.currentTarget.src;
+    const existing = document.querySelector('.image-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.innerHTML = `
+      <div class="image-modal-content">
+        <button class="image-modal-close" aria-label="Fechar">&times;</button>
+        <img src="${src}" alt="Imagem" class="image-modal-img">
+      </div>
+    `;
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('show'));
+
+    modal.querySelector('.image-modal-close').addEventListener('click', () => {
+      modal.classList.remove('show');
+      setTimeout(() => modal.remove(), 180);
     });
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 180);
+      }
+    });
+  }
+
+  // --- Envio de mensagens (HTTP) ---
+  let sending = false;
+  async function enviarMensagem() {
+    if (sending) return;
+    const message = messageInput.value.trim();
+    const file = imageInput?.files[0];
+    if (!message && !file) return;
+
+    const formData = new FormData(chatForm);
+    sending = true;
+    const submitBtn = chatForm.querySelector('button[type="submit"], .btn-send');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const url = `/social/chat/enviar/${encodeURIComponent(outroUsuarioUsername)}/`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '' },
+        credentials: 'same-origin'
+      });
+
+      if (!resp.ok) {
+        console.error('Erro no envio:', resp.status);
+      } else {
+        messageInput.value = '';
+        if (imageInput) imageInput.value = '';
+        if (previewContainer) previewContainer.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('Erro no fetch:', err);
+    } finally {
+      sending = false;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
+  chatForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    await enviarMensagem();
+  });
+
+  messageInput.addEventListener('keydown', async (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      await enviarMensagem();
+    }
+  });
+
+  // --- Pré-visualização de imagem ---
+  if (imageInput) {
+    imageInput.addEventListener('change', (ev) => {
+      const file = ev.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          previewImage.src = evt.target.result;
+          previewContainer.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewContainer.style.display = 'none';
+        previewImage.src = '';
+      }
+    });
+  }
+
+  if (removeImageBtn) {
+    removeImageBtn.addEventListener('click', () => {
+      imageInput.value = '';
+      previewImage.src = '';
+      previewContainer.style.display = 'none';
+    });
+  }
+
+  // adiciona listeners para imagens renderizadas do servidor
+  document.querySelectorAll('.chat-image').forEach(img => {
+    img.addEventListener('click', openImageModal);
+    if (img.src && img.src.startsWith('/')) img.src = window.location.origin + img.src;
+  });
+
+  scrollToBottom();
+});
 </script>
 {% endblock %}

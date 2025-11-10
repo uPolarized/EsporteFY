@@ -17,6 +17,20 @@ services:
     expose:
       - 6379
 
+  chat:
+    build: .
+    container_name: esportefy_chat
+    command: uvicorn social.app:app --host 0.0.0.0 --port 8080 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+
+
   web:
     build: .
     container_name: esportefy_web
@@ -25,10 +39,13 @@ services:
       - .:/app
       - ./static:/app/static
       - ./media:/app/media
+      - ./keys:/app/keys
     ports:
       - "8000:8000"
     env_file:
       - ./.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/confident-coda-471816-i9-0d5d3ad6c45e.json
     depends_on:
       - db
       - redis

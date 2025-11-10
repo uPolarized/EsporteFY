@@ -1,0 +1,14 @@
+Olá {{ username }} 👋
+
+Bem-vindo ao EsporteFY — o app que conecta você às melhores quadras e partidas da sua região! ⚽🏀🏐
+
+Agora você pode:
+• Criar e participar de partidas em tempo real
+• Encontrar jogadores próximos
+• Acompanhar suas atividades esportivas
+
+Se você não criou uma conta no EsporteFY, ignore este e-mail. 
+Alguém pode ter usado seu endereço por engano.
+
+Equipe EsporteFY 💪
+https://esportefy.com
