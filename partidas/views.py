@@ -11,6 +11,9 @@ from .models import Partida, AvaliacaoQuadra, AvaliacaoJogador
 from .forms import PartidaForm, AvaliacaoQuadraForm, AvaliacaoJogadorForm
 from quadras.models import Quadra
 from social.models import Atividade
+from django.db import transaction # Importa transaction para operações seguras
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
 
 # ---------------------------------------------------------
@@ -22,80 +25,160 @@ class CriarPartidaView(LoginRequiredMixin, CreateView):
     template_name = 'partidas/criar_partida.html'
     success_url = reverse_lazy('feed')
 
+    @transaction.atomic # Garante que tudo aconteça junto (partida + jogador + atividade)
     def form_valid(self, form):
         form.instance.organizador = self.request.user
         messages.success(self.request, "A sua partida foi criada e já está visível para outros jogadores!")
-        response = super().form_valid(form)
+        
+        # Primeiro, salva a partida (self.object é criado aqui)
+        response = super().form_valid(form) 
+        
+        # Adiciona o organizador aos jogadores confirmados
         self.object.jogadores_confirmados.add(self.request.user)
-        return response  # 🚫 não cria atividade aqui
 
-
+        # 🐛 CORREÇÃO: Criar a atividade que estava faltando
+        content_type = ContentType.objects.get_for_model(self.object)
+        Atividade.objects.create(
+            ator=self.request.user,
+            verbo='criou a partida',
+            content_type=content_type,
+            object_id=self.object.id
+            # O template feed.html parece usar o GFK como 'alvo',
+            # então 'atividade.alvo' será o objeto Partida.
+        )
+        
+        return response
 
 # ---------------------------------------------------------
-# ✅ PARTICIPAR DE UMA PARTIDA
+# ✅ PARTICIPAR DE UMA PARTIDA (com limpeza de atividades antigas)
 # ---------------------------------------------------------
 @login_required
+@transaction.atomic
 def participar_partida(request, partida_id):
-    partida = get_object_or_404(Partida, id=partida_id)
+    partida = get_object_or_404(
+        Partida.objects.select_related('organizador').prefetch_related('jogadores_confirmados'),
+        id=partida_id
+    )
+    user = request.user
 
-    if request.user in partida.jogadores_confirmados.all():
-        messages.warning(request, 'Você já está participando desta partida.')
-    elif partida.vagas_restantes > 0:
-        partida.jogadores_confirmados.add(request.user)
+    if user in partida.jogadores_confirmados.all():
+        messages.warning(request, "Você já está participando desta partida.")
+        return redirect('feed')
 
-        # Adiciona no feed (evita duplicados)
-        Atividade.objects.get_or_create(
-            ator=request.user,
-            verbo='entrou na partida',
-            alvo=partida
-        )
+    if partida.vagas_restantes <= 0:
+        messages.error(request, "Esta partida está lotada.")
+        return redirect('feed')
 
-        messages.success(request, 'Você entrou na partida! Nos vemos lá.')
-    else:
-        messages.error(request, 'Esta partida já está lotada.')
+    # Adiciona o jogador
+    partida.jogadores_confirmados.add(user)
 
+    content_type = ContentType.objects.get_for_model(Partida)
+
+    # 🧹 Remove qualquer "saiu da partida" anterior para limpar o feed
+    Atividade.objects.filter(
+        ator=user,
+        verbo__icontains="saiu",
+        content_type=content_type,
+        object_id=partida.id
+    ).delete()
+
+    # 🧹 Remove duplicatas de "entrou" também (caso alguém force refresh)
+    Atividade.objects.filter(
+        ator=user,
+        verbo__icontains="entrou",
+        content_type=content_type,
+        object_id=partida.id
+    ).delete()
+
+    # ✅ Cria nova atividade de entrada
+    Atividade.objects.create(
+        ator=user,
+        verbo="entrou na partida",
+        content_type=content_type,
+        object_id=partida.id
+    )
+
+    messages.success(request, f"Você entrou na partida '{partida.titulo}'.")
     return redirect('feed')
 
 
-# ---------------------------------------------------------
-# ✅ SAIR DE UMA PARTIDA
-# ---------------------------------------------------------
-@login_required
-def sair_da_partida(request, partida_id):
-    partida = get_object_or_404(Partida, id=partida_id)
 
-    if request.user == partida.organizador:
-        messages.error(request, 'Você é o organizador e não pode sair da partida. Considere cancelá-la.')
-    elif request.user in partida.jogadores_confirmados.all():
-        partida.jogadores_confirmados.remove(request.user)
-        messages.info(request, 'Você saiu da partida.')
+@login_required
+@transaction.atomic
+def sair_da_partida(request, partida_id):
+    # Busca otimizada da partida
+    partida = get_object_or_404(
+        Partida.objects.select_related('organizador').prefetch_related('jogadores_confirmados'),
+        id=partida_id
+    )
+    user = request.user
+
+    # Organizador não pode sair
+    if user == partida.organizador:
+        messages.error(
+            request,
+            'Você é o organizador e não pode sair da partida. Considere cancelá-la.'
+        )
+        return redirect('feed')
+
+    # Se o usuário está participando
+    if user in partida.jogadores_confirmados.all():
+        partida.jogadores_confirmados.remove(user)
+
+        content_type = ContentType.objects.get_for_model(Partida)
+
+        # 🧹 Remove atividades antigas de "entrou" e "saiu" relacionadas a essa partida
+        Atividade.objects.filter(
+            ator=user,
+            content_type=content_type,
+            object_id=partida.id
+        ).filter(verbo__icontains="entrou").delete()
+
+        Atividade.objects.filter(
+            ator=user,
+            content_type=content_type,
+            object_id=partida.id
+        ).filter(verbo__icontains="saiu").delete()
+
+        # ✅ Cria nova atividade limpa de saída
+        Atividade.objects.create(
+            ator=user,
+            verbo='saiu da partida',
+            content_type=content_type,
+            object_id=partida.id
+        )
+
+        messages.info(request, f'Você saiu da partida "{partida.titulo}".')
+
     else:
         messages.warning(request, 'Você não estava participando desta partida.')
 
     return redirect('feed')
 
-
 # ---------------------------------------------------------
 # ✅ CANCELAR UMA PARTIDA (somente organizador)
 # ---------------------------------------------------------
 @login_required
+@transaction.atomic
 def cancelar_partida(request, partida_id):
     partida = get_object_or_404(Partida, id=partida_id, organizador=request.user)
-
-    # Lógica para cancelar a partida
-    partida.delete()
-    messages.success(request, "A partida foi cancelada com sucesso!")
-
-    # Cria uma atividade manualmente
+    
+    # 🐛 CORREÇÃO: Criamos a atividade ANTES de deletar a partida.
+    # Se fizermos depois, o 'object_id' apontará para um objeto que não existe mais.
     content_type = ContentType.objects.get_for_model(partida)
-    Atividade.objects.get_or_create(
+    Atividade.objects.create( # Usamos create pois get_or_create não faz sentido aqui
         ator=request.user,
         verbo='cancelou a partida',
         content_type=content_type,
-        object_id=partida_id
+        object_id=partida.id
     )
 
+    # Agora podemos deletar a partida
+    partida.delete()
+    messages.success(request, "A partida foi cancelada com sucesso!")
+
     return redirect('feed')
+
 # ---------------------------------------------------------
 # ✅ MINHAS PARTIDAS
 # ---------------------------------------------------------
@@ -105,15 +188,40 @@ class MinhasPartidasView(LoginRequiredMixin, ListView):
     context_object_name = 'partidas'
 
     def get_queryset(self):
-        # Filtra as partidas em que o usuário está confirmado
-        return self.request.user.partidas_confirmadas.all().order_by('-data_hora')
+        # ✅ Busca otimizada: quadra e jogadores de uma vez
+        return (
+            self.request.user.partidas_confirmadas.all()
+            .order_by('-data_hora')
+            .select_related('quadra')
+            .prefetch_related('jogadores_confirmados')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
-        context['partidas_futuras'] = self.get_queryset().filter(data_hora__gte=now)
-        context['partidas_passadas'] = self.get_queryset().filter(data_hora__lt=now)
-        del context['partidas']
+
+        todas_as_partidas = context['partidas']
+
+        # ✅ Busca todas as avaliações do usuário logado de uma vez
+        avaliacoes = AvaliacaoQuadra.objects.filter(
+            avaliador=self.request.user,
+            partida__in=todas_as_partidas
+        ).values_list('partida_id', flat=True)
+        partidas_avaliadas_ids = set(avaliacoes)
+
+        # ✅ Divide em futuras/passadas + adiciona flag "avaliada"
+        partidas_futuras, partidas_passadas = [], []
+        for p in todas_as_partidas:
+            p.avaliada = p.id in partidas_avaliadas_ids  # flag para o template
+            if p.data_hora >= now:
+                partidas_futuras.append(p)
+            else:
+                partidas_passadas.append(p)
+
+        context['partidas_futuras'] = partidas_futuras
+        context['partidas_passadas'] = partidas_passadas
+        del context['partidas']  # remove o queryset bruto
+
         return context
 
 
@@ -121,15 +229,24 @@ class MinhasPartidasView(LoginRequiredMixin, ListView):
 # ✅ AVALIAR PARTIDA
 # ---------------------------------------------------------
 @login_required
+@transaction.atomic
 def avaliar_partida(request, partida_id):
-    partida = get_object_or_404(Partida, id=partida_id)
+    
+    # ✅ OTIMIZAÇÃO: Prefetch dos jogadores (para a lista de avaliação)
+    # e do perfil (para exibir fotos no template de avaliação, se necessário).
+    partida = get_object_or_404(
+        Partida.objects.prefetch_related('jogadores_confirmados__perfil'), 
+        id=partida_id
+    )
     avaliador = request.user
 
+    # Verificação de avaliação existente (ótimo, já estava eficiente)
     if AvaliacaoQuadra.objects.filter(partida=partida, avaliador=avaliador).exists():
         messages.warning(request, "Você já avaliou esta partida.")
         return redirect('partidas:minhas_partidas')
 
-    outros_jogadores = partida.jogadores_confirmados.exclude(id=avaliador.id)
+    # ✅ OTIMIZAÇÃO: 'outros_jogadores' agora usa a lista pré-buscada.
+    outros_jogadores = [j for j in partida.jogadores_confirmados.all() if j.id != avaliador.id]
     AvaliacaoJogadorFormSet = modelformset_factory(AvaliacaoJogador, form=AvaliacaoJogadorForm, extra=len(outros_jogadores))
 
     if request.method == 'POST':
@@ -150,6 +267,16 @@ def avaliar_partida(request, partida_id):
                     avaliacao_jogador.avaliado = outros_jogadores[i]
                     avaliacao_jogador.save()
 
+            # 🐛 CORREÇÃO: Criar a atividade "avaliou" que estava faltando
+            content_type = ContentType.objects.get_for_model(partida)
+            Atividade.objects.update_or_create(
+    ator=request.user,
+    verbo='avaliou',
+    content_type=content_type,
+    object_id=partida.id,
+    defaults={}
+)
+
             messages.success(request, "Obrigado pela sua avaliação!")
             return redirect('partidas:minhas_partidas')
 
@@ -166,3 +293,29 @@ def avaliar_partida(request, partida_id):
         'forms_e_jogadores': forms_e_jogadores,
     }
     return render(request, 'partidas/avaliar_partida.html', context)
+
+@login_required
+@require_GET
+def partidas_statuses(request):
+    """
+    Recebe ?ids=1,2,3 e retorna JSON com { "1": {"avaliada": true}, "2": {...} }
+    """
+    ids = request.GET.get('ids', '')
+    if not ids:
+        return JsonResponse({}, status=200)
+
+    try:
+        ids_list = [int(x) for x in ids.split(',') if x.strip().isdigit()]
+    except ValueError:
+        return JsonResponse({}, status=400)
+
+    usuario = request.user
+    # consulta única para ver quais partidas já foram avaliadas pelo usuário
+    avaliacoes = AvaliacaoQuadra.objects.filter(partida_id__in=ids_list, avaliador=usuario).values_list('partida_id', flat=True)
+    avaliadas_set = set(avaliacoes)
+
+    result = {}
+    for pid in ids_list:
+        result[str(pid)] = {'avaliada': pid in avaliadas_set}
+
+    return JsonResponse(result)

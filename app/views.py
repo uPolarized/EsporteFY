@@ -2,15 +2,19 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
-from django.db.models import Max
-from datetime import timedelta # 1. Importa o timedelta
+from django.db.models import Prefetch
+from datetime import timedelta
 from django.conf import settings
+from django.core.cache import cache # ✅ OTIMIZAÇÃO: Importa o cache do Django
+from django.contrib.contenttypes.models import ContentType # ✅ OTIMIZAÇÃO: Para pré-buscar GFKs
+
 # Importações dos modelos e API
-from conteudo.api_client import buscar_noticias_esportivas
 import requests
 from partidas.models import Partida
 from quadras.models import Quadra
 from social.models import Atividade
+# ✅ OTIMIZAÇÃO: As funções da API são importadas do cliente,
+# não definidas localmente.
 from conteudo.api_client import buscar_noticias_esportivas, buscar_clima_marica, buscar_previsao_chuva
 
 
@@ -26,27 +30,56 @@ class FeedView(LoginRequiredMixin, View):
     template_name = 'feed.html'
     
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
+        context = self.get_context_data(request=request)
         return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
         context = {}
+        request = kwargs.get('request') # Pega o request para o filtro de bairro
 
-        context['clima_atual'] = buscar_clima_marica()
-        context['noticias'] = buscar_noticias_esportivas()
-        context['previsao_chuva'] = buscar_previsao_chuva()
+        # --- 1. OTIMIZAÇÃO DE API (Cache) ---
+        # Tenta buscar os dados do cache. Se não existirem,
+        # chama a API e armazena os dados no cache.
 
-        uma_semana_atras = timezone.now() - timedelta(days=7)
+        # Cache do Clima (10 minutos)
+        context['clima_atual'] = cache.get('clima_marica')
+        if not context['clima_atual']:
+            clima_data = buscar_clima_marica()
+            if clima_data:
+                cache.set('clima_marica', clima_data, 600) # 600s = 10 min
+                context['clima_atual'] = clima_data
 
+        # Cache das Notícias (30 minutos)
+        context['noticias'] = cache.get('noticias_esportivas')
+        if not context['noticias']:
+            noticias_data = buscar_noticias_esportivas()
+            if noticias_data:
+                cache.set('noticias_esportivas', noticias_data, 1800) # 1800s = 30 min
+                context['noticias'] = noticias_data
 
+        # Cache da Previsão (10 minutos)
+        context['previsao_chuva'] = cache.get('previsao_chuva_marica')
+        if not context['previsao_chuva']:
+            previsao_data = buscar_previsao_chuva()
+            if previsao_data:
+                cache.set('previsao_chuva_marica', previsao_data, 600)
+                context['previsao_chuva'] = previsao_data
         
-        # 3. Busca apenas as atividades que aconteceram DEPOIS daquela data
-        context['atividades'] = Atividade.objects.filter(
-            timestamp__gte=uma_semana_atras
-        ).select_related('ator__perfil')[:20]
+
+        # --- 2. OTIMIZAÇÃO DE PARTIDAS (N+1) ---
         
-        bairro_filtrado = self.request.GET.get('bairro', 'todos')
-        partidas_list = Partida.objects.filter(data_hora__gte=timezone.now()).select_related('quadra')
+        bairro_filtrado = request.GET.get('bairro', 'todos')
+        
+        # ✅ OTIMIZAÇÃO: Adicionado prefetch_related('jogadores_confirmados')
+        # Isso busca todos os jogadores de todas as partidas em UMA consulta.
+        partidas_list = Partida.objects.filter(
+            data_hora__gte=timezone.now()
+        ).select_related(
+            'quadra'
+        ).prefetch_related(
+            'jogadores_confirmados' # <- A mágica acontece aqui
+        ).order_by('data_hora') # Boa prática adicionar um order_by
+
         if bairro_filtrado and bairro_filtrado != 'todos':
             partidas_list = partidas_list.filter(quadra__bairro=bairro_filtrado)
         
@@ -56,57 +89,53 @@ class FeedView(LoginRequiredMixin, View):
         context['bairro_atual_nome'] = dict(Quadra.BAIRRO_CHOICES).get(bairro_filtrado, 'Todos')
 
         
-        # Lógica do Feed de Atividades
-        # 1. Calcula a data de 7 dias atrás a partir de hoje
+        # --- 3. OTIMIZAÇÃO DE ATIVIDADES (N+1 com GFK) ---
+        
         uma_semana_atras = timezone.now() - timedelta(days=7)
 
-        context['atividades'] = Atividade.objects.filter(
+        # ✅ OTIMIZAÇÃO: select_related('ator__perfil') já estava ótimo.
+        atividades_list = Atividade.objects.filter(
             timestamp__gte=uma_semana_atras
-        ).select_related('ator__perfil')[:20]
+        ).select_related(
+            'ator__perfil'
+        ).order_by('-timestamp')[:20] # Limita a 20 atividades
+
+        # ✅ OTIMIZAÇÃO: Pré-busca manual dos GenericForeignKeys (GFK)
+        # 1. Agrupa IDs de objeto por tipo de conteúdo (ex: Partida, User)
+        gfk_map = {}
+        for atividade in atividades_list:
+            if atividade.content_type_id not in gfk_map:
+                gfk_map[atividade.content_type_id] = []
+            gfk_map[atividade.content_type_id].append(atividade.object_id)
+
+        # 2. Busca os objetos em si (ex: todas as Partidas) de uma vez
+        content_cache = {}
+        for ct_id, object_ids in gfk_map.items():
+            try:
+                ct = ContentType.objects.get_for_id(ct_id)
+                model_class = ct.model_class()
+                
+                # Otimização específica: Se for Partida, busca a quadra junto
+                if model_class == Partida:
+                    queryset = model_class.objects.filter(id__in=object_ids).select_related('quadra')
+                else:
+                    queryset = model_class.objects.filter(id__in=object_ids)
+                
+                # Adiciona ao cache
+                for obj in queryset:
+                    content_cache[(ct_id, obj.id)] = obj
+                    
+            except Exception as e:
+                print(f"Erro ao pré-buscar GFK: {e}") # Log de erro
+
+        # 3. Anexa os objetos pré-buscados às atividades
+        # O template agora acessará o 'alvo' sem bater no banco.
+        for atividade in atividades_list:
+            atividade.alvo = content_cache.get((atividade.content_type_id, atividade.object_id))
+
+        context['atividades'] = atividades_list
         
         return context
-    
-def buscar_clima_marica():
-    """
-    Busca o clima atual em Maricá (RJ) usando a API OpenWeatherMap.
-    Retorna um dicionário com temperatura, descrição, ícone e mensagem personalizada.
-    """
-    try:
-        api_key = settings.OPENWEATHER_API_KEY
-        cidade = "Maricá"
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},BR&appid={api_key}&lang=pt_br&units=metric"
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        dados = response.json()
 
-        descricao = dados["weather"][0]["description"].capitalize()
-        temperatura = round(dados["main"]["temp"])
-        icone = dados["weather"][0]["icon"]
-
-        # 💬 Gera mensagem personalizada baseada na descrição
-        desc_lower = descricao.lower()
-        if "chuva forte" in desc_lower or "tempestade" in desc_lower:
-            mensagem = "⛈️ Chuva pesada chegando! Melhor optar por quadras cobertas ou descansar hoje."
-        elif "chuva" in desc_lower:
-            mensagem = "🌧️ Pode chover hoje. Prefira quadras cobertas!"
-        elif "nublado" in desc_lower:
-            mensagem = "☁️ O clima está fechado, mas ainda dá pra jogar tranquilo. Leve um agasalho leve."
-        elif "limpo" in desc_lower or "ensolarado" in desc_lower:
-            mensagem = "☀️ Ótimo dia para jogar bola! Lembre-se de beber água e usar protetor solar. 💧🧴"
-        elif "neblina" in desc_lower:
-            mensagem = "🌫️ Atenção com a visibilidade! Evite quadras muito abertas."
-        elif "vento" in desc_lower:
-            mensagem = "💨 Dia de ventania! Pode ser difícil controlar a bola em campo aberto."
-        else:
-            mensagem = "🌤️ Tempo agradável! Perfeito para jogar com os amigos."
-
-        return {
-            "temperatura": temperatura,
-            "descricao": descricao,
-            "icone": icone,
-            "mensagem": mensagem,  # 👈 ESSENCIAL
-        }
-
-    except Exception as e:
-        print(f"[ERRO] Falha ao buscar clima de Maricá: {e}")
-        return None
+# 🐛 CORREÇÃO: Removemos a definição local de buscar_clima_marica().
+# Ela deve viver em 'conteudo/api_client.py' e ser importada (como feito acima).

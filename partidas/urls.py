@@ -16,5 +16,7 @@ urlpatterns = [
     path('minhas/', views.MinhasPartidasView.as_view(), name='minhas_partidas'),
 
     # Avaliar partida
+    path('statuses/', views.partidas_statuses, name='partidas_statuses'),
+
     path('<int:partida_id>/avaliar/', views.avaliar_partida, name='avaliar_partida'),
 ]

@@ -1,155 +1,204 @@
-/* ========================================= */
-/* ===== 1. ESTILOS GERAIS ===== */
-/* ========================================= */
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(145deg, #1f1f1f, #2c2c2c); /* fundo escuro */
-    color: #f1f1f1;
-    margin: 0;
-    padding: 0;
+/* ============================================================
+   Avaliar Partida — Tema EsporteFY Moderno (Atualizado)
+============================================================ */
+
+/* ======= Fundo geral ======= */
+body.dark-theme {
+  background: radial-gradient(circle at top, #0d0d12 0%, #111 100%);
+  color: #e8e8e8;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
 }
 
-.container {
-    max-width: 900px;
+/* ======= Card principal ======= */
+.card.avaliar-card {
+  background: linear-gradient(145deg, #18181d, #202027);
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  transition: 0.3s ease;
+  padding: 2.5rem;
+  max-width: 800px;
+  margin: auto;
 }
 
-/* ========================================= */
-/* ===== 2. CARD ===== */
-/* ========================================= */
-.card {
-    border-radius: 1rem;
-    background: linear-gradient(145deg, #2b2b2b, #383838);
-    border: 1px solid #444;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.card.avaliar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.25);
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.35);
+/* ======= Cabeçalhos ======= */
+.text-info {
+  color: #00bfff !important;
 }
 
-/* ========================================= */
-/* ===== 3. TÍTULOS ===== */
-/* ========================================= */
-.card-title {
-    color: #fff;
-    font-weight: 700;
+.card h4,
+.section h4 {
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  text-align: center;
 }
 
-h4, h5 {
-    color: #fff;
-    font-weight: 600;
+.text-muted {
+  color: #aaa !important;
 }
 
-/* ========================================= */
-/* ===== 4. FORMULÁRIO ===== */
-/* ========================================= */
-form {
-    color: #f1f1f1;
+/* ======= Campos de formulário ======= */
+textarea,
+input[type="text"],
+select {
+  background-color: #2a2a30 !important;
+  border: 1px solid #3a3a45 !important;
+  color: #f5f5f5 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.8rem 1rem !important;
+  width: 100%;
+  transition: 0.3s ease;
 }
 
-form input,
-form select,
-form textarea {
-    border-radius: 0.5rem;
-    border: 1px solid #555;
-    background: #2a2a2a;
-    color: #fff;
-    padding: 0.6rem 0.75rem;
-    width: 100%;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+textarea:focus,
+input:focus,
+select:focus {
+  border-color: #00bfff !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.2) !important;
 }
 
-form input:focus,
-form select:focus,
-form textarea:focus {
-    border-color: #ff6b6b;
-    box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
-    outline: none;
+/* ======= Label e texto ======= */
+label[for*="comentario"],
+.form-group label {
+  color: #f5f5f5 !important;
+  font-weight: 500;
 }
 
-/* Labels */
-form label {
-    font-weight: 500;
-    margin-bottom: 0.4rem;
-    display: block;
-    color: #ddd;
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* ========================================= */
-/* ===== 5. BOTÃO ===== */
-/* ========================================= */
+/* ======= Estrelas de avaliação ======= */
+.star-rating {
+  display: inline-flex;
+  flex-direction: row; /* Esquerda → Direita */
+  justify-content: center;
+  gap: 6px;
+  margin-top: 0.6rem;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 2rem;
+  color: #444;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.2s ease;
+}
+
+/* Hover ilumina estrelas à esquerda */
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+
+/* Corrige comportamento do :checked para acender até a selecionada */
+.star-rating input:checked ~ label {
+  color: #444;
+}
+
+.star-rating input:checked + label,
+.star-rating input:checked + label ~ label {
+  color: #ffc107;
+}
+
+/* Estrelas menores para Fair Play */
+.star-rating.small label {
+  font-size: 1.6rem;
+}
+
+/* Animação de clique */
+.star-rating label:active {
+  transform: scale(1.15);
+}
+
+/* ======= Jogador card ======= */
+.jogador-item {
+  background: #1d1d21;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.jogador-item:hover {
+  background: #202024;
+  transform: scale(1.01);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.15);
+}
+
+.jogador-foto {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #00bfff;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.25);
+}
+
+.jogador-foto.placeholder {
+  background: #333;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ======= Botão principal ======= */
 .btn-primary {
-    background: linear-gradient(135deg, #ff6b6b, #d32f2f);
-    border: none;
-    padding: 0.75rem;
-    font-weight: 600;
-    color: #fff;
-    border-radius: 0.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+  background: linear-gradient(90deg, #007bff, #00c3ff);
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
+  border-radius: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(211, 47, 47, 0.6);
+  background: linear-gradient(90deg, #00bfff, #0099ff);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
+  transform: translateY(-2px);
 }
 
-/* ========================================= */
-/* ===== 6. AVALIAÇÃO DE JOGADORES ===== */
-/* ========================================= */
-.d-flex.align-items-center {
-    background: rgba(255, 255, 255, 0.02);
-    padding: 0.8rem;
-    border-radius: 0.75rem;
-    transition: background 0.3s ease;
+.btn-primary:active {
+  transform: scale(0.97);
 }
 
-.d-flex.align-items-center:hover {
-    background: rgba(255, 107, 107, 0.08);
-}
-
-/* ========================================= */
-/* ===== 7. ESTRELAS ===== */
-/* ========================================= */
-.star-rating { 
-    display: flex; 
-    flex-direction: row-reverse; 
-    justify-content: flex-end; 
-    border: none; 
-    padding: 0; 
-}
-
-.star-rating input { display: none; }
-
-.star-rating label {
-    font-size: 2rem; 
-    color: #555; 
-    cursor: pointer; 
-    transition: color 0.2s;
-}
-
-.star-rating input:checked ~ label,
-.star-rating label:hover,
-.star-rating label:hover ~ label { 
-    color: #ffc107; 
-}
-
-/* ========================================= */
-/* ===== 8. RESPONSIVIDADE ===== */
-/* ========================================= */
+/* ======= Responsivo ======= */
 @media (max-width: 768px) {
-    .card-body {
-        text-align: center;
-    }
+  .card.avaliar-card {
+    padding: 1.8rem;
+    border-radius: 1rem;
+  }
 
-    .btn-primary {
-        width: 100%;
-    }
+  .star-rating label {
+    font-size: 1.8rem;
+  }
 
-    .d-flex.align-items-center {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-    }
+  .jogador-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .jogador-foto {
+    margin-bottom: 0.6rem;
+  }
+}
+
+.star-rating.rated label.selected {
+  color: #ffc107;
+  text-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
 }

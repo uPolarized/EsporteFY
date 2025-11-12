@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'quadras',
     'partidas',
     'perfis',
-    'social',
+    
+    'social.apps.SocialConfig',
     'conteudo',
     'allauth',
     'allauth.account',

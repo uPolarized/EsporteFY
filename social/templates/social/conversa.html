@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
 
+{# 🔥 Este bloco define a classe do <body> lá no base.html #}
+{% block body_class %}chat-page{% endblock %}
+
 {% block content %}
 <div class="messenger-container">
     <!-- === SIDEBAR === -->
@@ -57,10 +60,10 @@
             <div class="message-row {% if mensagem.remetente == request.user %}me{% else %}other{% endif %}">
                 <div class="message-bubble">
                     {% if mensagem.imagem %}
-                        <img src="{{ mensagem.imagem.url }}" class="chat-image">
+                        <img src="{{ mensagem.imagem.url }}" class="chat-image" alt="imagem">
                     {% endif %}
                     {% if mensagem.conteudo %}
-                        {{ mensagem.conteudo }}
+                        <p class="chat-text">{{ mensagem.conteudo }}</p>
                     {% endif %}
                     <span class="message-time">{{ mensagem.timestamp|localtime|date:"H:i" }}</span>
                 </div>
@@ -93,8 +96,8 @@
 {{ outro_usuario.username|json_script:"json-outro-usuario-username" }}
 {{ request.user.username|json_script:"json-meu-usuario-username" }}
 {% endblock %}
-
 {% block extra_js %}
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const chatForm = document.getElementById('chat-form');
@@ -108,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const outroUsuarioUsername = JSON.parse(document.getElementById('json-outro-usuario-username').textContent);
   const meuUsuarioUsername = JSON.parse(document.getElementById('json-meu-usuario-username').textContent);
 
-  // === 🧠 Atualização principal: WebSocket via FastAPI ===
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const chatHost = window.location.hostname;
   const wsUrl = `${wsProtocol}//${chatHost}:8080/ws/chat/${encodeURIComponent(outroUsuarioUsername)}/?me=${encodeURIComponent(meuUsuarioUsername)}`;
@@ -125,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
     chatSocket.onclose = () => console.warn('⚠️ WebSocket desconectado');
     chatSocket.onerror = (err) => console.error('⚠️ WebSocket erro', err);
 
-    // Recebe mensagens em tempo real
     chatSocket.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);
@@ -136,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // --- Helpers ---
   function ensureAbsoluteUrl(url) {
     if (!url) return url;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
@@ -184,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToBottom();
   }
 
-  // --- Modal de imagem ---
   function openImageModal(e) {
     const src = e.currentTarget.src;
     const existing = document.querySelector('.image-modal');
@@ -213,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Envio de mensagens (HTTP) ---
   let sending = false;
   async function enviarMensagem() {
     if (sending) return;
@@ -262,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Pré-visualização de imagem ---
   if (imageInput) {
     imageInput.addEventListener('change', (ev) => {
       const file = ev.target.files[0];
@@ -288,13 +285,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // adiciona listeners para imagens renderizadas do servidor
-  document.querySelectorAll('.chat-image').forEach(img => {
-    img.addEventListener('click', openImageModal);
-    if (img.src && img.src.startsWith('/')) img.src = window.location.origin + img.src;
-  });
+  // ✅ Garante que TODAS as imagens (inclusive no reload) abrem modal
+  function bindImageClickEvents() {
+    document.querySelectorAll('.chat-image').forEach(img => {
+      if (!img.dataset.bound) {
+        img.dataset.bound = "true";
+        img.addEventListener('click', openImageModal);
+        if (img.src && img.src.startsWith('/')) img.src = window.location.origin + img.src;
+      }
+    });
+  }
+
+  bindImageClickEvents();
+
+  const observer = new MutationObserver(() => bindImageClickEvents());
+  observer.observe(chatLog, { childList: true, subtree: true });
 
   scrollToBottom();
 });
+
+// === Garante que TODAS as imagens abrem no modal ===
+function bindImageClickEvents() {
+  document.querySelectorAll('.chat-image').forEach(img => {
+    if (!img.dataset.bound) {
+      img.dataset.bound = "true";
+      img.addEventListener('click', openImageModal);
+      if (img.src.startsWith('/')) img.src = window.location.origin + img.src;
+    }
+  });
+}
+
+// Espera o carregamento completo (imagens inclusas)
+window.addEventListener('load', () => {
+  bindImageClickEvents();
+
+  // Observa o chat e reanexa eventos para novas mensagens
+  const observer = new MutationObserver(() => bindImageClickEvents());
+  observer.observe(document.getElementById('chat-log'), {
+    childList: true,
+    subtree: true
+  });
+});
+
+// Espera todas as imagens carregarem antes de ativar
+window.addEventListener('load', () => {
+  bindImageClickEvents();
+
+  // Observa mudanças no chat (para mensagens novas)
+  const observer = new MutationObserver(() => bindImageClickEvents());
+  observer.observe(document.getElementById('chat-log'), {
+    childList: true,
+    subtree: true
+  });
+});
+
 </script>
 {% endblock %}

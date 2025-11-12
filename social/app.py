@@ -4,6 +4,7 @@ import os
 import redis.asyncio as redis
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from django.apps import AppConfig
 
 # URL do Redis (compartilhado entre Django e o chat)
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
@@ -18,6 +19,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SocialConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'social'
+
+    def ready(self):
+        import social.signals
 
 # === GERENCIADOR DE CONEXÕES ===
 class ConnectionManager:

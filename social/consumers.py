@@ -9,10 +9,23 @@ from .models import Mensagem, Conversa
 notificacoes_ativas = {}  # exemplo: { (destinatario_id, remetente_username): timestamp }
 
 
+class FeedConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add("feed", self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("feed", self.channel_name)
+
+    async def nova_atividade(self, event):
+        await self.send(text_data=event["data"])
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.outro_usuario_username = self.scope['url_route']['kwargs']['username']
         self.meu_usuario = self.scope['user']
+
         if not self.meu_usuario.is_authenticated:
             await self.close()
             return
@@ -42,9 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     async def chat_message(self, event):
-        """Repassa as mensagens enviadas para todos os sockets conectados"""
-        message_data = event['message_data']
-        await self.send(text_data=json.dumps(message_data))
+        await self.send(text_data=json.dumps(event['message_data']))
 
     @database_sync_to_async
     def save_message_and_get_data(self, message_content):
@@ -68,7 +79,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'chat_message',
             'message': mensagem.conteudo,
             'username': mensagem.remetente.username,
-            'user_avatar_url': mensagem.remetente.perfil.foto.url if hasattr(mensagem.remetente, "perfil") and mensagem.remetente.perfil.foto else "",
+            'user_avatar_url': (
+                mensagem.remetente.perfil.foto.url
+                if hasattr(mensagem.remetente, "perfil") and mensagem.remetente.perfil.foto
+                else ""
+            ),
             'timestamp': timestamp_local.strftime('%H:%M'),
         }
 
@@ -77,27 +92,42 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
 
-        # Fecha se não estiver autenticado
         if not self.user.is_authenticated:
             await self.close()
             return
 
-        # Define o grupo de notificações por usuário
         self.room_group_name = f'notifications_user_{self.user.id}'
-
-        # Adiciona o canal ao grupo
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Protege contra casos em que o atributo não foi definido
         if hasattr(self, "room_group_name"):
             try:
                 await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
             except Exception as e:
-                # Log opcional (para debug)
                 print(f"[DISCONNECT WARNING] Erro ao sair do grupo: {e}")
 
+    # 🔔 Notificação genérica (amizades, partidas etc.)
+    async def send_generic_notification(self, event):
+        data = {
+            'type': 'nova_atividade',
+            'titulo': event.get('titulo', 'Nova atividade'),
+            'mensagem': event.get('mensagem', ''),
+        }
+
+        # 🔗 Campos extras usados no frontend (amizade em tempo real)
+        if 'acao' in event:
+            data['acao'] = event['acao']
+        if 'usuario_id' in event:
+            data['usuario_id'] = event['usuario_id']
+        if 'solicitacao_id' in event:
+            data['solicitacao_id'] = event['solicitacao_id']
+        if 'solicitante_id' in event:
+            data['solicitante_id'] = event['solicitante_id']
+
+        await self.send(text_data=json.dumps(data))
+
+    # 💬 Notificação de mensagem
     async def send_notification(self, event):
         remetente = event['remetente']
         conversa_url = event['conversa_url']

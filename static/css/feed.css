@@ -565,3 +565,239 @@ body {
   }
 }
 
+/* =================================================== */
+/* 🎯 FEED DE ATIVIDADES — ESTILIZAÇÃO CONTEXTUAL */
+/* =================================================== */
+
+/* Base dos cards do feed */
+.post-card {
+  position: relative;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* ======================= */
+/* 💚 ENTRAR NA PARTIDA */
+/* ======================= */
+.post-card:has(.bi-person-check-fill),
+.post-card:has(.text-success) {
+  border-left-color: #2ecc71;
+  background: linear-gradient(145deg, rgba(46, 204, 113, 0.08), rgba(46, 204, 113, 0.03));
+  box-shadow: 0 0 20px rgba(46, 204, 113, 0.15);
+}
+
+.post-card:has(.bi-person-check-fill):hover {
+  background: linear-gradient(145deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.08));
+}
+
+/* ======================= */
+/* ❤️ SAIR DA PARTIDA */
+/* ======================= */
+.post-card:has(.bi-door-open-fill),
+.post-card:has(.text-warning) {
+  border-left-color: #e67e22;
+  background: linear-gradient(145deg, rgba(230, 126, 34, 0.08), rgba(230, 126, 34, 0.03));
+  box-shadow: 0 0 20px rgba(230, 126, 34, 0.15);
+}
+
+.post-card:has(.bi-door-open-fill):hover {
+  background: linear-gradient(145deg, rgba(230, 126, 34, 0.12), rgba(230, 126, 34, 0.05));
+}
+
+/* ======================= */
+/* 💙 CRIAR PARTIDA */
+/* ======================= */
+.post-card:has(.bi-dribbble),
+.post-card:has(.text-primary) {
+  border-left-color: #3498db;
+  background: linear-gradient(145deg, rgba(52, 152, 219, 0.08), rgba(52, 152, 219, 0.03));
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.15);
+}
+
+.post-card:has(.bi-dribbble):hover {
+  background: linear-gradient(145deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.08));
+}
+
+/* ======================= */
+/* 🤝 NOVA AMIZADE */
+/* ======================= */
+.post-card:has(.bi-people-fill) {
+  border-left-color: #1abc9c;
+  background: linear-gradient(145deg, rgba(26, 188, 156, 0.1), rgba(26, 188, 156, 0.05));
+  box-shadow: 0 0 20px rgba(26, 188, 156, 0.15);
+}
+
+/* ======================= */
+/* ❌ PARTIDA CANCELADA */
+/* ======================= */
+.post-card:has(.bi-x-octagon-fill),
+.post-card:has(.text-danger) {
+  border-left-color: #e74c3c;
+  background: linear-gradient(145deg, rgba(231, 76, 60, 0.08), rgba(231, 76, 60, 0.03));
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.15);
+}
+
+/* ======================= */
+/* ⭐ AVALIAÇÕES */
+/* ======================= */
+.post-card:has(.bi-star-fill) {
+  border-left-color: #f1c40f;
+  background: linear-gradient(145deg, rgba(241, 196, 15, 0.08), rgba(241, 196, 15, 0.03));
+  box-shadow: 0 0 20px rgba(241, 196, 15, 0.15);
+}
+
+
+/* 🎯 Modal Detalhes da Partida */
+.detalhes-modal {
+  background: linear-gradient(165deg, #2b2b2b, #1e1e1e);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 0 25px rgba(255, 80, 80, 0.25);
+  color: #f5f5f5;
+  animation: fadeInModal 0.25s ease;
+}
+
+.detalhes-modal .modal-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ff6b6b;
+  font-weight: 700;
+  font-size: 1.1rem;
+  align-items: center;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.detalhes-modal .modal-body {
+  background: linear-gradient(180deg, #232323, #1a1a1a);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  padding: 1.5rem;
+}
+
+.info-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  color: #ddd;
+  margin-bottom: 0.8rem;
+}
+
+.info-linha i {
+  color: #ff6b6b;
+  font-size: 1.2rem;
+}
+
+.detalhes-modal hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.2rem 0;
+}
+
+
+
+/* ======== */
+.post-card small {
+  color: #999 !important;
+}
+
+/* ✨ animação suave para novos cards */
+.post-card {
+  animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+/* feed.css ou mapa.css */
+.map-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(40, 40, 40, 0.08);
+  background: #f6fafd;
+  position: relative;
+}
+
+.mapa-embed {
+  border: none;
+  width: 100%;
+  height: 320px;
+  display: block;
+  background: #e1efff;
+  transition: box-shadow 0.3s;
+}
+
+/* ========================================= */
+/* 🗺️ BOTÃO 'COMO CHEGAR' (MODAL) */
+/* ========================================= */
+
+.btn-como-chegar {
+  /* Pega o estilo dos botões existentes */
+  font-weight: 600;
+  border-radius: 0.8rem;
+  transition: all 0.3s ease;
+  
+  /* Estilo "Outline" personalizado */
+  background: transparent;
+  border: 2px solid #ff6b6b; /* Borda mais forte */
+  color: #ff6b6b;
+  
+  /* Para alinhar ícone e texto */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Efeitos */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+}
+
+.btn-como-chegar:hover {
+  /* Transforma em "sólido" no hover */
+  background: #ff6b6b;
+  color: #fff;
+  border-color: #ff6b6b;
+  
+  /* Efeito de "levantar" */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+}
+
+.btn-como-chegar i {
+  transition: transform 0.3s ease;
+}
+
+/* Efeito sutil no ícone */
+.btn-como-chegar:hover i {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+
+
+@media (max-width: 768px) {
+  .map-wrapper {
+    max-width: 100%;
+  }
+  .mapa-embed {
+    height: 200px;
+  }
+}
+
+
+

@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy
 from allauth.account.views import PasswordSetView
-from django.contrib import messages
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm, FiltroUsuarioForm
-from partidas.models import Partida  # Certifique-se de que o app "partidas" está correto
-
+from partidas.models import Partida
+from .forms import SetPasswordCaptchaForm
 
 # ============================================================
 # LISTAGEM DE USUÁRIOS
@@ -70,7 +70,25 @@ def enviar_solicitacao_amizade(request, receptor_id):
     )
 
     if not ja_existe:
-        SolicitacaoAmizade.objects.create(solicitante=solicitante, receptor=receptor)
+        solicitacao = SolicitacaoAmizade.objects.create(
+            solicitante=solicitante,
+            receptor=receptor
+        )
+
+        # 🚀 Envia notificação via WebSocket com username e IDs
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'notifications_user_{receptor.id}',
+            {
+                'type': 'send_generic_notification',
+                'titulo': 'Novo pedido de amizade 🤝',
+                'mensagem': f'{solicitante.username} te enviou um pedido de amizade!',
+                'solicitacao_id': solicitacao.id,
+                'solicitante_id': solicitante.id,
+                'solicitante_username': solicitante.username,
+            }
+        )
+
         messages.success(request, f'Pedido de amizade enviado para {receptor.username}.')
     else:
         messages.warning(request, f'Já existe uma solicitação ou amizade com {receptor.username}.')
@@ -84,8 +102,24 @@ def aceitar_solicitacao(request, solicitacao_id):
     if solicitacao.receptor == request.user:
         solicitacao.receptor.perfil.amigos.add(solicitacao.solicitante)
         solicitacao.solicitante.perfil.amigos.add(solicitacao.receptor)
+        solicitante = solicitacao.solicitante
         solicitacao.delete()
-        messages.success(request, f"Você e {solicitacao.solicitante.username} agora são amigos!")
+
+        messages.success(request, f"Você e {solicitante.username} agora são amigos!")
+
+        # 🚀 Envia notificação de amizade aceita (para o solicitante original)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'notifications_user_{solicitante.id}',
+            {
+                'type': 'send_generic_notification',
+                'titulo': 'Amizade aceita 🎉',
+                'mensagem': f'{request.user.username} aceitou seu pedido de amizade!',
+                'solicitante_id': solicitante.id,
+                'solicitante_username': solicitante.username,
+            }
+        )
+
     else:
         messages.error(request, "Você não tem permissão para realizar esta ação.")
 
@@ -96,8 +130,26 @@ def aceitar_solicitacao(request, solicitacao_id):
 def recusar_solicitacao(request, solicitacao_id):
     solicitacao = get_object_or_404(SolicitacaoAmizade, id=solicitacao_id)
     if solicitacao.receptor == request.user:
+        solicitante = solicitacao.solicitante
+        receptor = solicitacao.receptor
+
         solicitacao.delete()
-        messages.info(request, f"Pedido de amizade de {solicitacao.solicitante.username} recusado.")
+        messages.info(request, f"Pedido de amizade de {solicitante.username} recusado.")
+
+        # 🚀 Notifica o solicitante em tempo real
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'notifications_user_{solicitante.id}',
+            {
+                'type': 'send_generic_notification',
+                'titulo': 'Pedido de amizade recusado',
+                'mensagem': f'{receptor.username} recusou seu pedido 😢',
+                'acao': 'amizade_recusada',
+                'usuario_id': receptor.id,
+                'solicitante_id': solicitante.id,
+                'solicitante_username': solicitante.username,
+            }
+        )
     else:
         messages.error(request, "Você não tem permissão para realizar esta ação.")
 
@@ -159,7 +211,6 @@ class VerPerfilView(LoginRequiredMixin, DetailView):
         perfil_visitado_user = self.get_object()
         perfil_visitado_perfil = perfil_visitado_user.perfil
 
-        # --- RELAÇÕES DE AMIZADE ---
         context['ja_sao_amigos'] = user_logado.perfil.amigos.filter(
             id=perfil_visitado_user.id
         ).exists()
@@ -174,14 +225,10 @@ class VerPerfilView(LoginRequiredMixin, DetailView):
             receptor=user_logado
         ).exists()
 
-        # --- DADOS DO PERFIL VISITADO ---
         context['total_amigos'] = perfil_visitado_perfil.amigos.count()
         context['total_partidas'] = Partida.objects.filter(
             jogadores_confirmados=perfil_visitado_user
         ).count()
-
-        # --- EXEMPLO: atividades (futuro recurso) ---
-        # context['activities'] = Atividade.objects.filter(user=perfil_visitado_user).order_by('-timestamp')[:10]
 
         return context
 
@@ -199,9 +246,11 @@ class EditarPerfilView(LoginRequiredMixin, UpdateView):
         return self.request.user.perfil
 
 
-
+# ============================================================
+# CUSTOM PASSWORD SET (Allauth)
+# ============================================================
 class CustomPasswordSetView(PasswordSetView):
-    form_class = 'perfis.forms.SetPasswordCaptchaForm'
+    form_class = SetPasswordCaptchaForm
 
     def form_valid(self, form):
         if not form.cleaned_data.get('captcha'):

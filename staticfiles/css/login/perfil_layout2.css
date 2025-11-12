@@ -1,0 +1,486 @@
+/*
+ * perfil_layout2.css
+ * Layout 2 (Sidebar + Feed) - Tema escuro, glass, hover suave
+ * Scoped under .profile-page/.profile-layout-wrapper to avoid global overrides
+ */
+
+/* Variáveis de tema */
+:root {
+    --bg-0: #0b0d10;
+    --bg-1: rgba(24, 24, 26, 0.78);
+    --glass-border: rgba(255, 255, 255, 0.03);
+    --accent: #e53935;
+    --accent-2: #ff6b6b;
+    --muted: #9da4a9;
+    --text: #eef1f3;
+    --glass-blur: 10px;
+    --card-radius: 12px;
+    --shadow-lg: 0 12px 30px rgba(2, 6, 23, 0.6);
+}
+
+/* ================================================= */
+/* ==== INÍCIO DA CORREÇÃO (Barra Branca Embaixo) ==== */
+/* ================================================= */
+
+/* Aqui está a correção. Nós forçamos o fundo da página inteira
+  a ser preto, então mesmo que o conteúdo seja curto,
+  nada branco vai aparecer.
+*/
+body {
+    background-color: var(--bg-0) !important;
+}
+
+/*
+  Nós também garantimos que seu wrapper principal tenha PELO MENOS
+  a altura da tela (menos a altura do seu header/navbar,
+  que eu vou chutar ser 70px. Ajuste se necessário.)
+*/
+.profile-layout-wrapper {
+    /* min-height: 72vh; (Valor antigo era muito baixo) */
+    min-height: calc(110vh - 70px); /* 100% altura da tela - navbar */
+    background: linear-gradient(180deg, var(--bg-0) 0%, #070708 100%);
+    color: var(--text);
+    padding: 2rem 1rem;
+}
+/* ================================================= */
+/* ================================================= */
+
+
+/* ----- GRID LAYOUT ----- */
+.profile-layout {
+    display: grid;
+    /* 3 colunas: [esquerda] [centro] [direita] */
+    grid-template-columns: 280px 1fr 280px; 
+    gap: 2rem;
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Mobile: Aumentamos o breakpoint para 1200px para acomodar as 3 colunas */
+@media (max-width: 1200px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+}
+
+
+/* ----- CARDS (GLASS) ----- */
+.card-glass,
+.side-card {
+    background: linear-gradient(180deg, rgba(28, 28, 30, 0.6), rgba(22, 22, 24, 0.6));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* hover suave */
+.card-glass:hover,
+.side-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(229, 57, 53, 0.06);
+}
+
+/* ----- LEFT SIDEBAR ----- */
+.profile-left {
+    position: relative;
+}
+
+/* side card wrapper */
+.side-card {
+    position: sticky;
+    top: 90px;
+    padding: 1.5rem;
+}
+
+
+/* ============================================== */
+/* ===   Centralizar Menu 'Atividade/Sobre'   === */
+/* ============================================== */
+
+.side-menu .side-link {
+    text-align: center;
+}
+
+/* ============================================== */
+/* ===   Centralizar Botão de Editar Perfil   === */
+/* ============================================== */
+
+.side-card .btn {
+    display: block;      /* Faz o botão ocupar a própria linha */
+    width: fit-content;  /* Faz o botão ter a largura do seu texto */
+    margin-left: auto;   /* Mágica para centralizar (auto) */
+    margin-right: auto;  /* Mágica para centralizar (auto) */
+    
+    /* Adiciona um espaçamento para respirar */
+    margin-top: 1rem;
+    margin-bottom: 1.5rem; 
+}
+
+/* avatar */
+.avatar-wrap {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    display: inline-block;
+}
+
+.avatar.placeholder {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #424242;
+    color: #fff;
+    font-size: 2.6rem;
+    font-weight: 700;
+}
+
+/* meta */
+.username {
+    margin: 0.8rem 0 0.2rem;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.email {
+    text-align: center;
+    margin-bottom: 0.8rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* stats */
+.side-stats {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-top: 1.2rem;
+}
+
+.side-stats .stat {
+    text-align: center;
+    flex: 1;
+}
+
+.side-stats .num {
+    display: block;
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.side-stats .label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+/* side menu */
+.side-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.side-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 10px;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.side-link:hover {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--accent-2);
+}
+
+.profile-center {
+    min-width: 0;
+    padding-top: 1rem; /* reduz o espaçamento do topo */
+}
+
+/* card headings */
+.card-glass h4 {
+    margin: 0 0 1rem 0;
+    color: var(--text);
+}
+
+/* input fields */
+.form-control,
+.form-select {
+    background: rgba(28, 28, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+.form-control:focus,
+.form-select:focus {
+    background: rgba(28, 28, 30, 0.5);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem rgba(229, 57, 53, 0.25);
+}
+.form-label {
+    color: var(--text);
+}
+
+/* file input styling */
+input[type="file"]::file-selector-button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+input[type="file"]::file-selector-button:hover {
+    background-color: var(--accent-2);
+}
+
+/* ----- BUTTON STYLES ----- */
+.btn.btn-primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(229, 57, 53, 0.12);
+    transition: transform 0.2s ease;
+    margin-top: 0.8rem;
+}
+.btn.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(229, 57, 53, 0.16);
+}
+
+/* outline */
+.btn.btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+    margin-top: 0.8rem;
+}
+.btn.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ----- SEÇÕES DE PERFIL ----- */
+.profile-section {
+    margin-bottom: 2rem; /* ainda espaçado, mas menos que antes */
+    padding-top: 0.5rem; /* espaço interno no topo para separar do header */
+}
+.profile-section p,
+.profile-section .info {
+    margin-top: 0.6rem;
+    line-height: 1.6;
+}
+
+
+/* ============================================== */
+/* ===  AJUSTES PARA PEDIDOS PENDENTES (v2)   === */
+/* ============================================== */
+
+/* Ajusta o container do pedido pendente */
+.pending-item {
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    padding: 0.75rem 0; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
+
+.pending-item:last-child {
+    border-bottom: none;
+}
+
+/* Garante que o mini-avatar tenha um tamanho fixo */
+.mini-avatar {
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    flex-shrink: 0; 
+    border: 1px solid rgba(255,255,255,0.08); 
+}
+
+/* Estilo para o placeholder do mini-avatar */
+.mini-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #424242; 
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem; 
+}
+
+/* * *** A CORREÇÃO ESTÁ AQUI ***
+ * Removemos o 'white-space: nowrap' do container
+ */
+.pending-item .p-body {
+    flex-grow: 1; /* Permite que o corpo ocupe o espaço */
+    min-width: 0; /* Ajuda o flexbox a encolher corretamente */
+}
+
+/* * E aplicamos o '...' APENAS no nome do usuário (<strong>)
+ * se ele for muito longo.
+ */
+.pending-item .p-body strong {
+    display: block; /* Faz o nome ter sua própria linha */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Agora o 'div.small.muted' (quer ser seu amigo)
+   vai para a linha de baixo e fica 100% visível.
+*/
+.pending-item .p-body .small {
+    white-space: normal; /* Garante que este texto possa quebrar linha */
+}
+
+
+/* Botões de ação (aceitar/recusar) */
+.pending-item .p-actions {
+    display: flex;
+    gap: 0.4rem; 
+    flex-shrink: 0; 
+}
+
+/* Ajuste para os botões dentro de p-actions */
+.pending-item .p-actions .btn {
+    width: 30px; 
+    height: 30px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+    font-size: 0.9rem; 
+    line-height: 1; 
+}
+
+/* (Opcional) Largura da coluna da direita */
+.profile-right {
+    flex-basis: 300px; 
+    max-width: 350px; 
+    width: 100%; 
+}
+
+
+/* ==== Botão de amigos ==== */
+.amigos-btn {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.amigos-btn:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ==== Modal estilizado ==== */
+.amigos-modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.75);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+
+.amigos-modal-content {
+  background: rgba(30, 30, 30, 0.9);
+  padding: 1.5rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.amigos-modal-content h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.amigos-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.amigo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.amigo-item .amigo-nome {
+  color: #fff;
+  text-decoration: none;
+}
+
+.amigo-item .amigo-nome:hover {
+  text-decoration: underline;
+}
+
+.amigos-modal .fechar {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #aaa;
+  transition: 0.2s;
+}
+
+.amigos-modal .fechar:hover {
+  color: #fff;
+}
+
+
+/* Responsividade para telas menores */
+@media (max-width: 991.98px) { 
+    .profile-right {
+        max-width: none; 
+        margin-top: 1.5rem; 
+    }
+}
