@@ -16,7 +16,28 @@
 
                 <form class="signup" method="post" action="{% url 'account_signup' %}">
                     {% csrf_token %}
-                    {{ form|crispy }}
+                    <div class="row">
+    <div class="col-12">
+        {{ form.username|as_crispy_field }}
+        {{ form.email|as_crispy_field }}
+        {{ form.esporte_preferido|as_crispy_field }}
+        {{ form.nivel_habilidade|as_crispy_field }}
+        {{ form.idade|as_crispy_field }}
+    </div>
+
+    
+    <div class="col-12">
+        {{ form.password1|as_crispy_field }}
+        {{ form.password2|as_crispy_field }}
+
+    </div>
+
+    <div class="col-12 d-flex justify-content-center my-3">
+        {{ form.captcha }}
+    </div>
+
+</div>
+
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary mb-3">Cadastrar com E-mail</button>
                     </div>

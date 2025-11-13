@@ -6,7 +6,7 @@ from crispy_forms.layout import Layout
 from allauth.account.forms import SetPasswordForm, ChangePasswordForm
 from django_recaptcha.fields import ReCaptchaField  # <--- CORRIGIDO
 from django_recaptcha.widgets import ReCaptchaV2Checkbox  # <--- CORRIGIDO
-
+from allauth.account.forms import ResetPasswordForm
 # --- Formulário para Cadastro FOI MOVIDO PARA 'perfis/signup_form.py' ---
 
 
@@ -77,5 +77,13 @@ class ChangePasswordCaptchaForm(ChangePasswordForm):
         widget=ReCaptchaV2Checkbox(attrs={
             'data-theme': 'dark',
             'data-size': 'normal',
+        })
+    )
+
+class CustomResetPasswordForm(ResetPasswordForm):
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(attrs={
+            "data-theme": "dark",
+            "data-size": "normal",
         })
     )

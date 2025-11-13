@@ -143,6 +143,14 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
 # ESTA É A MUDANÇA: em vez de herdar, apontamos para um formulário simples.
 ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.signup_form.CustomSignupForm'
 
+ACCOUNT_FORMS = {
+    "signup": "perfis.forms.CustomSignupForm",
+    "set_password": "perfis.forms.CustomPasswordSetForm",
+    "change_password": "perfis.forms.CustomChangePasswordForm",
+    "reset_password": "perfis.forms.CustomResetPasswordForm",
+}
+
+
 # --- Configuração do Google reCAPTCHA ---
 RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default='')
 RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PRIVATE_KEY', default='')
