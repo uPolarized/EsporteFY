@@ -1,0 +1,35 @@
+/* static/css/login/email_confirm.css */
+
+.email-confirm-container {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.email-confirm-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.email-confirm-card .card-body {
+    padding: 2.5rem;
+}
+
+.email-confirm-card .icon {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.email-confirm-card .icon-success {
+    color: #198754; /* Verde sucesso */
+}
+
+.email-confirm-card .icon-danger {
+    color: #dc3545; /* Vermelho perigo */
+}
+
+.email-confirm-card .card-title {
+    font-weight: 700;
+    color: #212529;
+}

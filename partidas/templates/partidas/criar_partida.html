@@ -1,0 +1,295 @@
+{% extends "account/base.html" %}
+{% load static crispy_forms_tags %}
+
+{% block title %}Criar Nova Partida{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/criar_partida.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+ crossorigin=""/>
+{% endblock %}
+
+{% block body_class %}criar-partida-page{% endblock %}
+
+{% block content %}
+<div class="container criar-partida-container">
+  <div class="col-md-8 col-lg-7">
+    <div class="card criar-partida-card">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="card-title text-center mb-4">Organize a sua Partida</h2>
+        <form method="post">
+          {% csrf_token %}
+          {{ form.titulo|as_crispy_field }}
+          {{ form.esporte|as_crispy_field }}
+
+          <div class="mb-3">
+            <label for="id_quadra_display" class="form-label requiredField">
+              Quadra<span class="asteriskField">*</span>
+            </label>
+            <div class="input-group">
+              <input type="text" id="id_quadra_display" class="form-control"
+                     placeholder="Nenhuma quadra selecionada" readonly required>
+              <button class="btn btn-outline-secondary" type="button"
+                      data-bs-toggle="modal" data-bs-target="#selecionarQuadraModal">
+                Escolher Quadra
+              </button>
+            </div>
+            {{ form.quadra.as_hidden }}
+          </div>
+
+          {{ form.data_hora|as_crispy_field }}
+          {{ form.jogadores_necessarios|as_crispy_field }}
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Publicar Partida</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SELECIONAR QUADRA -->
+<div class="modal fade" id="selecionarQuadraModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content" style="background: #181818;">
+      <div class="modal-header">
+        <h5 class="modal-title">Selecione uma Quadra</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="mapa-container">
+          <div id="mapa-modal"></div>
+
+          <div id="sidebar-quadras">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="flex-grow-1 me-2">
+                <label for="bairroFilter" class="form-label text-light">Filtrar por bairro:</label>
+                <select id="bairroFilter" class="form-select bg-dark text-light border-secondary">
+                  <option value="">Todas as quadras</option>
+                  <option value="flamengo">Flamengo</option>
+                  <option value="centro">Centro</option>
+                  <option value="sao_jose">São José do Imbassaí</option>
+                  <option value="itaipuacu">Itaipuaçu</option>
+                  <option value="itaocaia">Itaocaia Valley</option>
+                  <option value="parque_nanci">Parque Nanci</option>
+                </select>
+              </div>
+              <button id="btnMinhaLocalizacao" class="btn btn-outline-light mt-4">
+                📍 Usar minha localização
+              </button>
+            </div>
+
+            <div id="lista-quadras" class="mt-2">
+              <p class="text-secondary">Carregando quadras...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST BONITO -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 3000;">
+  <div id="toastLocalizacao" class="toast align-items-center text-white border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body fw-semibold"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+let map, markersLayer, userMarker;
+const sidebarEl = document.getElementById("lista-quadras");
+const bairroSelect = document.getElementById("bairroFilter");
+const locBtn = document.getElementById("btnMinhaLocalizacao");
+const modalEl = document.getElementById("selecionarQuadraModal");
+const toastEl = document.getElementById("toastLocalizacao");
+const toastBody = toastEl.querySelector(".toast-body");
+
+/* ==== Helper: Exibir Toast ==== */
+function showToast(mensagem, cor = "linear-gradient(90deg, #ff4b4b, #ff6b6b)") {
+  toastEl.style.background = cor;
+  toastBody.innerHTML = mensagem;
+  const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+  toast.show();
+}
+
+/* ==== Mapa ==== */
+function initMap() {
+  if (window.innerWidth < 768) return;
+  if (map) return map;
+
+  map = L.map("mapa-modal", {
+    center: [-22.9189, -42.8239],
+    zoom: 13
+  });
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
+  return map;
+}
+
+/* ==== Buscar Quadras ==== */
+async function fetchQuadras(bairro = "") {
+  if (!sidebarEl) return;
+
+  // Oculta a sidebar enquanto carrega (remove classe "ready")
+  sidebarEl.parentElement.classList.remove("ready");
+
+  // Mostra mensagem temporária
+  sidebarEl.innerHTML = `
+    <div class="text-center text-secondary py-4" style="opacity: 0.8;">
+      <div class="spinner-border text-danger mb-2" role="status" style="width: 2rem; height: 2rem;">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-2">Carregando quadras...</p>
+    </div>
+  `;
+
+  if (markersLayer) markersLayer.clearLayers();
+
+  const endpoint = bairro ? `/api/quadras/?bairro=${bairro}` : "/api/quadras/";
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const quadras = data.results || data.quadras || [];
+
+  sidebarEl.innerHTML = "";
+
+  quadras.forEach((q) => {
+    if (!q.latitude || !q.longitude) return;
+
+    // Marcadores no mapa (apenas desktop)
+    if (map && markersLayer) {
+      const marker = L.marker([q.latitude, q.longitude]).addTo(markersLayer);
+      marker.bindPopup(`<strong>${q.nome}</strong><br><small>${q.bairro_nome || q.bairro}</small>`);
+    }
+
+    // Cria card lateral
+    const item = document.createElement("div");
+    item.className = "quadra-card mb-3 p-2 border rounded bg-secondary bg-opacity-25";
+    item.innerHTML = `
+      <img src="${q.foto_principal_url || q.foto_url || '/static/images/default_quadra.jpg'}"
+           class="w-100 mb-2 rounded" style="height:120px;object-fit:cover;">
+      <h6 class="fw-bold mb-1">${q.nome}</h6>
+      <p class="text-muted small mb-2">${q.bairro_nome || q.bairro || 'Sem bairro'}</p>
+      <button class="btn btn-sm btn-primary w-100" 
+        onclick="selecionarQuadra(${q.id}, '${q.nome.replace(/'/g, "\\'")}')">
+        Selecionar esta Quadra
+      </button>
+    `;
+    sidebarEl.appendChild(item);
+  });
+
+  if (!quadras.length) {
+    sidebarEl.innerHTML = `
+      <p class="text-secondary text-center py-4">Nenhuma quadra encontrada.</p>
+    `;
+  }
+
+  // Mostra a sidebar suavemente após carregar
+  setTimeout(() => {
+    sidebarEl.parentElement.classList.add("ready");
+  }, 100);
+
+  return quadras;
+}
+
+/* ==== Selecionar Quadra ==== */
+function selecionarQuadra(id, nome) {
+  document.getElementById("id_quadra_display").value = nome;
+  document.getElementById("id_quadra").value = id;
+  bootstrap.Modal.getInstance(modalEl).hide();
+}
+
+/* ==== Geolocalização ==== */
+locBtn.addEventListener("click", async () => {
+  if (!navigator.geolocation) {
+    showToast("⚠️ Seu navegador não suporta geolocalização.", "linear-gradient(90deg, #555, #333)");
+    return;
+  }
+
+  showToast("📍 Buscando sua localização...");
+
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      const quadras = await fetchQuadras(bairroSelect.value);
+      if (!quadras || !quadras.length) return;
+
+      let maisProxima = null;
+      let menorDistancia = Infinity;
+
+      quadras.forEach(q => {
+        if (q.latitude && q.longitude) {
+          const dist = calcularDistancia(latitude, longitude, q.latitude, q.longitude);
+          if (dist < menorDistancia) {
+            menorDistancia = dist;
+            maisProxima = q;
+          }
+        }
+      });
+
+      if (maisProxima) {
+        selecionarQuadra(maisProxima.id, maisProxima.nome);
+        showToast(`✅ Quadra mais próxima: ${maisProxima.nome} (${menorDistancia.toFixed(2)} km)`,
+                  "linear-gradient(90deg, #28a745, #34d058)");
+      } else {
+        showToast("⚠️ Nenhuma quadra próxima encontrada.", "linear-gradient(90deg, #ff9800, #ffb74d)");
+      }
+
+      if (map) {
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.marker([latitude, longitude], {
+          icon: L.icon({
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/4876/4876901.png",
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+          })
+        }).addTo(map);
+        map.setView([latitude, longitude], 14);
+      }
+    },
+    err => {
+      showToast("❌ Não foi possível obter sua localização. Selecione o bairro manualmente.",
+                "linear-gradient(90deg, #dc3545, #ff6b6b)");
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+  );
+});
+
+/* ==== Modal ==== */
+modalEl.addEventListener("shown.bs.modal", () => {
+  if (window.innerWidth >= 768) {
+    const m = initMap();
+    setTimeout(() => {
+      m.invalidateSize();
+      fetchQuadras();
+    }, 300);
+  } else {
+    fetchQuadras();
+  }
+});
+
+bairroSelect.addEventListener("change", () => fetchQuadras(bairroSelect.value));
+
+/* ==== Distância ==== */
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+</script>
+{% endblock %}

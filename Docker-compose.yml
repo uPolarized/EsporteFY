@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: esportefy_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    expose:
+      - 5432
+
+  redis:
+    image: "redis:alpine"
+    container_name: esportefy_redis
+    expose:
+      - 6379
+    ports:
+      - "6379:6379" # Opcional: útil para debug local
+
+  # === SERVIÇO FASTAPI (WebSocket Realtime) ===
+  chat:
+    build: .
+    container_name: esportefy_chat
+    # Comando aponta para a pasta social/app.py
+    command: uvicorn social.app:app --host 0.0.0.0 --port 8080 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080" # Exposto para o navegador conectar via ws://localhost:8080
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+
+  # === SERVIÇO DJANGO (HTTP + Admin) ===
+  web:
+    build: .
+    container_name: esportefy_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - ./static:/app/static
+      - ./media:/app/media
+      - ./keys:/app/keys
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/confident-coda-471816-i9-0d5d3ad6c45e.json
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

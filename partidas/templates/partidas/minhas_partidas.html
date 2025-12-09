@@ -1,0 +1,150 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Minhas Partidas - EsporteFY{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/login/minhas_partidas.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="page-title text-center mb-5">
+    <i class="bi bi-trophy-fill me-2 text-danger"></i> Minhas Partidas
+  </h1>
+
+  <!-- 🔥 FUTURAS PARTIDAS -->
+  <section class="partidas-section mb-5">
+    <h3 class="section-heading">
+      <i class="bi bi-calendar-event me-2 text-success"></i> Próximos Jogos
+    </h3>
+
+    {% for partida in partidas_futuras %}
+      <div class="card partida-card future mb-3" data-id="{{ partida.id }}">
+        <div class="card-body d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <h5 class="card-title text-light">{{ partida.titulo }}</h5>
+            <p class="card-text mb-1 text-muted">
+              <i class="bi bi-geo-alt text-warning"></i>
+              {{ partida.quadra.nome }} — {{ partida.quadra.get_bairro_display }}
+            </p>
+            <p class="card-text text-secondary mb-0">
+              <i class="bi bi-clock-history text-info"></i>
+              {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
+            </p>
+          </div>
+
+          <div class="text-end card-actions">
+            <span class="badge bg-success mb-2">Confirmada</span>
+            <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}"
+               class="btn btn-outline-danger btn-sm transition-btn">
+              <i class="bi bi-box-arrow-left"></i> Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state text-center py-5">
+        <i class="bi bi-calendar-x display-5 mb-3 text-muted"></i>
+        <p class="text-light">Você ainda não tem partidas agendadas.<br>
+          <a href="{% url 'feed' %}" class="accent-link text-info fw-semibold">Encontre uma!</a>
+        </p>
+      </div>
+    {% endfor %}
+  </section>
+
+  <hr class="section-divider my-5">
+
+  <!-- 🕒 HISTÓRICO -->
+  <section class="partidas-section">
+    <h3 class="section-heading">
+      <i class="bi bi-clock-history me-2 text-warning"></i> Histórico de Jogos
+    </h3>
+
+    {% for partida in partidas_passadas %}
+      <div class="card partida-card past mb-3" data-id="{{ partida.id }}">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start">
+          <div>
+            <h5 class="card-title text-light">{{ partida.titulo }}</h5>
+            <p class="card-text mb-1 text-muted">
+              <i class="bi bi-geo-alt text-warning"></i>
+              {{ partida.quadra.nome }} — {{ partida.quadra.get_bairro_display }}
+            </p>
+            <p class="card-text text-secondary mb-0">
+              <i class="bi bi-calendar-event text-danger"></i>
+              Jogou em: {{ partida.data_hora|date:"d/m/Y" }}
+            </p>
+          </div>
+
+          <div class="text-end card-actions">
+            <span class="badge bg-warning text-dark mb-2">Finalizada</span>
+            {% if partida.avaliada %}
+              <button class="btn btn-sm btn-success transition-btn" disabled>
+                <i class="bi bi-check-circle-fill"></i> Avaliada
+              </button>
+            {% else %}
+              <a href="{% url 'partidas:avaliar_partida' partida.id %}" 
+                 class="btn btn-sm btn-primary avaliar-link" 
+                 data-id="{{ partida.id }}">
+                <i class="bi bi-star-fill"></i> Avaliar
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state text-center py-5">
+        <i class="bi bi-emoji-frown display-5 mb-3 text-muted"></i>
+        <p class="text-light">Nenhuma partida jogada ainda.</p>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+
+<!-- ✅ SCRIPT para corrigir estado do botão ao voltar da tela -->
+<script>
+(function () {
+  async function atualizarBotoesDeAvaliacao() {
+    const cards = Array.from(document.querySelectorAll('.partida-card[data-id]'));
+    if (!cards.length) return;
+
+    const ids = cards.map(c => c.getAttribute('data-id')).filter(Boolean);
+    try {
+      const url = `/partidas/statuses/?ids=${ids.join(',')}`;
+      const resp = await fetch(url, { method: 'GET', credentials: 'same-origin' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      cards.forEach(card => {
+        const pid = card.getAttribute('data-id');
+        const status = data[pid]?.avaliada;
+        const actions = card.querySelector('.card-actions');
+        if (!actions) return;
+
+        // botão existente
+        const btn = actions.querySelector('.avaliar-link, .transition-btn');
+        if (status) {
+          const b = document.createElement('button');
+          b.className = 'btn btn-sm btn-success transition-btn';
+          b.disabled = true;
+          b.innerHTML = '<i class="bi bi-check-circle-fill"></i> Avaliada';
+          if (btn) btn.replaceWith(b);
+        } else {
+          const a = document.createElement('a');
+          a.className = 'btn btn-sm btn-primary avaliar-link';
+          a.href = `/partidas/${pid}/avaliar/`;
+          a.innerHTML = '<i class="bi bi-star-fill"></i> Avaliar';
+          if (btn) btn.replaceWith(a);
+        }
+      });
+    } catch (e) {
+      console.warn('Erro ao verificar avaliações:', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', atualizarBotoesDeAvaliacao);
+  window.addEventListener('pageshow', atualizarBotoesDeAvaliacao);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+.env
+venv/
+data/
+dotenv_files/
+htmlcov/
+
+default.conf
+certs
+
+# Arquivos de cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Banco de dados local
+db.sqlite3
+
+# Arquivos de ambiente
+.env
+
+# Arquivos temporários / de build
+*.log
+*.tmp
+
+# Arquivos de IDE
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+keys/*.json

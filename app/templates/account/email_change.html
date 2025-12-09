@@ -1,0 +1,27 @@
+{% load socialaccount i18n %}
+
+<div class="account-menu-container">
+    <ul class="account-menu">
+        <li><a href="{% url 'account_email' %}">{% trans "Alterar e-mail" %}</a></li>
+
+       {% if user.is_superuser or not user.socialaccount_set.exists %}
+    <li><a href="{% url 'account_change_password' %}">Alterar senha</a></li>
+{% else %}
+    <li class="disabled-link" title="Gerenciado pela sua conta Google">
+        <i class="bi bi-lock-fill me-1"></i> Alterar senha (desativado)
+    </li>
+{% endif %}
+
+{% if user.is_superuser or not user.socialaccount_set.exists %}
+    <li><a href="{% url 'account_email' %}">Alterar e-mail</a></li>
+{% else %}
+    <li class="disabled-link" title="Gerenciado pela sua conta Google">
+        <i class="bi bi-lock-fill me-1"></i> Alterar e-mail (desativado)
+    </li>
+{% endif %}
+
+
+        <li><a href="{% url 'socialaccount_connections' %}">{% trans "Conexões de conta" %}</a></li>
+        <li><a href="{% url 'account_logout' %}">{% trans "Sair" %}</a></li>
+    </ul>
+</div>

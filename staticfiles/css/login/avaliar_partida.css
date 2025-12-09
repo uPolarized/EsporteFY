@@ -1,0 +1,155 @@
+/* ========================================= */
+/* ===== 1. ESTILOS GERAIS ===== */
+/* ========================================= */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c); /* fundo escuro */
+    color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 900px;
+}
+
+/* ========================================= */
+/* ===== 2. CARD ===== */
+/* ========================================= */
+.card {
+    border-radius: 1rem;
+    background: linear-gradient(145deg, #2b2b2b, #383838);
+    border: 1px solid #444;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.35);
+}
+
+/* ========================================= */
+/* ===== 3. TÍTULOS ===== */
+/* ========================================= */
+.card-title {
+    color: #fff;
+    font-weight: 700;
+}
+
+h4, h5 {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ========================================= */
+/* ===== 4. FORMULÁRIO ===== */
+/* ========================================= */
+form {
+    color: #f1f1f1;
+}
+
+form input,
+form select,
+form textarea {
+    border-radius: 0.5rem;
+    border: 1px solid #555;
+    background: #2a2a2a;
+    color: #fff;
+    padding: 0.6rem 0.75rem;
+    width: 100%;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+    outline: none;
+}
+
+/* Labels */
+form label {
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+    display: block;
+    color: #ddd;
+}
+
+/* ========================================= */
+/* ===== 5. BOTÃO ===== */
+/* ========================================= */
+.btn-primary {
+    background: linear-gradient(135deg, #ff6b6b, #d32f2f);
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(211, 47, 47, 0.6);
+}
+
+/* ========================================= */
+/* ===== 6. AVALIAÇÃO DE JOGADORES ===== */
+/* ========================================= */
+.d-flex.align-items-center {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.8rem;
+    border-radius: 0.75rem;
+    transition: background 0.3s ease;
+}
+
+.d-flex.align-items-center:hover {
+    background: rgba(255, 107, 107, 0.08);
+}
+
+/* ========================================= */
+/* ===== 7. ESTRELAS ===== */
+/* ========================================= */
+.star-rating { 
+    display: flex; 
+    flex-direction: row-reverse; 
+    justify-content: flex-end; 
+    border: none; 
+    padding: 0; 
+}
+
+.star-rating input { display: none; }
+
+.star-rating label {
+    font-size: 2rem; 
+    color: #555; 
+    cursor: pointer; 
+    transition: color 0.2s;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label { 
+    color: #ffc107; 
+}
+
+/* ========================================= */
+/* ===== 8. RESPONSIVIDADE ===== */
+/* ========================================= */
+@media (max-width: 768px) {
+    .card-body {
+        text-align: center;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+
+    .d-flex.align-items-center {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}

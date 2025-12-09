@@ -1,0 +1,104 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Avaliar Partida - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/avaliar_partida.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card avaliar-card mx-auto shadow-lg">
+    <div class="card-body p-5">
+      <h2 class="text-center mb-2 text-info fw-bold">AVALIAR PARTIDA</h2>
+      <p class="text-center text-muted mb-4">{{ partida.titulo }}</p>
+
+      <form method="post" class="avaliar-form">
+        {% csrf_token %}
+
+        <!-- ⭐ Avaliação da Quadra -->
+        <div class="section mb-5 text-center">
+          <h4 class="fw-semibold mb-3 text-light">Avaliação da Quadra</h4>
+          <div class="star-rating" data-field="quadra">
+            {% for i in "12345" %}
+              <input type="radio" id="quadra-{{ i }}" name="nota_quadra" value="{{ i }}">
+              <label for="quadra-{{ i }}">★</label>
+            {% endfor %}
+          </div>
+
+          <div class="mt-3 text-start">
+            <label for="id_comentario" class="form-label text-white">Comentário</label>
+            {{ quadra_form.comentario }}
+          </div>
+        </div>
+
+        <hr class="my-5">
+
+        <!-- 🧑‍🤝‍🧑 Avaliação dos Jogadores -->
+        <div class="section">
+          <h4 class="fw-semibold mb-4 text-light text-center">Avaliação de Jogadores (Fair Play)</h4>
+          {{ jogador_formset.management_form }}
+          <div class="avaliar-jogadores-list">
+            {% for form, jogador in forms_e_jogadores %}
+              <div class="jogador-item d-flex align-items-center justify-content-between mb-4 p-3 rounded">
+                <div class="d-flex align-items-center gap-3">
+                  {% if jogador.perfil.foto %}
+                    <img src="{{ jogador.perfil.foto.url }}" alt="{{ jogador.username }}"
+                         class="rounded-circle jogador-foto">
+                  {% else %}
+                    <div class="jogador-foto placeholder d-flex align-items-center justify-content-center">
+                      {{ jogador.username|first|upper }}
+                    </div>
+                  {% endif %}
+                  <div>
+                    <h6 class="text-light mb-1">{{ jogador.username }}</h6>
+                    <small class="text-muted">Nota de Fair Play</small>
+                  </div>
+                </div>
+
+                <div class="star-rating small" data-field="jogador-{{ jogador.id }}">
+                  {% for i in "12345" %}
+                    <input type="radio" id="jogador-{{ jogador.id }}-{{ i }}" name="jogador_{{ jogador.id }}" value="{{ i }}">
+                    <label for="jogador-{{ jogador.id }}-{{ i }}">★</label>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="d-grid mt-5">
+          <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-semibold">
+            Enviar Avaliações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ⚡ JS interativo -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const starGroups = document.querySelectorAll(".star-rating");
+
+  starGroups.forEach(group => {
+    const stars = group.querySelectorAll("input");
+
+    stars.forEach(input => {
+      input.addEventListener("change", e => {
+        const allLabels = group.querySelectorAll("label");
+        allLabels.forEach(lbl => lbl.classList.remove("selected"));
+
+        const val = parseInt(e.target.value);
+        for (let i = 0; i < val; i++) {
+          allLabels[i].classList.add("selected");
+        }
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

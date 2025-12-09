@@ -1,0 +1,266 @@
+/* app/static/css/base.css */
+
+/* Importa a fonte para todas as páginas */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ========================================= */
+/* ===== 1. VARIÁVEIS DE TEMA (Modo Claro/Escuro) ===== */
+/* ========================================= */
+
+/* Padrão (Modo Claro) */
+:root {
+    --body-bg-color: #f8f9fa; 
+    --text-color: #212529;
+    --card-bg-color: #ffffff;
+    --link-color: #0d6efd;
+    --border-color: #dee2e6;
+    --muted-text-color: #6c757d;
+}
+
+/* Modo Escuro */
+body.dark-mode {
+    --body-bg-color: #212121;
+    --text-color: #f8f9fa;
+    --card-bg-color: #343a40;
+    --link-color: #92b8ec;
+    --border-color: #495057;
+    --muted-text-color: #adb5bd;
+}
+
+
+/* ========================================= */
+/* ===== 2. ESTILOS GERAIS (Aplicam as variáveis) ===== */
+/* ========================================= */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--body-bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+/* ================================================== */
+/* === Forçar Estilo Escuro (Custom) no Dropdown === */
+/* ================================================== */
+
+/* 1. Força o fundo escuro, a cor do texto e as bordas */
+.navbar .dropdown-menu {
+    background-color: #2c2c2e !important; /* Fundo cinza-escuro, como na imagem */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Borda clara sutil */
+    border-radius: 0.5rem !important; /* Bordas arredondadas */
+    color: #f0f0f5 !important; /* Cor do texto principal clara */
+}
+
+/* 2. Força a cor dos links (itens) do menu */
+.navbar .dropdown-item {
+    color: #f0f0f5 !important;
+    background-color: transparent !important;
+}
+
+/* 3. Força o estilo do item ao passar o mouse (hover) */
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Um leve brilho no hover */
+}
+
+/* 4. Força a cor do divisor (a linha) */
+.navbar .dropdown-divider {
+    /* Usa a mesma cor da borda para consistência */
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Garante que o texto de links use a variável */
+a {
+    color: var(--link-color);
+}
+
+.text-muted {
+    color: var(--muted-text-color) !important;
+}
+
+/* O card e welcome-card usam o mesmo estilo de fundo agora */
+.card,
+.welcome-card {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.welcome-card {
+    max-width: 500px;
+    margin: 4rem auto;
+    padding: 2rem 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* ========================================= */
+/* ===== 3. ESTILOS DA NAVBAR ===== */
+/* ========================================= */
+
+.navbar {
+    background: linear-gradient(270deg, #eeafaf, #eb0606, #ff4c4c, #ec6767);
+    background-size: 600% 600%; /* aumenta a área do gradiente para animar */
+    animation: gradientAnimation 8s ease infinite; /* animação contínua */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 1rem;
+    transition: box-shadow 0.3s ease;
+}
+
+/* Mantém os estilos já existentes */
+.navbar .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s ease;
+}
+
+.navbar .navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.navbar .nav-link {
+    color: #e9ecef !important;
+    font-weight: 500;
+    margin-left: 1rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+.navbar-toggler {
+    border: none;
+    outline: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-toggler-icon {
+    filter: invert(1);
+}
+
+.navbar.scrolled {
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================= */
+/* ===== ANIMAÇÃO DO GRADIENTE ===== */
+/* ========================================= */
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+
+
+/* --- ESTILO GERAL DOS TOASTS --- */
+.toast {
+    background-color: rgba(30, 30, 30, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0;
+}
+
+/* --- TOAST HEADER --- */
+.toast-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+/* Cor do ícone e título padrão */
+.toast-header .bi-check-circle-fill { color: #4caf50; }
+.toast-header .bi-x-octagon-fill { color: #f44336; }
+.toast-header .bi-exclamation-triangle-fill { color: #ffc107; }
+.toast-header .bi-info-circle-fill { color: #2196f3; }
+
+/* Botão de fechar */
+.toast-header .btn-close {
+    background-color: transparent;
+    filter: invert(1);
+    opacity: 0.7;
+}
+
+.toast-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* --- TOAST DE NOVA MENSAGEM --- */
+.toast.new-message-toast .toast-header {
+    background-color: rgba(229, 57, 53, 0.8);
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast.new-message-toast .toast-header .bi-chat-dots-fill {
+    color: #fff;
+}
+
+.toast.new-message-toast .toast-header .btn-close {
+    filter: invert(0);
+}
+
+.toast.new-message-toast .toast-body a {
+    background-color: #e53935;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+}
+
+.toast.new-message-toast .toast-body a:hover {
+    background-color: #d32f2f;
+}
+
+
+
+/* ===========================================================
+   CORREÇÃO GLOBAL - Remove faixa branca no final da tela
+   =========================================================== */
+
+/* 🔹 Usa altura dinâmica que considera barras móveis */
+html, body {
+    min-height: 100dvh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden;
+    color: #f1f1f1;
+}
+
+/* 🔹 Fallback para iPhones antigos e navegadores legados */
+@supports not (height: 100dvh) {
+    html, body {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* 🔹 Camada fixa garante que o fundo cubra até o limite real da viewport */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    z-index: -1;
+}
+
+
+.bg-light {
+  background: transparent !important;
+}

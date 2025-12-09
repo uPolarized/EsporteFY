@@ -1,0 +1,42 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags socialaccount static %}
+
+{% block title %}Login - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-page-dark">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Bem-vindo de volta!</h3>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary mb-3">Entrar</button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google w-100">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                             alt="Google logo">
+                        Entrar com Google
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <p class="text-center mt-2 text-muted">
+                    Não tem conta? <a href="{% url 'account_signup' %}" class="link-light">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

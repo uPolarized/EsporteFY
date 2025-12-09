@@ -1,0 +1,188 @@
+{% extends "account/base.html" %}
+{% load static crispy_forms_tags %}
+
+{% block title %}Encontrar Jogadores - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/lista_usuarios.css' %}">
+{% endblock %}
+
+{% block body_class %}dark-theme{% endblock %}
+
+{% block content %}
+<div class="container my-4 my-md-5">
+    <h1 class="mb-4 text-center">Encontrar Jogadores na Plataforma</h1>
+
+    <!-- 🔍 FILTRO DE BUSCA -->
+    <div class="card filter-card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    {{ filtro_form.nome_usuario|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ filtro_form.esporte|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ filtro_form.nivel|as_crispy_field }}
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="alert-container mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-2" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- 🧑‍🤝‍🧑 LISTA DE JOGADORES -->
+    <div class="list-group shadow-sm">
+        {% for usuario in usuarios %}
+            <div class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row gap-3 card-usuario"
+                 data-user-id="{{ usuario.id }}">
+                
+                <!-- Foto e informações -->
+                <div class="d-flex align-items-center">
+                    {% if usuario.perfil.foto %}
+                        <img src="{{ usuario.perfil.foto.url }}" alt="{{ usuario.username }}" 
+                             width="50" height="50" class="rounded-circle me-3" style="object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white"
+                             style="width: 50px; height: 50px;">
+                            <span class="h5 mb-0">{{ usuario.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        <h5 class="mb-1">
+                            <a href="{% url 'perfis:ver_perfil' username=usuario.username %}" class="text-decoration-none text-light">
+                                {{ usuario.username }}
+                            </a>
+                        </h5>
+                        <small class="text-muted">
+                            Esporte: {{ usuario.perfil.esportes_preferidos|default:"Não informado" }} |
+                            Nível: {{ usuario.perfil.nivel_habilidade|default:"Não informado" }}
+                        </small>
+                    </div>
+                </div>
+
+                <!-- 🧭 Ações -->
+                <div class="d-flex gap-2 mt-2 mt-sm-0">
+                    {% if usuario in amigos_lista %}
+                        <span class="badge bg-success p-2">Amigos</span>
+
+                    {% elif usuario in enviadas_lista %}
+                    <button class="btn btn-sm btn-secondary" disabled data-userid="{{ usuario.id }}">Pedido Enviado</button>
+
+
+                    {% elif usuario in recebidas_lista %}
+                        <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-sm btn-warning btn-pedido">Responder Pedido</a>
+
+                    {% else %}
+                        <form method="post" action="{% url 'perfis:enviar_solicitacao' receptor_id=usuario.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-primary btn-pedido">Adicionar amigo</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="list-group-item text-center p-4">
+                <h5 class="mb-1">Nenhum jogador encontrado</h5>
+                <p class="mb-0 text-muted">Tente ajustar os seus filtros de busca.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 📄 Paginação -->
+    {% if is_paginated %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.previous_page_number }}">&laquo;</a>
+                    </li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.next_page_number }}">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Verifica se o WebSocket global existe
+  if (!window.notificationSocket) {
+    console.warn("🔌 WebSocket ainda não iniciado, aguardando...");
+    return;
+  }
+
+  console.log("🎯 Monitorando notificações em tempo real na lista de usuários...");
+
+  // Intercepta mensagens recebidas do socket
+  const originalHandler = window.notificationSocket.onmessage;
+  window.notificationSocket.onmessage = function(e) {
+    if (originalHandler) originalHandler.call(this, e); // mantém notificações visuais
+
+    let data;
+    try {
+      data = JSON.parse(e.data);
+    } catch {
+      console.error("❌ JSON inválido:", e.data);
+      return;
+    }
+
+    const titulo = (data.titulo || "").toLowerCase();
+    const msg = (data.mensagem || "").toLowerCase();
+
+    // --- 🟢 CASO 1: amizade aceita → atualizar botão
+    if (titulo.includes("amizade aceita") && data.solicitante_username) {
+  const username = data.solicitante_username;
+  const botoes = document.querySelectorAll(".list-group-item .btn.btn-secondary[disabled]");
+  botoes.forEach(btn => {
+    const container = btn.closest(".list-group-item");
+    if (container && container.textContent.includes(username)) {
+      btn.outerHTML = `<span class="badge bg-success p-2">Amigos</span>`;
+      console.log(`✅ Atualizado para 'Amigos' com ${username}`);
+    }
+  });
+}
+
+
+    // --- 🔴 CASO 2: pedido recusado → voltar botão para "Adicionar Amigo"
+    if (titulo.includes("pedido de amizade recusado")) {
+      const usernameMatch = msg.match(/([a-zA-Z0-9_]+)/);
+      if (usernameMatch) {
+        const username = usernameMatch[1];
+        const botoes = document.querySelectorAll(".list-group-item .btn.btn-secondary[disabled]");
+        botoes.forEach(btn => {
+          const container = btn.closest(".list-group-item");
+          if (container && container.textContent.includes(username)) {
+            btn.outerHTML = `
+              <a href="/perfis/solicitacao/enviar/${btn.dataset.userid}/" 
+                 class="btn btn-sm btn-primary">Adicionar Amigo</a>`;
+            console.log(`↩️ Pedido recusado — botão restaurado para ${username}`);
+          }
+        });
+      }
+    }
+  };
+});
+</script>
+
+
+
+
+{% endblock %}

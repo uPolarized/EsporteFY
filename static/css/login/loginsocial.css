@@ -1,0 +1,144 @@
+/* =======================================
+ * loginsocial.css - Tema Escuro EsporteFY
+ * ======================================= */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+    background-attachment: fixed;
+    background-size: cover;
+    color: #eef1f3;
+    font-family: "Inter", "Segoe UI", Tahoma, system-ui, -apple-system, "Helvetica Neue", Arial;
+}
+
+/* Centralização da página */
+.login-social-page {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: 10vh;
+}
+
+/* Card Glass */
+.login-social-card {
+    background: linear-gradient(180deg, rgba(28, 28, 30, 0.85), rgba(22, 22, 24, 0.85));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    text-align: center;
+    color: #eef1f3;
+    max-width: 460px;
+    width: 100%;
+    animation: fadeInUp 0.8s ease;
+}
+
+/* Ícone superior */
+.icon i {
+    font-size: 3rem;
+    color: #ff6b6b;
+    text-shadow: 0 0 12px rgba(255, 50, 50, 0.4);
+}
+
+/* Título */
+.login-social-card .card-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #fff;
+}
+
+/* Texto */
+.login-social-card p {
+    color: #b8b8b8;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+/* Botão principal */
+.login-social-card .btn-primary {
+    background: linear-gradient(90deg, #e53935, #ff6b6b);
+    border: none;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(229, 57, 53, 0.18);
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.login-social-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(229, 57, 53, 0.25);
+}
+
+/* ===== LINKS INFERIORES ===== */
+.login-social-card p.small {
+    margin-top: 1.8rem;
+    font-size: 0.95rem;
+}
+
+/* Links - agora mais chamativos */
+.login-social-card a {
+    color: #ff6b6b;
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+/* Efeito hover com glow sutil */
+.login-social-card a:hover {
+    color: #ff8b8b;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+}
+
+/* Barra vertical entre os links */
+.login-social-card p.small a + a::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 12px;
+    vertical-align: middle;
+}
+
+/* Ícones nos links */
+.login-social-card a i {
+    margin-right: 6px;
+    vertical-align: -1px;
+    font-size: 1.1rem;
+}
+
+/* Foco visível */
+.login-social-card a:focus-visible {
+    outline: 2px solid rgba(255, 107, 107, 0.5);
+    border-radius: 4px;
+}
+
+/* Animação de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+    .login-social-page {
+        padding-top: 7vh;
+    }
+    .login-social-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    .icon i {
+        font-size: 2.5rem;
+    }
+}

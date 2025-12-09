@@ -1,0 +1,216 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}{{ object.user.username }} — Perfil{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container-fluid profile-layout-wrapper py-4">
+    <div class="profile-layout">
+
+      <!-- ===================== LADO ESQUERDO ===================== -->
+      <aside class="profile-left">
+        <div class="side-card">
+
+          <div class="avatar-wrap">
+            {% if object.foto %}
+              <img src="{{ object.foto.url }}" alt="Avatar {{ object.user.username }}" class="avatar">
+            {% else %}
+              <div class="avatar placeholder">
+                <span>{{ object.user.username|first|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <h3 class="username">{{ object.user.username }}</h3>
+          <p class="email text-muted">{{ object.user.email }}</p>
+
+          <div class="side-actions">
+            <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+          </div>
+
+          <div class="side-stats mt-3">
+            <div class="stat">
+              <span class="num">{{ total_partidas|default:"0" }}</span>
+              <span class="label text-muted">Partidas</span>
+            </div>
+            <div class="stat">
+              <span class="num">{{ total_amigos|default:"0" }}</span>
+              <span class="label text-muted amigos-btn" onclick="abrirModalAmigos()">Amigos</span>
+            </div>
+          </div>
+
+          <hr>
+
+        </div>
+      </aside>
+
+      <!-- ===================== CENTRO ===================== -->
+      <main class="profile-center">
+        <div class="cards-grid">
+
+          <!-- SOBRE MIM -->
+          <section class="card-glass about-card">
+            <h3>Sobre Mim</h3>
+            {% if object.mini_bio %}
+              <p class="muted small">{{ object.mini_bio|linebreaksbr }}</p>
+            {% else %}
+              <p class="muted small">Nenhuma informação adicionada ainda.</p>
+            {% endif %}
+          </section>
+
+          <!-- PREFERÊNCIAS -->
+          <section class="card-glass prefs-card">
+            <h4>Preferências de Jogo</h4>
+            <ul class="prefs-list small muted">
+              <li><strong>Esporte:</strong> {{ object.esportes_preferidos|default:"Não definido" }}</li>
+              <li><strong>Nível:</strong> {{ object.nivel_habilidade|default:"Não definido" }}</li>
+              <li><strong>Idade:</strong> {{ object.idade|default:"Não definida" }}</li>
+              <li><strong>Cidade:</strong> {{ object.cidade|default:"Não definida" }}</li>
+            </ul>
+          </section>
+
+          <!-- ========== ATIVIDADES ATUALIZADAS (COM PARTIDA) ========== -->
+          <section class="card-glass activity-card full-width">
+            <h4>Atividade</h4>
+
+            {% if activities %}
+              <div class="activity-list">
+
+                {% for a in activities %}
+                  {% with obj=a.get_objeto %}
+
+                  <div class="activity-item clean">
+                    <div class="act-left">
+                      <div class="dot"></div>
+                    </div>
+
+                    <div class="act-body">
+
+                      <!-- TÍTULO DA AÇÃO -->
+                      <div class="act-title">
+                        {% if a.verbo == "criou" %}
+                          Criou a partida <strong>{{ obj.titulo }}</strong> ⚽
+                        {% elif a.verbo == "entrou" %}
+                          Entrou na partida <strong>{{ obj.titulo }}</strong> 🟢
+                        {% elif a.verbo == "saiu" %}
+                          Saiu da partida <strong>{{ obj.titulo }}</strong> 🔴
+                        {% else %}
+                          {{ a.verbo }}
+                        {% endif %}
+                      </div>
+
+                      <!-- META INFO -->
+                      <div class="act-meta small muted">
+                        {{ a.timestamp|date:"d/m/Y H:i" }}
+                        {% if obj %}
+                          — {{ obj.local|default:"Local não informado" }}
+                        {% endif %}
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {% endwith %}
+                {% endfor %}
+
+              </div>
+
+            {% else %}
+              <div class="empty-activity muted">Nenhuma atividade recente.</div>
+            {% endif %}
+          </section>
+
+        </div>
+      </main>
+
+      <!-- ===================== DIREITA ===================== -->
+      <aside class="profile-right">
+        <div class="right-card card-glass">
+          <h5>Pedidos Pendentes</h5>
+
+          {% if solicitacoes_pendentes %}
+            <div class="pending-list">
+              {% for solicitacao in solicitacoes_pendentes %}
+                <div class="pending-item">
+
+                  <div class="p-left">
+                    {% if solicitacao.solicitante.perfil.foto %}
+                      <img src="{{ solicitacao.solicitante.perfil.foto.url }}" class="mini-avatar" alt="">
+                    {% else %}
+                      <div class="mini-avatar placeholder">{{ solicitacao.solicitante.username|first|upper }}</div>
+                    {% endif %}
+                  </div>
+
+                  <div class="p-body">
+                    <strong>{{ solicitacao.solicitante.username }}</strong>
+                    <div class="small muted">quer ser seu amigo</div>
+                  </div>
+
+                  <div class="p-actions">
+                    <a href="{% url 'perfis:aceitar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-success">✓</a>
+                    <a href="{% url 'perfis:recusar_solicitacao' solicitacao_id=solicitacao.id %}" class="btn btn-sm btn-danger">✗</a>
+                  </div>
+
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="muted small">Nenhum pedido pendente</div>
+          {% endif %}
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL DE AMIGOS ===================== -->
+<div id="modalAmigos" class="amigos-modal">
+  <div class="amigos-modal-content card-glass">
+    <span class="fechar" onclick="fecharModalAmigos()">&times;</span>
+    <h3>Amigos de {{ object.user.username }}</h3>
+
+    {% if object.amigos.all %}
+      <ul class="amigos-lista">
+        {% for amigo in object.amigos.all %}
+          <li class="amigo-item">
+
+            {% if amigo.perfil.foto %}
+              <img src="{{ amigo.perfil.foto.url }}" class="mini-avatar" alt="">
+            {% else %}
+              <div class="mini-avatar placeholder">{{ amigo.username|first|upper }}</div>
+            {% endif %}
+
+            <a href="{% url 'perfis:ver_perfil' username=amigo.username %}" class="amigo-nome">
+              {{ amigo.username }}
+            </a>
+
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted small">Nenhum amigo ainda.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function abrirModalAmigos() {
+  document.getElementById("modalAmigos").style.display = "flex";
+}
+function fecharModalAmigos() {
+  document.getElementById("modalAmigos").style.display = "none";
+}
+window.onclick = function(event) {
+  const modal = document.getElementById("modalAmigos");
+  if (event.target === modal) modal.style.display = "none";
+};
+</script>
+
+{% endblock %}

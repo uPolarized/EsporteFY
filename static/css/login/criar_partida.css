@@ -1,0 +1,458 @@
+/* === GLOBAL === */
+body.criar-partida-page {
+    background: radial-gradient(circle at 20% 20%, #151515, #0d0d0d);
+    color: #f1f1f1;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* === CONTAINER PRINCIPAL === */
+/* === CONTAINER CENTRALIZADO === */
+.criar-partida-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 56px); /* Ajuste preciso da navbar */
+    padding: 0;
+}
+
+.criar-partida-card {
+    position: relative;
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.02);
+    width: 90%;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: cardFadeIn 0.8s ease-out forwards;
+}
+
+
+@keyframes cardFadeIn {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* === TÍTULO === */
+.criar-partida-card .card-title {
+    font-weight: 700;
+    font-size: 1.8rem;
+    text-align: center;
+    background: linear-gradient(90deg, #ff6b6b, #ff3b3b, #ff8080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 107, 107, 0.4); }
+    50% { text-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
+}
+
+/* === LABELS E INPUTS === */
+.criar-partida-card .form-label {
+    color: #ccc;
+    font-weight: 500;
+}
+
+.criar-partida-card .form-control,
+.criar-partida-card .form-select {
+    background-color: #181818;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.criar-partida-card .form-control:focus,
+.criar-partida-card .form-select:focus {
+    background-color: #1f1f1f;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+}
+
+/* Ícone de calendário */
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+/* === BOTÕES === */
+.criar-partida-card .btn-outline-secondary {
+    border-color: #555;
+    color: #ccc;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+.criar-partida-card .btn-outline-secondary:hover {
+    background-color: #333;
+    color: #fff;
+    border-color: #ff6b6b;
+}
+
+/* === BOTÃO PRINCIPAL === */
+.criar-partida-card .btn-primary {
+    background: linear-gradient(90deg, #ff4b4b, #ff6b6b);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+    transition: all 0.25s ease;
+}
+
+.criar-partida-card .btn-primary:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 25px rgba(255, 75, 75, 0.6);
+    background: linear-gradient(90deg, #ff6b6b, #ff2b2b);
+}
+
+/* === MODAL === */
+.modal-content {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    color: #f1f1f1;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+}
+.modal-header {
+    border-bottom: 1px solid #444;
+}
+.btn-close {
+    filter: invert(1);
+}
+
+/* === QUADRAS === */
+.quadra-selector-card {
+    background: linear-gradient(145deg, #262626, #1b1b1b);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    padding: 1rem;
+}
+
+.quadra-selector-card:hover {
+    transform: translateY(-6px);
+    border-color: #ff6b6b;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.quadra-selector-card.selected {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+}
+
+/* === SCROLLBAR (dark mode) === */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #151515;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ff6b6b;
+}
+
+
+/* === PLACEHOLDER LEGÍVEL === */
+::placeholder {
+    color: #aaa !important;
+    opacity: 1;
+}
+
+/* Corrige o texto do select “Nenhuma quadra selecionada” */
+.criar-partida-card select:invalid,
+.criar-partida-card select option[value=""] {
+    color: #999;
+}
+
+/* Força contraste visível no placeholder do campo Quadra */
+.criar-partida-card .form-select {
+    color: #f1f1f1;
+}
+.criar-partida-card .form-select:invalid {
+    color: #999;
+}
+
+/* === CALENDÁRIO (datetime-local) === */
+
+/* Estilo do campo */
+.criar-partida-card input[type="datetime-local"] {
+    background-color: #1b1b1b;
+    border: 1px solid #333;
+    color: #f1f1f1;
+    border-radius: 10px;
+    padding-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.criar-partida-card input[type="datetime-local"]:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+}
+
+/* Ícone de calendário */
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-color: #ff6b6b;
+    border-radius: 6px;
+    padding: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.criar-partida-card input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    background-color: #ff3b3b;
+}
+
+/* === POPUP DO CALENDÁRIO (Webkit browsers) === */
+/* Simula o estilo escuro do seletor */
+/* 🌙 Modo escuro para input datetime-local */
+input[type="datetime-local"] {
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="datetime-local"]:focus {
+    background-color: #222;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+    outline: none;
+}
+
+/* Ícone do calendário (no canto direito) */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-color: #ff6b6b;
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    background-color: #ff3b3b;
+    transform: scale(1.1);
+}
+
+/* Estilo do texto dentro do campo */
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+    color: #bbb;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field {
+    color: #f1f1f1;
+}
+
+/* Remove setas feias */
+input[type="datetime-local"]::-webkit-inner-spin-button {
+    display: none;
+}
+
+/* Remove botão de limpar */
+input[type="datetime-local"]::-webkit-clear-button {
+    display: none;
+}
+
+/* Ajuste para o placeholder (dd/mm/aaaa) */
+input[type="datetime-local"]::placeholder {
+    color: #999;
+}
+
+/* 🔥 Sombras suaves para o campo */
+input[type="datetime-local"]:hover {
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+}
+
+/* 🧭 Ajuste geral de tipografia */
+input[type="datetime-local"] {
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.4px;
+}
+
+/* === GLOBAL === */
+body.criar-partida-page {
+  background: radial-gradient(circle at 20% 20%, #151515, #0d0d0d);
+  color: #f1f1f1;
+  font-family: "Poppins", sans-serif;
+}
+
+/* === CONTAINER PRINCIPAL === */
+.criar-partida-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 56px);
+}
+
+.criar-partida-card {
+  background: rgba(25, 25, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6),
+              inset 0 0 10px rgba(255, 255, 255, 0.02);
+  animation: cardFadeIn 0.8s ease-out forwards;
+}
+
+/* === MODAL === */
+.modal-content {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 14px;
+  color: #f1f1f1;
+}
+
+/* === CONTAINER FLEX DESKTOP === */
+.mapa-container {
+  display: flex;
+  height: 550px;
+  overflow: hidden;
+}
+
+#mapa-modal {
+  flex: 2;
+  height: 100%;
+  width: 100%;
+}
+
+#sidebar-quadras {
+  flex: 1;
+  background: #151515;
+  color: #fff;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+/* === QUADRAS CARD === */
+.quadra-card {
+  background: linear-gradient(145deg, #262626, #1b1b1b);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.quadra-card:hover {
+  transform: translateY(-4px);
+  border-color: #ff6b6b;
+  box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+}
+
+.quadra-card.active {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
+
+/* === SCROLLBAR DARK === */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #151515;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6b6b;
+}
+
+/* === MOBILE: remover mapa, deixar só lista === */
+@media (max-width: 767px) {
+  .mapa-container {
+    display: block;
+    height: auto;
+  }
+
+  #mapa-modal {
+    display: none !important;
+  }
+
+  #sidebar-quadras {
+    width: 100%;
+    max-height: 70vh;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  #sidebar-quadras select,
+  #sidebar-quadras button {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .modal-body {
+    overflow-y: auto !important;
+  }
+}
+
+/* ===== SIDEBAR (Lista de quadras) ===== */
+#sidebar-quadras {
+  flex: 1;
+  background: rgba(18, 18, 18, 0.9);
+  backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 15px;
+  overflow-y: auto;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Barra de rolagem refinada */
+#sidebar-quadras::-webkit-scrollbar {
+  width: 8px;
+}
+#sidebar-quadras::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+#sidebar-quadras::-webkit-scrollbar-thumb:hover {
+  background: #ff6b6b;
+}
+
+/* Evita que a barra preta apareça antes do mapa carregar */
+#sidebar-quadras {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Quando o conteúdo estiver carregado */
+#sidebar-quadras.ready {
+  opacity: 1;
+}
+
+/* Garante que o mapa se encaixe perfeitamente e sem overflow */
+#mapa-modal {
+  flex: 2;
+  height: 100%;
+  width: 100%;
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}

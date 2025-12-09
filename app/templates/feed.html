@@ -1,0 +1,460 @@
+{% extends "account/base.html" %}
+{% load static %}
+{% load cache %}  {% load l10n %}   {% block title %}Seu Feed - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/feed.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+  <div class="row gx-4">
+    
+    <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none">
+      <div class="text-center">
+        {% now "H" as hora_atual %}
+        <h1 class="mb-0 welcome-header">
+          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
+          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
+          {% else %}🌙Boa noite
+          {% endif %}!
+        </h1>
+      </div>
+    </div>
+
+    <div class="col-lg-3 order-md-2 order-lg-1">
+      <h2 class="section-title"><i class="bi bi-activity"></i> Feed de Atividades</h2>
+      
+      <div id="feed-lista-container">
+        
+        {% for atividade in atividades %}
+        <div class="card shadow-sm mb-3 post-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              {% if atividade.ator.perfil.foto %}
+                <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-3" width="44" height="44" style="object-fit: cover;">
+              {% else %}
+                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 44px; height: 44px;">
+                  <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
+                </div>
+              {% endif %}
+
+              <div class="flex-grow-1">
+                <p class="mb-0 lh-sm small">
+                  {% if "agora são amigos" in atividade.verbo %}
+                    <i class="bi bi-people-fill text-success me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> e {{ atividade.alvo }} agora são amigos 🤝
+                  {% elif "criou" in atividade.verbo %}
+                    <i class="bi bi-dribbble text-primary me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🏟️
+                  {% elif "entrou" in atividade.verbo %}
+                    <i class="bi bi-person-check-fill text-success me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ✅
+                  {% elif "saiu" in atividade.verbo %}
+                    <i class="bi bi-door-open-fill text-warning me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🚪
+                  {% elif "cancelou" in atividade.verbo %}
+                    <i class="bi bi-x-octagon-fill text-danger me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ❌
+                  {% elif "avaliou" in atividade.verbo %}
+  <i class="bi bi-star-fill text-warning me-1"></i>
+  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+  {% if atividade.alvo %}
+    <strong class="text-info">"{{ atividade.alvo }}"</strong>
+  {% endif %}
+  
+
+
+                  {% else %}
+                    <i class="bi bi-lightning-charge-fill text-info me-1"></i>
+                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
+                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %}
+                  {% endif %}
+                </p>
+
+                <small class="text-muted">
+                  <i class="bi bi-clock me-1"></i>{{ atividade.timestamp|timesince }} atrás
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="no-activity-card text-center text-muted">
+          Nenhuma atividade na comunidade ainda.
+        </div>
+        {% endfor %} </div> </div> <div class="col-lg-6 order-md-1 order-lg-2">
+      <div class="text-center d-none d-lg-block">
+        {% now "H" as hora_atual %}
+        <h1 class="mb-4 welcome-header">
+          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
+          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
+          {% else %}🌙Boa noite
+          {% endif %}!
+        </h1>
+      </div>
+
+      <div class="card shadow-sm mb-4 action-card">
+        <div class="card-header text-center">Acesso Rápido</div>
+        <div class="card-body d-flex flex-wrap gap-2">
+          <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1">
+            <i class="bi bi-plus-circle-fill me-2"></i>Criar Partida
+          </a>
+          <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1">
+            <i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas
+          </a>
+        </div>
+      </div>
+
+      <div class="section-header text-center mb-4">
+        <h2 class="section-title m-0">
+          <i class="bi bi-dribbble me-2"></i>Partidas Abertas
+        </h2>
+      </div>
+
+      <div class="filtro-bar d-flex justify-content-end align-items-center flex-wrap gap-2 mb-4">
+        <button id="toggle-minhas-partidas" class="btn-filtro-ocultar">
+          <i class="bi bi-eye-slash me-1"></i> Ocultar minhas partidas
+        </button>
+        <div class="dropdown">
+          <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-geo-alt me-1"></i> Bairro: <strong>{{ bairro_atual_nome }}</strong>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
+            {% for valor, nome in bairros_disponiveis %}
+            <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      {% for partida in partidas %}
+      <div class="card shadow-sm mb-3 match-card fade-card"
+        data-bs-toggle="modal"
+        data-bs-target="#detalhesPartidaModal{{ partida.id }}"
+        style="cursor: pointer;"
+        data-organizador="{% if partida.organizador == user %}true{% else %}false{% endif %}">
+
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title">{{ partida.titulo }}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">
+                <i class="bi bi-geo-alt"></i> {{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}
+              </h6>
+              <p class="card-text mb-2">
+                <i class="bi bi-calendar-event"></i> {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
+              </p>
+            </div>
+            <div class="text-end">
+              {% if partida.vagas_restantes == 1 %}
+              <span class="badge bg-danger fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% elif partida.vagas_restantes <= 3 %}
+              <span class="badge bg-warning text-dark fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% else %}
+              <span class="badge bg-primary fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+              {% endif %}
+              <small class="d-block text-muted">Jogadores</small>
+            </div>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              {% if user == partida.organizador %}
+              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
+                Cancelar Partida
+              </button>
+              {% elif user in partida.jogadores_confirmados.all %}
+              <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-danger">Sair da Partida</a>
+              {% elif partida.vagas_restantes > 0 %}
+              <a href="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="btn btn-success">Participar</a>
+              {% else %}
+              <button class="btn btn-secondary" disabled>Lotado</button>
+              {% endif %}
+            </div>
+            <button type="button" class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#jogadoresModal{{ partida.id }}">
+              Ver jogadores confirmados ({{ partida.vagas_preenchidas }})
+            </button>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card no-match-card">
+        <div class="card-body text-center text-muted">
+          <i class="bi bi-emoji-frown me-2"></i> Nenhuma partida encontrada. Que tal <a href="{% url 'partidas:criar_partida' %}">criar uma</a>?
+        </div>
+      </div>
+      {% endfor %} {% for partida in partidas %}
+      <div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="jogadoresModalLabel{{ partida.id }}">
+                👥 Jogadores Confirmados — {{ partida.titulo }}
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              {% if partida.jogadores_confirmados.all %}
+              <ul class="list-group">
+                {% for jogador in partida.jogadores_confirmados.all %}
+                <li class="list-group-item d-flex align-items-center">
+                  {% if jogador.perfil.foto %}
+                    <img src="{{ jogador.perfil.foto.url }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                  {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                      {{ jogador.username|first|upper }}
+                    </div>
+                  {% endif %}
+                  <span class="fw-semibold">{{ jogador.username }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-muted text-center mb-0">
+                <i class="bi bi-info-circle me-2"></i> Ainda não há jogadores confirmados.
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% for partida in partidas %}
+      <div class="modal fade" id="detalhesPartidaModal{{ partida.id }}" tabindex="-1" aria-labelledby="detalhesPartidaLabel{{ partida.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content detalhes-modal">
+            <div class="modal-header">
+              <h5 class="modal-title" id="detalhesPartidaLabel{{ partida.id }}">
+                ⚽ {{ partida.titulo }}
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <div class="modal-body">
+              <div class="info-linha">
+                <i class="bi bi-person-fill"></i>
+                <strong>Organizador:</strong> {{ partida.organizador.username }}
+              </div>
+              <div class="info-linha">
+                <i class="bi bi-geo-alt-fill"></i>
+                <strong>Local:</strong> {{ partida.quadra.nome }} — {{ partida.quadra.get_bairro_display }}
+              </div>
+              <div class="info-linha">
+                <i class="bi bi-calendar-event"></i>
+                <strong>Data:</strong> {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
+              </div>
+              <div class="info-linha">
+                <i class="bi bi-people-fill"></i>
+                <strong>Jogadores:</strong> {{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}
+              </div>
+              <div class="info-linha">
+                
+                
+              </div>
+
+              {% if partida.quadra.latitude and partida.quadra.longitude %}
+            <div class="map-wrapper mt-4">
+              <iframe
+                class="mapa-embed"
+                loading="lazy"
+                allowfullscreen
+                data-src="https://www.openstreetmap.org/export/embed.html?bbox=-43.0,-23.1,-42.7,-22.8&layer=mapnik&marker={{ partida.quadra.latitude|unlocalize }},{{ partida.quadra.longitude|unlocalize }}"
+                id="mapa-iframe-{{ partida.id }}">
+              </iframe>
+            </div>
+            
+           <div class="text-center mt-3">
+              <a href="https://www.google.com/maps/dir/?api=1&destination={{ partida.quadra.latitude|unlocalize }},{{ partida.quadra.longitude|unlocalize }}"
+                 target="_blank" 
+                 class="btn btn-como-chegar w-100"> <i class="bi bi-geo-alt-fill me-2"></i>Como Chegar (Abrir no Maps)
+              </a>
+            </div>
+            
+            {% endif %}
+
+            <hr>
+
+              <div class="text-center mt-3">
+                {% if user == partida.organizador %}
+                  
+                {% elif user in partida.jogadores_confirmados.all %}
+                  <a href="{% url 'partidas:sair_da_partida' partida.id %}" class="btn btn-danger">Sair da Partida</a>
+                {% elif partida.vagas_restantes > 0 %}
+                  <a href="{% url 'partidas:participar_partida' partida.id %}" class="btn btn-success">Participar</a>
+                {% else %}
+                  <button class="btn btn-secondary" disabled>Partida Lotada</button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div> <div class="col-lg-3 order-md-3 order-lg-3">
+      
+      {% cache 600 clima_widget %}
+      {% if clima_atual %}
+      <div class="weather-card mb-4 text-center">
+        <div class="weather-header position-relative">
+          <h5 class="weather-title mb-0">Tempo em Maricá</h5>
+          <div class="weather-icon-wrapper-right">
+            {% if "chuva" in clima_atual.descricao|lower %}
+            <i class="bi bi-cloud-rain-fill weather-icon rainy"></i>
+            {% elif "nublado" in clima_atual.descricao|lower %}
+            <i class="bi bi-cloud-fill weather-icon cloudy"></i>
+            {% else %}
+            <i class="bi bi-brightness-high-fill weather-icon sunny"></i>
+            {% endif %}
+          </div>
+        </div>
+        <div class="weather-body">
+          <span class="temp display-5 fw-bold d-block mt-2">{{ clima_atual.temperatura }}°C</span>
+          <span class="desc text-muted mb-3 d-block">{{ clima_atual.descricao }}</span>
+          <div class="weather-tip p-3 rounded">
+            <i class="bi bi-info-circle me-2"></i>{{ clima_atual.mensagem }}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endcache %} {% cache 1800 noticias_widget %}
+      <div class="news-sidebar">
+        <h2 class="section-title text-center mb-3"><i class="bi bi-newspaper me-2"></i>Notícias</h2>
+        {% for noticia in noticias %}
+        <a href="{{ noticia.url }}" target="_blank" class="text-decoration-none">
+          <div class="card shadow-sm mb-3 news-card">
+            {% if noticia.urlToImage %}
+            <img src="{{ noticia.urlToImage }}" class="img-fluid rounded-top" alt="{{ noticia.title }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ noticia.title|truncatechars:60 }}</h5>
+              <small class="news-source text-muted">{{ noticia.source.name }}</small>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <div class="card">
+          <div class="card-body text-center text-muted">
+            <i class="bi bi-wifi-off me-2"></i> Não foi possível carregar as notícias.
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endcache %} 
+    </div> 
+    </div> 
+    </div> 
+
+<!-- SCRIPT DE FILTRO -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('toggle-minhas-partidas');
+  const partidas = document.querySelectorAll('.match-card');
+  let ocultando = false;
+
+  toggleBtn.addEventListener('click', () => {
+    ocultando = !ocultando;
+
+    partidas.forEach(card => {
+      const ehMinha = card.dataset.organizador === 'true';
+      if (ehMinha) {
+        if (ocultando) {
+          card.classList.add('fade-out');
+          setTimeout(() => card.style.display = 'none', 200);
+        } else {
+          card.style.display = '';
+          card.classList.remove('fade-out');
+        }
+      }
+    });
+
+    toggleBtn.innerHTML = ocultando
+      ? '<i class="bi bi-eye"></i> Mostrar minhas partidas'
+      : '<i class="bi bi-eye-slash"></i> Ocultar minhas partidas';
+  });
+});
+
+
+// SCRIPT DO WEBSOCKET CORRIGIDO
+const feedSocket = new WebSocket(
+  "ws://" + window.location.host + "/ws/feed/"
+);
+
+feedSocket.onmessage = function(e) {
+  const data = JSON.parse(e.data);
+  
+  // 1. CORREÇÃO: Usar o ID correto do seu HTML
+  const feedContainer = document.getElementById("feed-lista-container"); 
+
+  if (feedContainer) {
+    // Remove a mensagem "Nenhuma atividade" se ela existir
+    const noActivity = feedContainer.querySelector('.no-activity-card');
+    if (noActivity) {
+      noActivity.remove();
+    }
+    
+    // 2. CORREÇÃO: Criar o card completo, não só o texto
+    const item = document.createElement("div");
+    item.classList.add("card", "shadow-sm", "mb-3", "post-card");
+    item.style.opacity = 0; // Para um efeito de fade-in
+    
+    // 3. (OPCIONAL) Este HTML é mais completo, mas você precisa
+    //    que seu consumer do WebSocket envie (data.ator_initial, data.verbo_icon, data.alvo)
+    //    Vou usar um HTML simples por enquanto, baseado no seu script.
+    item.innerHTML = `
+    <div class="card-body">
+      <div class="d-flex align-items-center">
+        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 44px; height: 44px;">
+           <span class="fw-bold">${data.ator_initial || data.ator.charAt(0).toUpperCase()}</span>
+        </div>
+        <div class="flex-grow-1">
+          <p class="mb-0 lh-sm small">
+            <i class="bi bi-lightning-charge-fill text-info me-1"></i>
+            <strong>${data.ator}</strong> ${data.verbo}
+            ${data.alvo ? `<strong>"${data.alvo}"</strong>` : ''}
+          </p>
+          <small class="text-muted">
+            <i class="bi bi-clock me-1"></i>${data.timestamp}
+          </small>
+        </div>
+      </div>
+    </div>`;
+    
+    feedContainer.prepend(item);
+    setTimeout(() => item.style.opacity = 1, 10); // Efeito de fade-in
+  }
+};
+
+const modalsDetalhes = document.querySelectorAll('[id^="detalhesPartidaModal"]');
+  
+  modalsDetalhes.forEach(modal => {
+    modal.addEventListener('show.bs.modal', event => {
+      try {
+        // Encontra o iframe *dentro* deste modal específico
+        const iframe = modal.querySelector('.mapa-embed');
+        
+        // Se o iframe existir e ainda não tiver um 'src', defina-o
+        if (iframe && !iframe.getAttribute('src')) {
+          const mapaSrc = iframe.getAttribute('data-src');
+          if (mapaSrc) {
+            iframe.setAttribute('src', mapaSrc);
+          }
+        }
+      } catch (e) {
+        console.error("Erro ao carregar mapa no modal:", e);
+      }
+    });
+  });
+
+
+</script>
+{% endblock %}

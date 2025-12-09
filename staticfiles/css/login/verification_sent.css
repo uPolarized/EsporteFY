@@ -1,0 +1,28 @@
+/* static/css/login/verification_sent.css */
+
+.verification-sent-container {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.verification-sent-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.verification-sent-card .card-body {
+    padding: 2.5rem;
+}
+
+.verification-sent-card .icon {
+    font-size: 3.5rem;
+    color: #0d6efd; /* Azul, para diferenciar da confirmação de senha */
+    margin-bottom: 1.5rem;
+}
+
+.verification-sent-card .card-title {
+    font-weight: 700;
+    color: #212529;
+}

@@ -1,0 +1,144 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}{{ object.username }} — Perfil{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container-fluid profile-layout-wrapper py-4">
+    <div class="profile-layout">
+
+      <!-- ===================== LADO ESQUERDO ===================== -->
+      <aside class="profile-left">
+        <div class="side-card">
+
+          <div class="avatar-wrap">
+            {% if object.perfil.foto %}
+              <img src="{{ object.perfil.foto.url }}" alt="Avatar {{ object.username }}" class="avatar">
+            {% else %}
+              <div class="avatar placeholder">
+                <span>{{ object.username|first|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <h3 class="username">{{ object.username }}</h3>
+          
+
+          <div class="side-actions">
+            {% if request.user == object %}
+              <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
+            {% else %}
+              {% if ja_sao_amigos %}
+                <a href="{% url 'perfis:remover_amigo' user_id=object.id %}" class="btn btn-danger btn-block">Remover Amigo</a>
+                
+
+              {% elif pedido_enviado %}
+                <button class="btn btn-secondary btn-block" disabled>Pedido Enviado</button>
+                <button class="btn btn-outline btn-block mt-2" disabled>Aguardando amizade</button>
+
+              {% elif pedido_recebido %}
+                <a href="{% url 'perfis:meu_perfil' %}" class="btn btn-warning btn-block">Responder Pedido</a>
+                <button class="btn btn-outline btn-block mt-2" disabled>Aguardando resposta</button>
+
+              {% else %}
+                <a href="{% url 'perfis:enviar_solicitacao' receptor_id=object.id %}" class="btn btn-primary btn-block">Adicionar Amigo</a>
+                <button class="btn btn-outline btn-block mt-2" disabled>Aguardando amizade</button>
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <div class="side-stats mt-3">
+            <div class="stat">
+              <span class="num">{{ total_partidas|default:"0" }}</span>
+              <span class="label text-muted">Partidas</span>
+            </div>
+            <div class="stat">
+              <span class="num">{{ total_amigos|default:"0" }}</span>
+              <span class="label text-muted">Amigos</span>
+            </div>
+          </div>
+
+          <hr>
+
+          
+
+        </div>
+      </aside>
+
+      <!-- ===================== CENTRO ===================== -->
+      <main class="profile-center">
+
+        <div class="cards-grid">
+
+          <!-- SOBRE MIM -->
+          <section class="card-glass about-card">
+            <h4>Sobre Mim</h4>
+
+            {% if object.perfil.mini_bio %}
+              <p class="muted small">{{ object.perfil.mini_bio|linebreaksbr }}</p>
+            {% else %}
+              <p class="muted small">Nenhuma informação adicionada ainda.</p>
+            {% endif %}
+          </section>
+
+          <!-- PREFERÊNCIAS -->
+          <section class="card-glass prefs-card">
+            <h4>Preferências de Jogo</h4>
+            <ul class="prefs-list small muted">
+              <li><strong>Esporte:</strong> {{ object.perfil.esportes_preferidos|default:"Não definido" }}</li>
+              <li><strong>Nível:</strong> {{ object.perfil.nivel_habilidade|default:"Não definido" }}</li>
+              <li><strong>Idade:</strong> {{ object.perfil.idade|default:"Não definida" }}</li>
+              <li><strong>Cidade:</strong> {{ object.perfil.cidade|default:"Não definida" }}</li>
+            </ul>
+          </section>
+
+         <!-- ATIVIDADES -->
+<section class="card-glass activity-card full-width">
+  <h4>Atividade</h4>
+
+  {% if activities %}
+    <div class="activity-list">
+
+      {% for a in activities %}
+        <div class="activity-item clean">
+          
+          <div class="act-left">
+            <div class="dot"></div>
+          </div>
+
+          <div class="act-body">
+
+            <div class="act-title">{{ a.verbo }}</div>
+
+            <div class="act-meta small muted">
+              {{ a.timestamp|date:"d/m/Y H:i" }}
+            </div>
+
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+  {% else %}
+    <div class="empty-activity muted">Nenhuma atividade recente.</div>
+  {% endif %}
+</section>
+
+
+
+
+      <!-- ===================== LADO DIREITO ===================== -->
+      <aside class="profile-right">
+        
+      </aside>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EsporteFY{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/login/base.css' %}">
+    
+    <style>
+        /* Pequenos ajustes para a notificação ficar bonita */
+        .notificacao-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            transition: background 0.2s;
+        }
+        .notificacao-item:hover {
+            background-color: #f8f9fa;
+        }
+        .notificacao-item:last-child {
+            border-bottom: none;
+        }
+        .badge-animada {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1) translate(-50%, -50%); }
+            50% { transform: scale(1.4) translate(-50%, -50%); }
+            100% { transform: scale(1) translate(-50%, -50%); }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}bg-light{% endblock %}">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        {% if user.is_authenticated %}
+            <a class="navbar-brand" href="{% url 'feed' %}">EsporteFY</a>
+        {% else %}
+            <a class="navbar-brand" href="{% url 'home' %}">EsporteFY</a>
+        {% endif %}
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'perfis:lista_usuarios' %}">Encontrar Jogadores</a>
+                    </li>
+<!--
+                    <li class="nav-item dropdown me-3 position-relative">
+                        <a class="nav-link position-relative d-flex align-items-center justify-content-center"
+                           href="#" id="notificacoesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                           style="width: 36px; height: 36px;">
+                            <i id="icone-sino" class="bi bi-bell fs-5"></i>
+                            <span id="badge-notificacoes"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                0
+                            </span>
+                        </a>
+
+                       
+<ul class="dropdown-menu dropdown-menu-end shadow notificacoes-dropdown"
+        aria-labelledby="notificacoesDropdown" style="width: 320px;">
+    <li>
+        <h6 class="dropdown-header text-uppercase text-muted fw-bold small px-3">Notificações</h6>
+    </li>
+
+    <div id="lista-notificacoes" class="px-0" style="max-height: 330px; overflow-y: auto;">
+        <p class="text-muted small text-center py-3 mb-0 placeholder-msg">Nenhuma nova notificação.</p>
+    </div>
+
+    <li><hr class="dropdown-divider m-0"></li>
+    <li>
+        <a class="dropdown-item text-center text-primary small fw-semibold py-2" href="{% url 'feed' %}">
+            Ver todas
+        </a>
+    </li>
+</ul>
+-->
+
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.perfil.foto %}
+                                <img src="{{ user.perfil.foto.url }}" alt=" " width="32" height="32" class="rounded-circle me-2" style="object-fit: cover;">
+                            {% endif %}
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'perfis:meu_perfil' %}">Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'perfis:editar_perfil' %}">Editar Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Sair</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'account_signup' %}">Registrar</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055; margin-top: 4rem;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="toast-header">
+                    {% if message.tags == 'success' %}
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong class="me-auto">Sucesso!</strong>
+                    {% elif message.tags == 'error' %}
+                        <i class="bi bi-x-octagon-fill text-danger me-2"></i>
+                        <strong class="me-auto">Erro!</strong>
+                    {% elif message.tags == 'warning' %}
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        <strong class="me-auto">Atenção!</strong>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill text-info me-2"></i>
+                        <strong class="me-auto">Aviso</strong>
+                    {% endif %}
+                    <small class="text-muted">agora</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% if user.is_authenticated %}
+    {{ user.id|json_script:"json-user-id" }}
+{% endif %}
+
+<script>
+/* ======= Helper: pega csrftoken do cookie ======= */
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Inicializa Toasts
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    var toastList = toastElList.map(function (toastEl) {
+      return new bootstrap.Toast(toastEl).show();
+    });
+
+    console.log("🚀 Base JS carregado");
+
+    // --- Lógica de Notificações ---
+    const userIdElement = document.getElementById('json-user-id');
+    
+    // Tenta ler o ID. Se o elemento não existir (usuário deslogado), retorna null.
+    const userId = userIdElement ? JSON.parse(userIdElement.textContent) : null;
+
+    if (userId) {
+        initNotificationSocket(userId);
+    } else {
+        console.log("👤 Usuário não logado (Sem ID). Notificações desativadas.");
+    }
+
+    function initNotificationSocket(uid) {
+        console.log("🔌 Iniciando WebSocket de notificações...");
+
+        const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+        const host = window.location.hostname;
+        
+        // Força porta 8080 se estiver local (Docker/FastAPI)
+        const port = (window.location.port === '8000' || window.location.port === '8080') ? ':8080' : '';
+        
+        const url = `${protocol}${host}${port}/ws/notifications/?user=${uid}`;
+
+        try {
+            const socket = new WebSocket(url);
+            window.notificationSocket = socket;
+
+            socket.onopen = () => console.log("✅ WebSocket de notificações conectado!");
+
+            socket.onclose = (e) => {
+                console.warn("⚠️ WebSocket desconectado. Reconectando em 5s...");
+                setTimeout(() => initNotificationSocket(uid), 5000);
+            };
+
+            socket.onerror = (e) => console.error("❌ Erro no WebSocket:", e);
+
+            socket.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                console.log("📩 Notificação recebida:", data);
+                
+                const lista = document.getElementById('lista-notificacoes');
+                const badge = document.getElementById('badge-notificacoes');
+                
+                if (!lista) return;
+
+                const vazio = lista.querySelector('.placeholder-msg');
+                if (vazio) vazio.remove();
+
+                const item = document.createElement('div');
+                item.classList.add('notificacao-item');
+                
+                let conteudoHTML = '';
+
+                if (data.type === 'notification' || data.type === 'new_message_notification') {
+                    const avatar = data.foto_url 
+                        ? `<img src="${data.foto_url}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">`
+                        : `<div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">${(data.remetente || '?').charAt(0).toUpperCase()}</div>`;
+                    
+                    const link = data.conversa_url || '#';
+
+                    conteudoHTML = `
+                        <a href="${link}" class="d-flex align-items-center text-decoration-none text-dark gap-2 p-2 border-bottom">
+                            <div class="position-relative">
+                                ${avatar}
+                                <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle"></span>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.9rem;">${data.remetente}</h6>
+                                    <small class="text-muted" style="font-size: 0.7rem;">${data.timestamp || 'agora'}</small>
+                                </div>
+                                <p class="mb-0 text-muted text-truncate small" style="max-width: 220px;">${data.mensagem}</p>
+                            </div>
+                        </a>
+                    `;
+                } else {
+                    conteudoHTML = `
+                        <div class="d-flex align-items-center gap-2 p-2 border-bottom">
+                            <i class="bi bi-bell-fill text-warning fs-4"></i>
+                            <div>
+                                <h6 class="mb-0 small fw-bold">Nova notificação</h6>
+                                <small class="text-muted">Você tem uma nova interação.</small>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                item.innerHTML = conteudoHTML;
+                lista.prepend(item);
+
+                if (badge) {
+                    let count = parseInt(badge.innerText) || 0;
+                    badge.innerText = count + 1;
+                    badge.classList.remove('d-none');
+                    badge.classList.add('badge-animada');
+                    setTimeout(() => badge.classList.remove('badge-animada'), 500);
+                }
+                
+                // Som
+                const soundUrl = "{% static 'sounds/notification.mp3' %}";
+                new Audio(soundUrl).play().catch(e => {});
+            };
+
+        } catch (err) {
+            console.error("Erro no setup do socket:", err);
+        }
+    }
+});
+
+// Função global de amizade
+window.responderAmizade = function(solicitacaoId, aceitar, itemElemento) {
+    if (!solicitacaoId) return;
+    const token = getCookie('csrftoken');
+    const url = `/perfis/solicitacao/${aceitar ? "aceitar" : "recusar"}/${solicitacaoId}/`;
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": token,
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(res => {
+        if(res.ok) {
+            itemElemento.innerHTML = aceitar 
+                ? `<div class="text-success small text-center"><i class="bi bi-check"></i> Feito.</div>`
+                : `<div class="text-muted small text-center">Recusado.</div>`;
+            setTimeout(() => itemElemento.remove(), 2000);
+            
+            const badge = document.getElementById('badge-notificacoes');
+            if(badge) {
+                let count = parseInt(badge.innerText) || 0;
+                if (count > 0) badge.innerText = count - 1;
+                if (count - 1 <= 0) badge.classList.add('d-none');
+            }
+        }
+    });
+}
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

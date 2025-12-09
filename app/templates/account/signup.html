@@ -1,0 +1,62 @@
+{% extends "account/base.html" %}
+{% load crispy_forms_tags socialaccount static %}
+
+{% block title %}Cadastro - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="signup-page-dark">
+    <div class="signup-wrapper">
+        <div class="signup-card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Crie sua Conta</h3>
+
+                <form class="signup" method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    <div class="row">
+    <div class="col-12">
+        {{ form.username|as_crispy_field }}
+        {{ form.email|as_crispy_field }}
+        {{ form.esporte_preferido|as_crispy_field }}
+        {{ form.nivel_habilidade|as_crispy_field }}
+        {{ form.idade|as_crispy_field }}
+    </div>
+
+    
+    <div class="col-12">
+        {{ form.password1|as_crispy_field }}
+        {{ form.password2|as_crispy_field }}
+
+    </div>
+
+    <div class="col-12 d-flex justify-content-center my-3">
+        {{ form.captcha }}
+    </div>
+
+</div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary mb-3">Cadastrar com E-mail</button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-google w-100">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
+                        Cadastrar com Google
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <p class="text-center mt-2 text-muted">
+                    Já tem conta? <a href="{% url 'account_login' %}" class="link-light">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
