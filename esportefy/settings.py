@@ -17,8 +17,22 @@ RECAPTCHA_REQUIRED_SCORE = 0.5
 # URL usada pelas Views do Django para publicar mensagens no Redis
 REDIS_URL = env('REDIS_URL', default='redis://redis:6379/0')
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "a9b6a9e85d43.ngrok-free.app", "*"] # * Ajuda no Docker
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://a9b6a9e85d43.ngrok-free.app"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".ngrok-free.app",
+    "2e04-2804-3d28-43-1eeb-9540-3aad-ad40-e8b.ngrok-free.app"
+]
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "https://d9fcadc8ea7a.ngrok-free.app",
+    "https://ee8218ea778b.ngrok-free.app",
+]
+
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [

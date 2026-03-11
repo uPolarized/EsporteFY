@@ -155,14 +155,29 @@ def sair_da_partida(request, partida_id):
 @transaction.atomic
 def cancelar_partida(request, partida_id):
     partida = get_object_or_404(Partida, id=partida_id, organizador=request.user)
-    
+
+    # Referência ao tipo do objeto Partida
     content_type = ContentType.objects.get_for_model(partida)
-    Atividade.objects.create(
-        ator=request.user,
-        verbo='cancelou a partida',
+
+    # 1️⃣ APAGAR TODAS AS ATIVIDADES RELACIONADAS A ESSA PARTIDA
+    Atividade.objects.filter(
         content_type=content_type,
         object_id=partida.id
-    )
+    ).delete()
+
+    # 2️⃣ APAGAR A PRÓPRIA PARTIDA
+    partida.delete()
+
+    messages.success(request, "Partida cancelada com sucesso!")
+    return redirect("partidas:minhas_partidas")
+
+
+    # 🔥 Agora sim cancelando de verdade!
+    partida.delete()
+
+    messages.success(request, "Partida cancelada com sucesso!")
+    return redirect('partidas:minhas_partidas')
+
 
     partida.delete()
     messages.success(request, "A partida foi cancelada com sucesso!")
