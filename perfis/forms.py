@@ -2,20 +2,22 @@ from django import forms
 from .models import Perfil
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-# Importação agora é SEGURA, pois o CustomSignupForm não está mais aqui
 from allauth.account.forms import SetPasswordForm, ChangePasswordForm
-from django_recaptcha.fields import ReCaptchaField  # <--- CORRIGIDO
-from django_recaptcha.widgets import ReCaptchaV2Checkbox  # <--- CORRIGIDO
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from allauth.account.forms import ResetPasswordForm
-# --- Formulário para Cadastro FOI MOVIDO PARA 'perfis/signup_form.py' ---
 
 
-# --- Formulário para Editar o Perfil ---
+# ============================================================
+# FORMULÁRIO DE EDITAR PERFIL
+# ============================================================
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = Perfil
         fields = [
             'foto',
+            'banner',
+            'banner_position',
             'mini_bio',
             'esportes_preferidos',
             'nivel_habilidade',
@@ -28,38 +30,110 @@ class PerfilForm(forms.ModelForm):
             'nivel_habilidade': 'Nível de Habilidade',
             'idade': 'Idade',
             'cidade': 'Cidade',
+            'banner': 'Banner do Perfil',
+            'banner_position': 'Posição do Banner',
+        }
+        widgets = {
+            # O valor de banner_position vem do JavaScript (drag to reposition)
+            'banner_position': forms.HiddenInput(),
         }
 
+    # ── Validação da FOTO DE PERFIL ──────────────────────────
+    def clean_foto(self):
+        from PIL import Image
+
+        foto = self.cleaned_data.get('foto')
+        if not foto or not hasattr(foto, 'file'):
+            return foto
+
+        if foto.size > 25 * 1024 * 1024:
+            raise forms.ValidationError("Imagem muito grande. Tamanho máximo: 25 MB.")
+
+        try:
+            foto.seek(0)
+            img = Image.open(foto)
+            img.load()
+            fmt = img.format
+        except Exception:
+            raise forms.ValidationError(
+                "Arquivo inválido ou corrompido. Envie uma imagem JPG, PNG, WEBP ou GIF."
+            )
+        finally:
+            foto.seek(0)
+
+        allowed_formats = {'JPEG', 'PNG', 'WEBP', 'GIF'}
+        if fmt not in allowed_formats:
+            raise forms.ValidationError(
+                f"Formato não permitido ({fmt}). Use JPG, PNG, WEBP ou GIF."
+            )
+
+        return foto
+
+    # ── Validação do BANNER ──────────────────────────────────
+    def clean_banner(self):
+        from PIL import Image
+
+        banner = self.cleaned_data.get('banner')
+        if not banner or not hasattr(banner, 'file'):
+            return banner
+
+        if banner.size > 50 * 1024 * 1024:  # era 10MB, agora 50MB
+            raise forms.ValidationError("Banner muito grande. Tamanho máximo: 50 MB.")
+
+        try:
+            banner.seek(0)
+            img = Image.open(banner)
+            img.load()
+            fmt = img.format
+        except Exception:
+            raise forms.ValidationError(
+                "Arquivo inválido ou corrompido. Envie JPG, PNG, WEBP ou GIF."
+            )
+        finally:
+            banner.seek(0)
+
+        allowed_formats = {'JPEG', 'PNG', 'WEBP', 'GIF'}
+        if fmt not in allowed_formats:
+            raise forms.ValidationError(
+                f"Formato não permitido ({fmt}). Use JPG, PNG, WEBP ou GIF."
+            )
+
+        return banner
+
+
+# ============================================================
+# FORMULÁRIO DE FILTRO DE USUÁRIOS
+# ============================================================
 class FiltroUsuarioForm(forms.Form):
-    # Campo de busca por nome, não obrigatório
     nome_usuario = forms.CharField(
         label='Buscar por nome',
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'Digite um nome de usuário...'})
     )
-
-    # Campo de filtro por desporto, não obrigatório
     esporte = forms.ChoiceField(
         label='Filtrar por Esportes',
         required=False,
         choices=[('', 'Todos os Esportes')] + Perfil.ESPORTES_CHOICES
     )
-
-    # Campo de filtro por nível, não obrigatório
     nivel = forms.ChoiceField(
         label='Filtrar por Nível',
         required=False,
         choices=[('', 'Todos os Níveis')] + Perfil.NIVEL_HABILIDADE_CHOICES
     )
 
+
+# ============================================================
+# FORMULÁRIOS DE SENHA / CAPTCHA
+# ============================================================
 class CustomSetPasswordForm(SetPasswordForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
+
 
 class SetPasswordCaptchaForm(SetPasswordForm):
     captcha = ReCaptchaField(
         widget=ReCaptchaV2Checkbox(attrs={
             'data-theme': 'dark',
-            'data-size': 'normal',  # ou 'compact' se quiser menor
+            'data-size': 'normal',
         })
     )
 
@@ -72,6 +146,8 @@ class SetPasswordCaptchaForm(SetPasswordForm):
             'new_password2',
             'captcha'
         )
+
+
 class ChangePasswordCaptchaForm(ChangePasswordForm):
     captcha = ReCaptchaField(
         widget=ReCaptchaV2Checkbox(attrs={
@@ -79,6 +155,7 @@ class ChangePasswordCaptchaForm(ChangePasswordForm):
             'data-size': 'normal',
         })
     )
+
 
 class CustomResetPasswordForm(ResetPasswordForm):
     captcha = ReCaptchaField(

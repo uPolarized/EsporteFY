@@ -1,0 +1,32 @@
+# VCS
+.git
+.gitignore
+
+# Python cache/artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+.venv/
+
+# Local runtime/state
+.env
+*.log
+build.log
+db.sqlite3
+media/
+staticfiles/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Secrets and local keys
+keys/
+
+# Docker metadata
+Docker-compose.yml

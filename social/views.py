@@ -5,13 +5,14 @@ import logging
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Conversa, Mensagem
+from .models import Conversa, Mensagem, LikeAtividade, Atividade
 from .forms import MensagemForm
 from .utils.image_moderation import analisar_imagem
 
@@ -145,4 +146,34 @@ def enviar_mensagem(request, username):
         "success": True, 
         "message": "Enviada",
         "msg_id": mensagem.id
+    })
+
+
+@login_required
+@require_POST
+def toggle_like_atividade(request, atividade_id):
+    """
+    API para curtir/descurtir uma atividade.
+    """
+    atividade = get_object_or_404(Atividade, id=atividade_id)
+    
+    like, created = LikeAtividade.objects.get_or_create(
+        atividade=atividade,
+        usuario=request.user
+    )
+    
+    if not created:
+        # Se já existia, deleta (unlike)
+        like.delete()
+        liked = False
+    else:
+        liked = True
+    
+    like_count = atividade.likes.count()
+    
+    return JsonResponse({
+        "success": True,
+        "liked": liked,
+        "like_count": like_count,
+        "cta_label": "Curtido" if liked else "Curtir",
     })

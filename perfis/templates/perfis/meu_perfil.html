@@ -1,34 +1,41 @@
-{% extends "account/base.html" %}
-{% load static %}
+﻿{% extends "account/base.html" %}
+{% load static custom_filters %}
 
-{% block title %}{{ object.user.username }} — Perfil{% endblock %}
+{% block title %}{{ object.user.username }} — Meu Perfil{% endblock %}
+{% block body_class %}profile-social{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-page">
-  <div class="container-fluid profile-layout-wrapper py-4">
-    <div class="profile-layout">
+<div class="profile-page" data-profile-user-id="{{ object.user.id }}" data-activity-page="1" data-activity-page-size="{{ activities_page_size|default:8 }}">
 
-      <!-- ===================== LADO ESQUERDO ===================== -->
-      <aside class="profile-left">
-        <div class="side-card">
+  <!-- BANNER -->
+  <div class="profile-banner-wrap">
+    {% if object.banner %}
+      <img src="{{ object.banner.url|media_bust }}" alt="Banner de {{ object.user.username }}" class="profile-banner-img" style="object-position: {{ object.banner_position|default:'50% 50%' }};">
+    {% else %}
+      <div class="banner-placeholder"></div>
+    {% endif %}
+  </div>
 
-          <div class="avatar-wrap">
-            {% if object.foto %}
-              <img src="{{ object.foto.url }}" alt="Avatar {{ object.user.username }}" class="avatar">
-            {% else %}
-              <div class="avatar placeholder">
-                <span>{{ object.user.username|first|upper }}</span>
-              </div>
-            {% endif %}
-          </div>
+  <!-- HEADER -->
+  <div class="profile-header">
+    <div class="profile-header-inner">
 
-          <h3 class="username">{{ object.user.username }}</h3>
-          <p class="email text-muted">{{ object.user.email }}</p>
+      <div class="avatar-wrap">
+        {% if object.foto %}
+          <img src="{{ object.foto.url|media_bust }}" alt="Avatar {{ object.user.username }}" class="avatar">
+        {% else %}
+          <div class="avatar placeholder">{{ object.user.username|first|upper }}</div>
+        {% endif %}
+        {% if object.verificado %}
+          <div class="avatar-badge" title="Verificado">✓</div>
+        {% endif %}
+      </div>
 
+<<<<<<< Updated upstream
           <div class="side-actions">
             <a href="{% url 'perfis:editar_perfil' %}" class="btn btn-primary btn-block">Editar Perfil</a>
           </div>
@@ -161,56 +168,247 @@
             </div>
           {% else %}
             <div class="muted small">Nenhum pedido pendente</div>
+=======
+      <div class="profile-info">
+        <div class="profile-name-row">
+          <h1 class="profile-username">{{ object.user.username }}</h1>
+          {% if object.user.is_staff %}
+            <span class="profile-tag tag-oficial">Fundador</span>
+          {% endif %}
+          {% if object.verificado %}
+            <span class="profile-tag tag-verified">✓ Verificado</span>
+>>>>>>> Stashed changes
           {% endif %}
         </div>
 
-      </aside>
+        {% if object.mini_bio %}
+          <p class="profile-bio">{{ object.mini_bio }}</p>
+        {% else %}
+          <p class="profile-bio">Nenhuma bio adicionada ainda.</p>
+        {% endif %}
+
+        <ul class="profile-meta">
+          <li class="meta-item"><strong>{{ total_partidas|default:"0" }}</strong> partidas</li>
+          <li class="meta-item"><strong>{{ total_amigos|default:"0" }}</strong> <button type="button" class="link-btn amigos-btn" onclick="abrirModalAmigos()">amigos</button></li>
+          <li class="meta-item">Membro desde {{ object.user.date_joined|date:"Y" }}</li>
+        </ul>
+      </div>
+
+      <div class="profile-actions">
+        <a href="{% url 'perfis:editar_perfil' %}" class="btn-primary-action">Editar Perfil</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="profile-stats-bar">
+    <div class="stats-bar-inner">
+      <div class="stat-block"><span class="s-num">{{ total_partidas|default:"0" }}</span><span class="s-label">Partidas</span></div>
+      <div class="stat-block"><span class="s-num">{{ partidas_finalizadas|default:"0" }}</span><span class="s-label">Finalizadas</span></div>
+      <div class="stat-block"><span class="s-num">{{ total_amigos|default:"0" }}</span><span class="s-label amigos-btn" onclick="abrirModalAmigos()">Amigos</span></div>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="content-grid">
+
+      <div class="profile-left-col">
+
+        <!-- ATIVIDADE -->
+        <div class="pcard" id="atividade">
+          <h4 class="pcard-title">Atividade Recente</h4>
+
+          <div class="activity-scroll" id="activityScroll">
+            {% if activities_page %}
+              <div id="activityList" class="activity-list">
+                {% for a in activities_page %}
+                  {% with obj=a.get_objeto %}
+                    <div class="activity-item">
+                      {% if obj and obj.quadra and obj.quadra.fotos.first %}
+                        <img src="{{ obj.quadra.fotos.first.imagem.url|media_bust }}" alt="{{ obj.quadra.nome }}" class="activity-quadra-img">
+                      {% endif %}
+                      <div class="act-dot"></div>
+                      <div class="act-body">
+                        <div class="act-title">{{ a.get_descricao_formatada }}</div>
+                        <div class="act-meta">{{ a.timestamp|date:"d/m/Y H:i" }}{% if obj and obj.quadra %} — {{ obj.quadra.nome }} ({{ obj.quadra.get_bairro_display }}){% endif %}</div>
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+              </div>
+
+              {% if activities_total > activities_page|length %}
+                <div class="load-more-wrap">
+                  <button id="loadMoreActivities" class="btn-see-all">Carregar mais</button>
+                </div>
+              {% endif %}
+
+            {% else %}
+              <div class="empty-activity">Nenhuma atividade recente.</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="profile-right-col">
+        <div class="pcard">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h4 class="pcard-title" style="margin-bottom:0">Amigos 👥</h4>
+            <span class="count-badge">{{ total_amigos|default:"0" }}</span>
+          </div>
+
+          {% if amigos_recentes %}
+            <div class="friends-grid-sidebar">
+              {% for item in amigos_recentes %}
+                <a href="{% url 'perfis:ver_perfil' username=item.amigo.username %}" class="friend-card-sidebar" data-friend-id="{{ item.amigo.id }}">
+                  <div class="friend-status-badge" id="status-badge-{{ item.amigo.id }}">{% if item.is_online %}<span class="status-online" title="Online">🟢</span>{% else %}<span>⚫</span>{% endif %}</div>
+                  {% if item.amigo.perfil.foto %}
+                    <img src="{{ item.amigo.perfil.foto.url|media_bust }}" alt="{{ item.amigo.username }}" class="friend-photo-sidebar">
+                  {% else %}
+                    <div class="friend-photo-sidebar placeholder">{{ item.amigo.username|first|upper }}</div>
+                  {% endif %}
+                  <span class="friend-name-sidebar">{{ item.amigo.username }}</span>
+                  <div class="friend-info-sidebar">{% if item.dias == 0 %}🆕{% elif item.dias == 1 %}1d{% else %}{{ item.dias }}d{% endif %}{% if item.partidas_comuns > 0 %} · ⚽{{ item.partidas_comuns }}{% endif %}</div>
+                </a>
+              {% endfor %}
+            </div>
+            {% if total_amigos > 9 %}
+              <button class="btn-see-all" onclick="abrirModalAmigos()">Ver todos ({{ total_amigos }})</button>
+            {% endif %}
+          {% else %}
+            <div style="text-align:center; padding:1.5rem 0; color:var(--muted); font-size:0.88rem;">Sem amigos ainda</div>
+          {% endif %}
+        </div>
+      </div>
 
     </div>
   </div>
 </div>
 
-<!-- ===================== MODAL DE AMIGOS ===================== -->
+<!-- MODAL AMIGOS -->
 <div id="modalAmigos" class="amigos-modal">
-  <div class="amigos-modal-content card-glass">
-    <span class="fechar" onclick="fecharModalAmigos()">&times;</span>
+  <div class="amigos-modal-content">
+    <button class="fechar" onclick="fecharModalAmigos()">×</button>
     <h3>Amigos de {{ object.user.username }}</h3>
 
     {% if object.amigos.all %}
       <ul class="amigos-lista">
         {% for amigo in object.amigos.all %}
           <li class="amigo-item">
-
             {% if amigo.perfil.foto %}
-              <img src="{{ amigo.perfil.foto.url }}" class="mini-avatar" alt="">
+              <img src="{{ amigo.perfil.foto.url|media_bust }}" class="mini-avatar" alt="">
             {% else %}
               <div class="mini-avatar placeholder">{{ amigo.username|first|upper }}</div>
             {% endif %}
-
-            <a href="{% url 'perfis:ver_perfil' username=amigo.username %}" class="amigo-nome">
-              {{ amigo.username }}
-            </a>
-
+            <a href="{% url 'perfis:ver_perfil' username=amigo.username %}" class="amigo-nome">{{ amigo.username }}</a>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p class="muted small">Nenhum amigo ainda.</p>
+      <p style="color:var(--muted); text-align:center; font-size:0.9rem;">Nenhum amigo ainda.</p>
     {% endif %}
   </div>
 </div>
 
 <script>
-function abrirModalAmigos() {
-  document.getElementById("modalAmigos").style.display = "flex";
+function abrirModalAmigos() { document.getElementById('modalAmigos').classList.add('open'); }
+function fecharModalAmigos() { document.getElementById('modalAmigos').classList.remove('open'); }
+window.addEventListener('click', function(e){ const modal=document.getElementById('modalAmigos'); if(e.target===modal) fecharModalAmigos(); });
+
+function renderActivityItem(item) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'activity-item';
+
+  if (item.quadra_foto_url) {
+    const img = document.createElement('img');
+    img.className = 'activity-quadra-img';
+    img.src = item.quadra_foto_url;
+    img.alt = item.quadra_nome || 'Quadra';
+    wrapper.appendChild(img);
+  }
+
+  const dot = document.createElement('div');
+  dot.className = 'act-dot';
+  wrapper.appendChild(dot);
+
+  const body = document.createElement('div');
+  body.className = 'act-body';
+
+  const title = document.createElement('div');
+  title.className = 'act-title';
+  title.textContent = item.descricao || item.verbo || 'Atividade registrada';
+
+  const meta = document.createElement('div');
+  meta.className = 'act-meta';
+  meta.textContent = `${item.timestamp}` + (item.quadra_nome ? ` — ${item.quadra_nome} (${item.quadra_bairro || ''})` : '');
+
+  body.appendChild(title);
+  body.appendChild(meta);
+  wrapper.appendChild(body);
+
+  return wrapper;
 }
-function fecharModalAmigos() {
-  document.getElementById("modalAmigos").style.display = "none";
+
+function atualizarStatusAmigos() {
+  const cards = document.querySelectorAll('.friend-card-sidebar[data-friend-id]');
+  if (!cards.length) return;
+  const ids = Array.from(cards).map(c => c.dataset.friendId).join(',');
+  fetch(`/perfis/api/status/?ids=${ids}`)
+    .then(r => r.json())
+    .then(data => {
+      for (const [userId, isOnline] of Object.entries(data)) {
+        const badge = document.getElementById(`status-badge-${userId}`);
+        if (badge) {
+          badge.innerHTML = isOnline
+            ? '<span class="status-online" title="Online agora">🟢</span>'
+            : '<span title="Offline">⚫</span>';
+        }
+      }
+    })
+    .catch(err => console.error('Status tickrate error:', err));
 }
-window.onclick = function(event) {
-  const modal = document.getElementById("modalAmigos");
-  if (event.target === modal) modal.style.display = "none";
-};
+
+function loadMoreActivities() {
+  const pageInfo = document.querySelector('.profile-page');
+  if (!pageInfo) return;
+
+  let activityPage = parseInt(pageInfo.dataset.activityPage, 10) || 1;
+  const pageSize = parseInt(pageInfo.dataset.activityPageSize, 10) || 8;
+  const userId = pageInfo.dataset.profileUserId;
+
+  const nextPage = activityPage + 1;
+  fetch(`/perfis/api/atividades/?user_id=${userId}&page=${nextPage}&page_size=${pageSize}`)
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('activityList');
+      if (!list || !data.activities) return;
+
+      data.activities.forEach(item => {
+        list.appendChild(renderActivityItem(item));
+      });
+
+      activityPage = nextPage;
+      pageInfo.dataset.activityPage = activityPage;
+
+      if (list.children.length >= data.total) {
+        const btn = document.getElementById('loadMoreActivities');
+        if (btn) btn.style.display = 'none';
+      }
+    })
+    .catch(err => console.error('Erro ao carregar mais atividades:', err));
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  const moreBtn = document.getElementById('loadMoreActivities');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', loadMoreActivities);
+  }
+
+  setInterval(atualizarStatusAmigos, 15000);
+  atualizarStatusAmigos();
+});
 </script>
 
 {% endblock %}

@@ -1,0 +1,119 @@
+{% load account %}
+{% load i18n %}
+{% user_display user as user_display %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirme seu e-mail - EsporteFY</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f3f5f7;
+      font-family: Verdana, Geneva, sans-serif;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 620px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    .header {
+      padding: 26px 24px;
+      background: linear-gradient(120deg, #ff4b2b 0%, #ff416c 100%);
+      color: #ffffff;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+    .content {
+      padding: 28px 24px;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .content p {
+      margin: 0 0 14px;
+    }
+    .cta-wrap {
+      margin: 24px 0;
+      text-align: center;
+    }
+    .cta {
+      display: inline-block;
+      padding: 12px 22px;
+      background: #ef4444;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .features {
+      margin: 12px 0 0;
+      padding-left: 18px;
+    }
+    .features li {
+      margin: 6px 0;
+    }
+    .fallback {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      color: #4b5563;
+      word-break: break-all;
+    }
+    .footer {
+      border-top: 1px solid #e5e7eb;
+      background: #fafafa;
+      color: #6b7280;
+      text-align: center;
+      padding: 16px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Bem-vindo ao EsporteFY</h1>
+    </div>
+
+    <div class="content">
+      <p>Ola <strong>{{ user_display }}</strong>, sua conta foi criada com sucesso.</p>
+      <p>Para ativar e liberar todos os recursos, confirme seu e-mail no botao abaixo.</p>
+
+      <div class="cta-wrap">
+        <a class="cta" href="{{ activate_url }}">Confirmar e-mail</a>
+      </div>
+
+      <p>Depois da confirmacao, voce podera:</p>
+      <ul class="features">
+        <li>Criar e participar de partidas em tempo real.</li>
+        <li>Encontrar jogadores proximos da sua regiao.</li>
+        <li>Acompanhar suas atividades esportivas.</li>
+      </ul>
+
+      <p style="margin-top: 18px;">Se voce nao criou esta conta, pode ignorar este e-mail.</p>
+
+      <div class="fallback">
+        Se o botao nao funcionar, copie e cole este link no navegador:<br>
+        {{ activate_url }}
+      </div>
+    </div>
+
+    <div class="footer">
+      EsporteFY
+    </div>
+  </div>
+</body>
+</html>

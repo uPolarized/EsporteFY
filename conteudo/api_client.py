@@ -40,7 +40,7 @@ def buscar_noticias_esportivas():
     # ------------------------------------
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
         

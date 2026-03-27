@@ -1,6 +1,7 @@
 {% extends "account/base.html" %}
-{% load static %}
-{% load cache %}  {% load l10n %}   {% block title %}Seu Feed - EsporteFY{% endblock %}
+{% load static cache l10n custom_filters %}
+{% block title %}Seu Feed - EsporteFY{% endblock %}
+{% block body_class %}feed-scroll-locked{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/feed.css' %}">
@@ -9,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 feed-shell">
   <div class="row gx-4">
     
     <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none">
@@ -25,173 +26,329 @@
     </div>
 
     <div class="col-lg-3 order-md-2 order-lg-1">
-      <h2 class="section-title"><i class="bi bi-activity"></i> Feed de Atividades</h2>
-      
-      <div id="feed-lista-container">
-        
-        {% for atividade in atividades %}
-        <div class="card shadow-sm mb-3 post-card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              {% if atividade.ator.perfil.foto %}
-                <img src="{{ atividade.ator.perfil.foto.url }}" class="rounded-circle me-3" width="44" height="44" style="object-fit: cover;">
-              {% else %}
-                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 44px; height: 44px;">
-                  <span class="fw-bold">{{ atividade.ator.username|first|upper }}</span>
-                </div>
-              {% endif %}
-
-              <div class="flex-grow-1">
-                <p class="mb-0 lh-sm small">
-                  {% if "agora são amigos" in atividade.verbo %}
-                    <i class="bi bi-people-fill text-success me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> e {{ atividade.alvo }} agora são amigos 🤝
-                  {% elif "criou" in atividade.verbo %}
-                    <i class="bi bi-dribbble text-primary me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🏟️
-                  {% elif "entrou" in atividade.verbo %}
-                    <i class="bi bi-person-check-fill text-success me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ✅
-                  {% elif "saiu" in atividade.verbo %}
-                    <i class="bi bi-door-open-fill text-warning me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} 🚪
-                  {% elif "cancelou" in atividade.verbo %}
-                    <i class="bi bi-x-octagon-fill text-danger me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %} ❌
-                  {% elif "avaliou" in atividade.verbo %}
-  <i class="bi bi-star-fill text-warning me-1"></i>
-  <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-  {% if atividade.alvo %}
-    <strong class="text-info">"{{ atividade.alvo }}"</strong>
-  {% endif %}
-  
-
-
-                  {% else %}
-                    <i class="bi bi-lightning-charge-fill text-info me-1"></i>
-                    <strong>{{ atividade.ator.username }}</strong> {{ atividade.verbo }}
-                    {% if atividade.alvo %}<strong>"{{ atividade.alvo }}"</strong>{% endif %}
-                  {% endif %}
-                </p>
-
-                <small class="text-muted">
-                  <i class="bi bi-clock me-1"></i>{{ atividade.timestamp|timesince }} atrás
-                </small>
-              </div>
+      <section id="feed-atividades" class="activity-feed-shell">
+        <div class="activity-feed-header">
+          <div class="activity-feed-header__top">
+            <div>
+              <p class="activity-kicker">Comunidade</p>
+              <h2 class="section-title activity-feed-title"><i class="bi bi-activity"></i> Atividades</h2>
+            </div>
+            <div class="activity-toolbar">
+              <button type="button" class="activity-icon-btn" id="feed-toggle-filters" aria-label="Mostrar filtros" aria-pressed="false" title="Mostrar filtros">
+                <i class="bi bi-sliders"></i>
+              </button>
             </div>
           </div>
+          <p class="activity-subtitle">Movimentacoes recentes dos ultimos 7 dias.</p>
         </div>
-        {% empty %}
-        <div class="no-activity-card text-center text-muted">
-          Nenhuma atividade na comunidade ainda.
+
+        <div class="activity-filter-row is-collapsed" id="feed-filter-row">
+          <button type="button" class="activity-filter-pill is-active" data-filter="all">
+            Tudo <span data-count-for="all">{{ activity_counts.all|default:0 }}</span>
+          </button>
+          <button type="button" class="activity-filter-pill" data-filter="partidas">
+            Partidas <span data-count-for="partidas">{{ activity_counts.partidas|default:0 }}</span>
+          </button>
+          <button type="button" class="activity-filter-pill" data-filter="amizades">
+            Amizades <span data-count-for="amizades">{{ activity_counts.amizades|default:0 }}</span>
+          </button>
+          <button type="button" class="activity-filter-pill" data-filter="avaliacoes">
+            Avaliacoes <span data-count-for="avaliacoes">{{ activity_counts.avaliacoes|default:0 }}</span>
+          </button>
         </div>
-        {% endfor %} </div> </div> <div class="col-lg-6 order-md-1 order-lg-2">
-      <div class="text-center d-none d-lg-block">
+
+        <div id="feed-filter-empty" class="activity-empty-filter d-none">
+          Nenhuma atividade desse tipo apareceu nos ultimos dias.
+        </div>
+
+        <div id="feed-sections" class="activity-sections-scroll">
+          {% for section in activity_sections %}
+            <section class="activity-period" data-section-key="{{ section.key }}" id="activity-section-{{ section.key }}">
+              <div class="activity-period__header">
+                <span>{{ section.label }}</span>
+                <small>{{ section.items|length }} item{{ section.items|length|pluralize }}</small>
+              </div>
+
+              <div class="activity-period__items" id="activity-section-items-{{ section.key }}">
+                {% for item in section.items %}
+                  <article class="activity-card activity-card--{{ item.kind }}{% if item.is_past %} activity-card--past{% endif %}" data-category="{{ item.category }}" data-activity-id="{{ item.id }}" style="--activity-delay: {{ forloop.counter0 }}0ms;">
+                    <div class="activity-card__top">
+                      {% if item.actor_avatar_url %}
+                        <img src="{{ item.actor_avatar_url|media_bust }}" alt="{{ item.actor_name }}" class="activity-card__avatar">
+                      {% else %}
+                        <div class="activity-card__avatar activity-card__avatar--placeholder">{{ item.actor_initial }}</div>
+                      {% endif %}
+
+                      <div class="activity-card__content">
+                        <div class="activity-card__badge">
+                          <i class="bi {{ item.icon }}"></i>
+                          {{ item.badge_label }}
+                        </div>
+                        <h3 class="activity-card__headline">{{ item.headline }}</h3>
+                        <p class="activity-card__description">{{ item.description }}</p>
+                      </div>
+
+                      <div class="activity-card__time">{{ item.timestamp_label }}</div>
+                    </div>
+
+                    {% if item.meta %}
+                      <div class="activity-card__meta">
+                        {% for meta_item in item.meta %}
+                          <span>{{ meta_item }}</span>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    {% if item.stats %}
+                      <div class="activity-card__stats">
+                        {% for stat in item.stats %}
+                          <div class="activity-card__stat">
+                            <small>{{ stat.label }}</small>
+                            <strong>{{ stat.value }}</strong>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    <div class="activity-card__actions">
+                      {% if item.cta_type == 'modal' and item.cta_target %}
+                        <button type="button" class="activity-card__cta" data-bs-toggle="modal" data-bs-target="#{{ item.cta_target }}">
+                          {{ item.cta_label }}
+                        </button>
+                      {% elif item.cta_url %}
+                        <a href="{{ item.cta_url }}" class="activity-card__cta">{{ item.cta_label }}</a>
+                      {% endif %}
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            </section>
+          {% empty %}
+            <div class="activity-empty-state" id="feed-empty-state">
+              <div class="activity-empty-state__icon"><i class="bi bi-stars"></i></div>
+              <h3>A comunidade ainda esta silenciosa</h3>
+              <p>Crie uma partida ou encontre jogadores para começar a movimentar o feed.</p>
+              <div class="activity-empty-state__actions">
+                <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary">Criar Partida</a>
+                <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-secondary">Encontrar Jogadores</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div> <div class="col-lg-6 order-md-1 order-lg-2">
+      <div id="feed-partidas" class="feed-center-rail">
+      <section class="center-intro-panel mb-4">
+      <div class="dashboard-hero">
         {% now "H" as hora_atual %}
-        <h1 class="mb-4 welcome-header">
+        <h1 class="dashboard-hero__title">
           {% if hora_atual|add:"0" < 12 %}☀️Bom dia
           {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
           {% else %}🌙Boa noite
-          {% endif %}!
+          {% endif %}, {{ user.first_name|default:user.username }}
         </h1>
-      </div>
+        <p class="dashboard-hero__subtitle">Seu painel em tempo real para entrar no próximo jogo.</p>
 
-      <div class="card shadow-sm mb-4 action-card">
-        <div class="card-header text-center">Acesso Rápido</div>
-        <div class="card-body d-flex flex-wrap gap-2">
-          <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary flex-grow-1">
-            <i class="bi bi-plus-circle-fill me-2"></i>Criar Partida
-          </a>
-          <a href="{% url 'partidas:minhas_partidas' %}" class="btn btn-outline-secondary flex-grow-1">
-            <i class="bi bi-calendar-check me-2"></i>Ver Minhas Partidas
+        <div class="dashboard-hero__stats">
+          <div class="hero-stat">
+            <small>Partidas hoje</small>
+            <strong>{{ partidas_hoje_count }}</strong>
+          </div>
+          <div class="hero-stat">
+            <small>Jogadores online</small>
+            <strong>{{ jogadores_online_count }}</strong>
+          </div>
+          <div class="hero-stat">
+            <small>Quadras próximas</small>
+            <strong>{{ quadras_proximas_count }}</strong>
+          </div>
+        </div>
+
+        <div class="dashboard-hero__actions">
+          <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-people-fill me-2"></i>Encontrar jogadores
           </a>
         </div>
       </div>
 
-      <div class="section-header text-center mb-4">
+      <div class="section-header text-center center-intro-panel__title">
         <h2 class="section-title m-0">
-          <i class="bi bi-dribbble me-2"></i>Partidas Abertas
+          <i class="bi"></i>Próximas partidas
         </h2>
       </div>
 
-      <div class="filtro-bar d-flex justify-content-end align-items-center flex-wrap gap-2 mb-4">
+      <div class="filtro-panel">
+      <div class="filtro-bar d-flex justify-content-end align-items-center flex-wrap gap-2">
         <button id="toggle-minhas-partidas" class="btn-filtro-ocultar">
           <i class="bi bi-eye-slash me-1"></i> Ocultar minhas partidas
         </button>
+        <a href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if not nearby_only %}&nearby=1{% endif %}" class="btn-filtro-chip {% if nearby_only %}is-active{% endif %}">
+          <i class="bi bi-geo-alt-fill me-1"></i> Perto de você
+        </a>
         <div class="dropdown">
           <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <i class="bi bi-geo-alt me-1"></i> Bairro: <strong>{{ bairro_atual_nome }}</strong>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="?bairro=todos">Todos os Bairros</a></li>
+            <li><a class="dropdown-item" href="?bairro=todos&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">Todos os Bairros</a></li>
             {% for valor, nome in bairros_disponiveis %}
-            <li><a class="dropdown-item" href="?bairro={{ valor }}">{{ nome }}</a></li>
+            <li><a class="dropdown-item" href="?bairro={{ valor }}&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">{{ nome }}</a></li>
             {% endfor %}
           </ul>
         </div>
-      </div>
-
-      {% for partida in partidas %}
-      <div class="card shadow-sm mb-3 match-card fade-card"
-        data-bs-toggle="modal"
-        data-bs-target="#detalhesPartidaModal{{ partida.id }}"
-        style="cursor: pointer;"
-        data-organizador="{% if partida.organizador == user %}true{% else %}false{% endif %}">
-
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h5 class="card-title">{{ partida.titulo }}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">
-                <i class="bi bi-geo-alt"></i> {{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}
-              </h6>
-              <p class="card-text mb-2">
-                <i class="bi bi-calendar-event"></i> {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
-              </p>
-            </div>
-            <div class="text-end">
-              {% if partida.vagas_restantes == 1 %}
-              <span class="badge bg-danger fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-              {% elif partida.vagas_restantes <= 3 %}
-              <span class="badge bg-warning text-dark fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-              {% else %}
-              <span class="badge bg-primary fs-6">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
-              {% endif %}
-              <small class="d-block text-muted">Jogadores</small>
-            </div>
-          </div>
-          <hr>
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              {% if user == partida.organizador %}
-              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
-                Cancelar Partida
-              </button>
-              {% elif user in partida.jogadores_confirmados.all %}
-              <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="btn btn-danger">Sair da Partida</a>
-              {% elif partida.vagas_restantes > 0 %}
-              <a href="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="btn btn-success">Participar</a>
-              {% else %}
-              <button class="btn btn-secondary" disabled>Lotado</button>
-              {% endif %}
-            </div>
-            <button type="button" class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#jogadoresModal{{ partida.id }}">
-              Ver jogadores confirmados ({{ partida.vagas_preenchidas }})
-            </button>
+        <div class="dropdown">
+          <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-dribbble me-1"></i> Esporte: <strong>{{ esporte_atual_nome }}</strong>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte=todos&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">Todos os Esportes</a></li>
+            {% for esporte in esportes_disponiveis %}
+            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte.id }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">{{ esporte.nome }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="dropdown">
+          <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-calendar-event me-1"></i> Quando: <strong>{{ data_filtro_nome }}</strong>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end filtro-data-menu p-3">
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=all{% if nearby_only %}&nearby=1{% endif %}">Qualquer data</a>
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=today{% if nearby_only %}&nearby=1{% endif %}">Hoje</a>
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=tomorrow{% if nearby_only %}&nearby=1{% endif %}">Amanhã</a>
+            <div class="dropdown-divider"></div>
+            <form method="get" class="filtro-data-form">
+              <input type="hidden" name="bairro" value="{{ bairro_atual }}">
+              <input type="hidden" name="esporte" value="{{ esporte_atual }}">
+              {% if nearby_only %}<input type="hidden" name="nearby" value="1">{% endif %}
+              <input type="hidden" name="date_filter" value="custom">
+              <label class="filtro-data-form__label" for="custom-date-input">Data específica</label>
+              <input id="custom-date-input" type="date" name="custom_date" class="form-control form-control-sm filtro-data-form__input" value="{{ custom_date }}">
+              <label class="filtro-data-form__label mt-2" for="custom-time-input">Horário mínimo</label>
+              <input id="custom-time-input" type="time" name="custom_time" class="form-control form-control-sm filtro-data-form__input" value="{{ custom_time }}">
+              <button type="submit" class="btn btn-primary btn-sm w-100 mt-3">Aplicar</button>
+            </form>
           </div>
         </div>
       </div>
+      </div>
+      </section>
+
+      <div class="matches-grid">
+      {% for partida in partidas %}
+      {% with foto=partida.quadra.foto_principal %}
+      <div class="match-card fade-card"
+        data-bs-toggle="modal"
+        data-bs-target="#detalhesPartidaModal{{ partida.id }}"
+        data-organizador="{% if partida.organizador == user %}true{% else %}false{% endif %}">
+
+        <!-- Foto da quadra -->
+        <div class="match-card__cover">
+          {% if foto %}
+            <img src="{{ foto.imagem.url }}" alt="{{ partida.quadra.nome }}" class="match-card__cover-img" loading="lazy">
+          {% else %}
+            <div class="match-card__cover-placeholder">
+              <i class="bi bi-building"></i>
+            </div>
+          {% endif %}
+          <div class="match-card__cover-overlay">
+            <span class="match-card__sport-chip">
+              <i class="bi bi-dribbble"></i> {{ partida.esporte.nome }}
+            </span>
+            {% if partida.vagas_restantes == 0 %}
+              <span class="match-card__vagas-chip match-card__vagas-chip--lotado"><i class="bi bi-lock-fill"></i> LOTADO</span>
+            {% elif partida.vagas_restantes <= 2 %}
+              <span class="match-card__vagas-chip match-card__vagas-chip--quase">
+                {{ partida.vagas_restantes }} VAGA{% if partida.vagas_restantes > 1 %}S{% endif %}
+              </span>
+            {% else %}
+              <span class="match-card__vagas-chip match-card__vagas-chip--aberta">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="match-card__body">
+          <h5 class="match-card__title">{{ partida.titulo }}</h5>
+          <div class="match-card__meta-row">
+            <span class="match-card__meta-item">
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ partida.quadra.nome }} · {{ partida.quadra.get_bairro_display }}
+            </span>
+            <span class="match-card__meta-item">
+              <i class="bi bi-calendar-event"></i>
+              {{ partida.data_hora|date:"d/m \\à\\s H:i" }}
+            </span>
+          </div>
+
+          <!-- Barra de progressso de vagas -->
+          <div class="match-card__progress-wrap">
+            <div class="match-card__progress-track">
+              <div class="match-card__progress-fill
+                {% if partida.vagas_restantes == 0 %}match-card__progress-fill--lotado
+                {% elif partida.vagas_restantes <= 2 %}match-card__progress-fill--quase{% endif %}"
+                style="width: {% widthratio partida.vagas_preenchidas partida.jogadores_necessarios 100 %}%">
+              </div>
+            </div>
+            <span class="match-card__progress-label">
+              {{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }} jogadores
+            </span>
+          </div>
+
+          <!-- Ações -->
+          <div class="match-card__actions" onclick="event.stopPropagation()">
+            {% if user == partida.organizador %}
+              <button type="button" class="match-btn match-btn--cancel"
+                data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
+                <i class="bi bi-x-circle me-1"></i>Cancelar
+              </button>
+            {% elif user in partida.jogadores_confirmados.all %}
+              <form method="post" action="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="match-btn match-btn--leave">
+                  <i class="bi bi-box-arrow-left me-1"></i>Sair
+                </button>
+              </form>
+            {% elif partida.vagas_restantes > 0 %}
+              <form method="post" action="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="match-btn match-btn--join">
+                  <i class="bi bi-check-circle me-1"></i>Participar
+                </button>
+              </form>
+            {% else %}
+              <button class="match-btn match-btn--full" disabled>
+                <i class="bi bi-lock-fill me-1"></i>Lotado
+              </button>
+            {% endif %}
+            <div class="match-players-mini" aria-label="{{ partida.vagas_preenchidas }} jogadores confirmados">
+              <div class="match-players-mini__icons">
+                {% for jogador in partida.jogadores_confirmados.all|slice:":3" %}
+                  {% if jogador.perfil.foto %}
+                    <img src="{{ jogador.perfil.foto.url|media_bust }}" alt="{{ jogador.username }}" class="match-players-mini__avatar">
+                  {% else %}
+                    <span class="match-players-mini__avatar match-players-mini__avatar--placeholder">{{ jogador.username|first|upper }}</span>
+                  {% endif %}
+                {% empty %}
+                  <span class="match-players-mini__avatar match-players-mini__avatar--placeholder">-</span>
+                {% endfor %}
+              </div>
+              <span class="match-players-mini__count">{{ partida.vagas_preenchidas }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endwith %}
       {% empty %}
-      <div class="card no-match-card">
+      <div class="card no-match-card matches-grid__empty">
         <div class="card-body text-center text-muted">
           <i class="bi bi-emoji-frown me-2"></i> Nenhuma partida encontrada. Que tal <a href="{% url 'partidas:criar_partida' %}">criar uma</a>?
         </div>
       </div>
-      {% endfor %} {% for partida in partidas %}
+      {% endfor %}
+      </div>
+
+      </div>
+      {% for partida in partidas %}
       <div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
@@ -207,7 +364,7 @@
                 {% for jogador in partida.jogadores_confirmados.all %}
                 <li class="list-group-item d-flex align-items-center">
                   {% if jogador.perfil.foto %}
-                    <img src="{{ jogador.perfil.foto.url }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                    <img src="{{ jogador.perfil.foto.url|media_bust }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
                   {% else %}
                     <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
                       {{ jogador.username|first|upper }}
@@ -287,9 +444,15 @@
                 {% if user == partida.organizador %}
                   
                 {% elif user in partida.jogadores_confirmados.all %}
-                  <a href="{% url 'partidas:sair_da_partida' partida.id %}" class="btn btn-danger">Sair da Partida</a>
+                  <form method="post" action="{% url 'partidas:sair_da_partida' partida.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sair da Partida</button>
+                  </form>
                 {% elif partida.vagas_restantes > 0 %}
-                  <a href="{% url 'partidas:participar_partida' partida.id %}" class="btn btn-success">Participar</a>
+                  <form method="post" action="{% url 'partidas:participar_partida' partida.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Participar</button>
+                  </form>
                 {% else %}
                   <button class="btn btn-secondary" disabled>Partida Lotada</button>
                 {% endif %}
@@ -300,11 +463,39 @@
       </div>
       {% endfor %}
 
+      {% for partida in partidas %}
+      <div class="modal fade" id="modalCancelarPartida{{ partida.id }}" tabindex="-1" aria-labelledby="modalCancelarLabel{{ partida.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="modalCancelarLabel{{ partida.id }}">
+                ⚠️ Cancelar Partida
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <p>Tem certeza que deseja cancelar a partida <strong>{{ partida.titulo }}</strong>?</p>
+              <p class="text-muted mb-0"><small>Esta ação não pode ser desfeita e todos os jogadores inscritos serão notificados.</small></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+              <form method="post" action="{% url 'partidas:cancelar_partida' partida.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Cancelar Partida</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
     </div> <div class="col-lg-3 order-md-3 order-lg-3">
+      <div id="feed-noticias" class="feed-right-rail">
+      <div class="right-unified-panel">
       
       {% cache 600 clima_widget %}
       {% if clima_atual %}
-      <div class="weather-card mb-4 text-center">
+      <div class="weather-card text-center">
         <div class="weather-header position-relative">
           <h5 class="weather-title mb-0">Tempo em Maricá</h5>
           <div class="weather-icon-wrapper-right">
@@ -342,7 +533,7 @@
           </div>
         </a>
         {% empty %}
-        <div class="card">
+        <div class="card news-card">
           <div class="card-body text-center text-muted">
             <i class="bi bi-wifi-off me-2"></i> Não foi possível carregar as notícias.
           </div>
@@ -350,6 +541,8 @@
         {% endfor %}
       </div>
       {% endcache %} 
+      </div>
+      </div>
     </div> 
     </div> 
     </div> 
@@ -359,7 +552,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   const toggleBtn = document.getElementById('toggle-minhas-partidas');
   const partidas = document.querySelectorAll('.match-card');
+  const feedFilterButtons = document.querySelectorAll('.activity-filter-pill');
+  const feedFilterRow = document.getElementById('feed-filter-row');
+  const feedFilterEmpty = document.getElementById('feed-filter-empty');
+  const feedSectionsRoot = document.getElementById('feed-sections');
+  const activityFeedShell = document.querySelector('.activity-feed-shell');
+  const feedToggleFilters = document.getElementById('feed-toggle-filters');
   let ocultando = false;
+  let activeFeedFilter = 'all';
 
   toggleBtn.addEventListener('click', () => {
     ocultando = !ocultando;
@@ -381,57 +581,299 @@ document.addEventListener('DOMContentLoaded', () => {
       ? '<i class="bi bi-eye"></i> Mostrar minhas partidas'
       : '<i class="bi bi-eye-slash"></i> Ocultar minhas partidas';
   });
+
+  function escapeFeedValue(value) {
+    if (typeof window.escapeHtml === 'function') {
+      return window.escapeHtml(value == null ? '' : String(value));
+    }
+    const div = document.createElement('div');
+    div.innerText = value == null ? '' : String(value);
+    return div.innerHTML;
+  }
+
+  function renderActivityAvatar(data) {
+    if (data.actor_avatar_url) {
+      const url = `${data.actor_avatar_url}${String(data.actor_avatar_url).includes('?') ? '&' : '?'}v=${Date.now()}`;
+      return `<img src="${escapeFeedValue(url)}" alt="${escapeFeedValue(data.actor_name)}" class="activity-card__avatar">`;
+    }
+    return `<div class="activity-card__avatar activity-card__avatar--placeholder">${escapeFeedValue(data.actor_initial || '?')}</div>`;
+  }
+
+  function renderActivityMeta(data) {
+    if (!Array.isArray(data.meta) || !data.meta.length) return '';
+    return `<div class="activity-card__meta">${data.meta.map((item) => `<span>${escapeFeedValue(item)}</span>`).join('')}</div>`;
+  }
+
+  function renderActivityStats(data) {
+    if (!Array.isArray(data.stats) || !data.stats.length) return '';
+    return `
+      <div class="activity-card__stats">
+        ${data.stats.map((stat) => `
+          <div class="activity-card__stat">
+            <small>${escapeFeedValue(stat.label || '')}</small>
+            <strong>${escapeFeedValue(stat.value || '')}</strong>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
+  function renderActivityCta(data) {
+    if (data.cta_type === 'like') {
+      const likeClass = data.user_liked ? ' is-liked' : '';
+      const likeCount = data.like_count || 0;
+      return `<button type="button" class="activity-card__cta activity-card__like${likeClass}" data-activity-id="${escapeFeedValue(data.activity_id)}" data-liked="${data.user_liked}" data-like-count="${likeCount}">
+        <i class="bi bi-heart-fill"></i>
+        <span class="like-count">${likeCount}</span>
+      </button>`;
+    }
+    if (data.cta_type === 'modal' && data.cta_target && document.getElementById(data.cta_target)) {
+      return `<button type="button" class="activity-card__cta" data-bs-toggle="modal" data-bs-target="#${escapeFeedValue(data.cta_target)}">${escapeFeedValue(data.cta_label || 'Ver partida')}</button>`;
+    }
+    if (data.cta_url) {
+      return `<a href="${escapeFeedValue(data.cta_url)}" class="activity-card__cta">${escapeFeedValue(data.cta_label || 'Abrir')}</a>`;
+    }
+    return '';
+  }
+
+  function renderActivityCard(data) {
+    const pastClass = data.is_past ? ' activity-card--past' : '';
+    return `
+      <article class="activity-card activity-card--${escapeFeedValue(data.kind || 'generic')}${pastClass}" data-category="${escapeFeedValue(data.category || 'geral')}" data-activity-id="${escapeFeedValue(data.id)}" style="--activity-delay: 0ms;">
+        <div class="activity-card__top">
+          ${renderActivityAvatar(data)}
+          <div class="activity-card__content">
+            <div class="activity-card__badge">
+              <i class="bi ${escapeFeedValue(data.icon || 'bi-lightning-charge-fill')}"></i>
+              ${escapeFeedValue(data.badge_label || 'Atividade')}
+            </div>
+            <h3 class="activity-card__headline">${escapeFeedValue(data.headline || '')}</h3>
+            <p class="activity-card__description">${escapeFeedValue(data.description || '')}</p>
+          </div>
+          <div class="activity-card__time">${escapeFeedValue(data.timestamp_label || 'agora')}</div>
+        </div>
+        ${renderActivityMeta(data)}
+        ${renderActivityStats(data)}
+        <div class="activity-card__actions">${renderActivityCta(data)}</div>
+      </article>`;
+  }
+
+  function updateFilterCounter(category) {
+    const allCounter = document.querySelector('[data-count-for="all"]');
+    if (allCounter) {
+      allCounter.textContent = String((parseInt(allCounter.textContent, 10) || 0) + 1);
+    }
+
+    if (category && ['partidas', 'amizades', 'avaliacoes'].includes(category)) {
+      const counter = document.querySelector(`[data-count-for="${category}"]`);
+      if (counter) {
+        counter.textContent = String((parseInt(counter.textContent, 10) || 0) + 1);
+      }
+    }
+  }
+
+  function updateFeedVisibility() {
+    const cards = document.querySelectorAll('.activity-card');
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const shouldShow = activeFeedFilter === 'all' || card.dataset.category === activeFeedFilter;
+      card.classList.toggle('d-none', !shouldShow);
+      if (shouldShow) visibleCount += 1;
+    });
+
+    document.querySelectorAll('.activity-period').forEach((section) => {
+      const visibleCards = section.querySelectorAll('.activity-card:not(.d-none)');
+      section.classList.toggle('d-none', visibleCards.length === 0);
+    });
+
+    if (feedFilterEmpty) {
+      feedFilterEmpty.classList.toggle('d-none', visibleCount !== 0);
+    }
+  }
+
+  feedFilterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      activeFeedFilter = button.dataset.filter || 'all';
+      feedFilterButtons.forEach((item) => item.classList.toggle('is-active', item === button));
+      updateFeedVisibility();
+    });
+  });
+
+  if (feedToggleFilters) {
+    feedToggleFilters.addEventListener('click', () => {
+      const expanded = !feedFilterRow.classList.contains('is-collapsed');
+      feedFilterRow.classList.toggle('is-collapsed', expanded);
+      feedToggleFilters.setAttribute('aria-pressed', String(!expanded));
+      feedToggleFilters.classList.toggle('is-active', !expanded);
+    });
+  }
+
+  if (activityFeedShell && feedSectionsRoot && window.innerWidth > 768) {
+    activityFeedShell.addEventListener('wheel', (event) => {
+      const canScrollInside = feedSectionsRoot.scrollHeight > feedSectionsRoot.clientHeight;
+      if (!canScrollInside) return;
+
+      const goingDown = event.deltaY > 0;
+      const atTop = feedSectionsRoot.scrollTop <= 0;
+      const atBottom = Math.ceil(feedSectionsRoot.scrollTop + feedSectionsRoot.clientHeight) >= feedSectionsRoot.scrollHeight;
+
+      if ((goingDown && !atBottom) || (!goingDown && !atTop)) {
+        event.preventDefault();
+        feedSectionsRoot.scrollTop += event.deltaY;
+      }
+    }, { passive: false });
+  }
+
+  window.feedUi = {
+    renderActivityCard,
+    updateFilterCounter,
+    updateFeedVisibility,
+    getActiveFilter: () => activeFeedFilter,
+  };
+
+  updateFeedVisibility();
+  setupLikeButtons();
+
+  // Setup like buttons
+  function setupLikeButtons() {
+    const likeButtons = document.querySelectorAll('.activity-card__like');
+    likeButtons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const atividadeId = btn.dataset.activityId;
+        const likeCountSpan = btn.querySelector('.like-count');
+        
+        // Otimistic UI - muda imediatamente
+        const wasLiked = btn.classList.contains('is-liked');
+        btn.classList.toggle('is-liked');
+        
+        if (likeCountSpan) {
+          const currentCount = parseInt(likeCountSpan.textContent, 10) || 0;
+          likeCountSpan.textContent = wasLiked ? currentCount - 1 : currentCount + 1;
+        }
+        
+        try {
+          const response = await fetch(`/social/atividade/${atividadeId}/like/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (!response.ok) throw new Error('Erro na requisição');
+          
+          const data = await response.json();
+          if (data.success) {
+            btn.dataset.liked = data.liked;
+            btn.dataset.likeCount = data.like_count;
+            btn.classList.toggle('is-liked', data.liked);
+            
+            // Atualiza o contador com o valor real do backend
+            if (likeCountSpan) {
+              likeCountSpan.textContent = data.like_count;
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao curtir:', err);
+          // Rollback do otimistic UI
+          btn.classList.toggle('is-liked');
+          if (likeCountSpan) {
+            const currentCount = parseInt(likeCountSpan.textContent, 10) || 0;
+            likeCountSpan.textContent = wasLiked ? currentCount + 1 : currentCount - 1;
+          }
+        }
+      });
+    });
+  }
+
+  setupLikeButtons();
 });
 
 
-// SCRIPT DO WEBSOCKET CORRIGIDO
+const feedSectionLabels = {
+  today: 'Hoje',
+  yesterday: 'Ontem',
+  week: 'Esta semana',
+  older: 'Mais antigas',
+};
+
+function ensureFeedSection(sectionKey) {
+  const sectionsRoot = document.getElementById('feed-sections');
+  if (!sectionsRoot) return null;
+
+  const existing = document.getElementById(`activity-section-items-${sectionKey}`);
+  if (existing) return existing;
+
+  const emptyState = document.getElementById('feed-empty-state');
+  if (emptyState) emptyState.remove();
+
+  const wrapper = document.createElement('section');
+  wrapper.className = 'activity-period';
+  wrapper.dataset.sectionKey = sectionKey;
+  wrapper.id = `activity-section-${sectionKey}`;
+  wrapper.innerHTML = `
+    <div class="activity-period__header">
+      <span>${feedSectionLabels[sectionKey] || 'Agora'}</span>
+      <small>1 item</small>
+    </div>
+    <div class="activity-period__items" id="activity-section-items-${sectionKey}"></div>
+  `;
+
+  sectionsRoot.prepend(wrapper);
+  return wrapper.querySelector('.activity-period__items');
+}
+
+function refreshSectionCounters() {
+  document.querySelectorAll('.activity-period').forEach((section) => {
+    const headerCounter = section.querySelector('.activity-period__header small');
+    const total = section.querySelectorAll('.activity-card').length;
+    if (headerCounter) {
+      headerCounter.textContent = `${total} item${total === 1 ? '' : 's'}`;
+    }
+  });
+}
+
+const feedProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 const feedSocket = new WebSocket(
-  "ws://" + window.location.host + "/ws/feed/"
+  `${feedProtocol}${window.location.hostname}:8080/ws/feed/?user={{ user.id|urlencode }}&username={{ user.username|urlencode }}&token={{ WS_AUTH_TOKEN|urlencode }}`
 );
 
 feedSocket.onmessage = function(e) {
   const data = JSON.parse(e.data);
-  
-  // 1. CORREÇÃO: Usar o ID correto do seu HTML
-  const feedContainer = document.getElementById("feed-lista-container"); 
+  if (!window.feedUi) return;
+  const sectionKey = data.section_key || 'today';
+  const container = ensureFeedSection(sectionKey);
+  if (!container) return;
 
-  if (feedContainer) {
-    // Remove a mensagem "Nenhuma atividade" se ela existir
-    const noActivity = feedContainer.querySelector('.no-activity-card');
-    if (noActivity) {
-      noActivity.remove();
-    }
-    
-    // 2. CORREÇÃO: Criar o card completo, não só o texto
-    const item = document.createElement("div");
-    item.classList.add("card", "shadow-sm", "mb-3", "post-card");
-    item.style.opacity = 0; // Para um efeito de fade-in
-    
-    // 3. (OPCIONAL) Este HTML é mais completo, mas você precisa
-    //    que seu consumer do WebSocket envie (data.ator_initial, data.verbo_icon, data.alvo)
-    //    Vou usar um HTML simples por enquanto, baseado no seu script.
-    item.innerHTML = `
-    <div class="card-body">
-      <div class="d-flex align-items-center">
-        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 44px; height: 44px;">
-           <span class="fw-bold">${data.ator_initial || data.ator.charAt(0).toUpperCase()}</span>
-        </div>
-        <div class="flex-grow-1">
-          <p class="mb-0 lh-sm small">
-            <i class="bi bi-lightning-charge-fill text-info me-1"></i>
-            <strong>${data.ator}</strong> ${data.verbo}
-            ${data.alvo ? `<strong>"${data.alvo}"</strong>` : ''}
-          </p>
-          <small class="text-muted">
-            <i class="bi bi-clock me-1"></i>${data.timestamp}
-          </small>
-        </div>
-      </div>
-    </div>`;
-    
-    feedContainer.prepend(item);
-    setTimeout(() => item.style.opacity = 1, 10); // Efeito de fade-in
+  const alreadyExists = document.querySelector(`.activity-card[data-activity-id="${String(data.id)}"]`);
+  if (alreadyExists) {
+    alreadyExists.remove();
   }
+
+  container.insertAdjacentHTML('afterbegin', window.feedUi.renderActivityCard(data));
+  refreshSectionCounters();
+  window.feedUi.updateFilterCounter(data.category || 'geral');
+  
+  // Reattach like button handlers para novas atividades
+  setupLikeButtons();
+
+  const filterButtons = document.querySelectorAll('.activity-filter-pill');
+  const activeFilter = window.feedUi.getActiveFilter();
+  document.querySelectorAll('.activity-card').forEach((card) => {
+    const shouldShow = activeFilter === 'all' || card.dataset.category === activeFilter;
+    card.classList.toggle('d-none', !shouldShow);
+  });
+  document.querySelectorAll('.activity-period').forEach((section) => {
+    section.classList.toggle('d-none', section.querySelectorAll('.activity-card:not(.d-none)').length === 0);
+  });
+  const filterEmpty = document.getElementById('feed-filter-empty');
+  if (filterEmpty) {
+    filterEmpty.classList.toggle('d-none', document.querySelectorAll('.activity-card:not(.d-none)').length !== 0);
+  }
+  filterButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.filter === activeFilter));
 };
 
 const modalsDetalhes = document.querySelectorAll('[id^="detalhesPartidaModal"]');

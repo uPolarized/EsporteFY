@@ -1,0 +1,17 @@
+{% extends "account/email/base_message.txt" %}
+{% load account %}
+{% load i18n %}
+
+{% block content %}{% autoescape off %}{% user_display user as user_display %}
+Ola {{ user_display }}, bem-vindo ao EsporteFY.
+
+Para ativar sua conta e comecar a usar a plataforma, confirme seu e-mail:
+{{ activate_url }}
+
+Depois da confirmacao, voce podera:
+- Criar e participar de partidas em tempo real
+- Encontrar jogadores proximos
+- Acompanhar suas atividades esportivas
+
+Se voce nao criou esta conta, ignore este e-mail.
+{% endautoescape %}{% endblock content %}

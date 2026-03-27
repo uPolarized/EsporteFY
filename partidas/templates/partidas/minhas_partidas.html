@@ -37,10 +37,12 @@
 
           <div class="text-end card-actions">
             <span class="badge bg-success mb-2">Confirmada</span>
-            <a href="{% url 'partidas:sair_da_partida' partida_id=partida.id %}"
-               class="btn btn-outline-danger btn-sm transition-btn">
-              <i class="bi bi-box-arrow-left"></i> Sair
-            </a>
+            <form method="post" action="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm transition-btn">
+                <i class="bi bi-box-arrow-left"></i> Sair
+              </button>
+            </form>
           </div>
         </div>
       </div>

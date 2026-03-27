@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 
 from .models import Mensagem, Atividade
+from app.feed_utils import build_activity_payload
 
 # Configura logger para debug
 logger = logging.getLogger(__name__)
@@ -64,26 +65,12 @@ def enviar_notificacao_nova_mensagem(sender, instance, created, **kwargs):
 def broadcast_atividade(sender, instance, created, **kwargs):
     if created and r:
         try:
-            # Prepara o alvo
-            alvo_str = str(instance.alvo) if instance.alvo else ""
-            
-            # Prepara a inicial
-            ator_initial = instance.ator.username[0].upper() if instance.ator else "?"
-            
-            data = {
-                "type": "feed_update", # Tipo para o Frontend diferenciar
-                "id": instance.id,
-                "ator": instance.ator.username if instance.ator else "Usuário",
-                "ator_initial": ator_initial,
-                "verbo": instance.verbo,
-                "alvo": alvo_str,
-                "timestamp": instance.timestamp.strftime("%H:%M"),
-            }
+            data = build_activity_payload(instance)
+            data["type"] = "feed_update"
 
             # Publica no canal que o FastAPI está escutando
-            # Obs: O FastAPI escuta 'notifications_*', então vamos usar esse prefixo
-            # para garantir que ele pegue, ou você pode adicionar 'feed' no app.py
-            channel_name = "notifications_feed" 
+            # Usando o canal 'feed_all' que está configurado no app.py
+            channel_name = "feed_all"
             
             r.publish(channel_name, json.dumps(data, cls=DjangoJSONEncoder))
             logger.info(f"📰 Atividade publicada no feed: {channel_name}")

@@ -32,3 +32,21 @@ def publish_to_redis(channel_name, data):
             logger.error(f"Erro ao publicar no Redis: {e}")
     else:
         logger.warning("Redis não disponível. Mensagem não enviada.")
+
+def is_user_online(user_identifier):
+    """
+    Verifica se um usuário está online consultando Redis.
+    Args:
+        user_identifier: user_id (int) ou username (str)
+    Returns:
+        bool: True se online, False caso contrário
+    """
+    client = get_redis_client()
+    if client:
+        try:
+            result = client.exists(f"user_online:{user_identifier}")
+            return bool(result)
+        except Exception as e:
+            logger.error(f"Erro ao verificar status online: {e}")
+            return False
+    return False

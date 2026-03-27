@@ -1,5 +1,5 @@
 {% extends "account/base.html" %}
-{% load static %}
+{% load static custom_filters %}
 
 {% block title %}Avaliar Partida - EsporteFY{% endblock %}
 
@@ -45,7 +45,7 @@
               <div class="jogador-item d-flex align-items-center justify-content-between mb-4 p-3 rounded">
                 <div class="d-flex align-items-center gap-3">
                   {% if jogador.perfil.foto %}
-                    <img src="{{ jogador.perfil.foto.url }}" alt="{{ jogador.username }}"
+                    <img src="{{ jogador.perfil.foto.url|media_bust }}" alt="{{ jogador.username }}"
                          class="rounded-circle jogador-foto">
                   {% else %}
                     <div class="jogador-foto placeholder d-flex align-items-center justify-content-center">

@@ -1,5 +1,5 @@
 {% extends "account/base.html" %}
-{% load i18n tz static %}
+{% load i18n tz static custom_filters %}
 
 {% block title %}Conversa com {{ outro_usuario.username }}{% endblock %}
 
@@ -75,7 +75,7 @@
                class="conversation-item {% if item.outro.username == outro_usuario.username %}active{% endif %}">
                 
                 {% if item.outro.perfil.foto %}
-                    <img src="{{ item.outro.perfil.foto.url }}" class="avatar" alt="{{ item.outro.username }}">
+                    <img src="{{ item.outro.perfil.foto.url|media_bust }}" class="avatar" alt="{{ item.outro.username }}">
                 {% else %}
                     <div class="avatar d-flex align-items-center justify-content-center bg-secondary text-white" style="width:40px; height:40px; border-radius:50%;">
                         {{ item.outro.username|slice:":1"|upper }}
@@ -111,7 +111,7 @@
     <div class="chat-area">
         <div class="chat-header border-bottom p-3 d-flex align-items-center">
             {% if outro_usuario.perfil.foto %}
-                <img src="{{ outro_usuario.perfil.foto.url }}" class="avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px;" alt="Avatar">
+                <img src="{{ outro_usuario.perfil.foto.url|media_bust }}" class="avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px;" alt="Avatar">
             {% else %}
                  <div class="avatar d-flex align-items-center justify-content-center bg-secondary text-white" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
                     {{ outro_usuario.username|slice:":1"|upper }}
@@ -202,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatHost = window.location.hostname; 
     
     // Força a porta 8080 onde o FastAPI está rodando
-    const wsUrl = `${wsProtocol}//${chatHost}:8080/ws/chat/${encodeURIComponent(outroUsuarioUsername)}/?me=${encodeURIComponent(meuUsuarioUsername)}`;
+    const wsAuthToken = "{{ WS_AUTH_TOKEN|urlencode }}";
+    const wsUrl = `${wsProtocol}//${chatHost}:8080/ws/chat/${encodeURIComponent(outroUsuarioUsername)}/?me=${encodeURIComponent(meuUsuarioUsername)}&user={{ user.id|urlencode }}&token=${encodeURIComponent(wsAuthToken)}`;
 
     let chatSocket = null;
 

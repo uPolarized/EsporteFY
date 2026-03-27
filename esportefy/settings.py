@@ -17,6 +17,7 @@ RECAPTCHA_REQUIRED_SCORE = 0.5
 # URL usada pelas Views do Django para publicar mensagens no Redis
 REDIS_URL = env('REDIS_URL', default='redis://redis:6379/0')
 
+<<<<<<< Updated upstream
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -33,6 +34,18 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
+=======
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
+    '.ngrok-free.app',
+    'localhost',
+    '127.0.0.1',
+    
+])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
+    'http://localhost:8000',
+    'https://a9b6a9e85d43.ngrok-free.app',
+])
+>>>>>>> Stashed changes
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
@@ -132,8 +145,9 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_LOGIN_METHODS = ['username', 'email']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.signup_form.CustomSignupForm'
+ACCOUNT_ADAPTER = 'perfis.adapters.AsyncAccountAdapter'
 
 ACCOUNT_FORMS = {
     "set_password": "perfis.forms.CustomPasswordSetForm",
@@ -161,7 +175,20 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER') 
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD') 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
+EMAIL_TIMEOUT = 10
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+# Segurança padrão para produção (ajuste por variável de ambiente).
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=not DEBUG)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=not DEBUG)
+SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=31536000 if not DEBUG else 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=not DEBUG)
+SECURE_HSTS_PRELOAD = env.bool('SECURE_HSTS_PRELOAD', default=not DEBUG)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SESSION_COOKIE_HTTPONLY = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

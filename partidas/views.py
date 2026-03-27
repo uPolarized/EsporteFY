@@ -13,7 +13,7 @@ from quadras.models import Quadra
 from social.models import Atividade
 from django.db import transaction
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 
 # ---------------------------------------------------------
@@ -50,6 +50,7 @@ class CriarPartidaView(LoginRequiredMixin, CreateView):
 # ✅ PARTICIPAR DE UMA PARTIDA (com limpeza de atividades antigas)
 # ---------------------------------------------------------
 @login_required
+@require_POST
 @transaction.atomic
 def participar_partida(request, partida_id):
     partida = get_object_or_404(
@@ -79,27 +80,12 @@ def participar_partida(request, partida_id):
         object_id=partida.id
     ).delete()
 
-    # 🧹 Remove duplicatas de "entrou" também (caso alguém force refresh)
-    Atividade.objects.filter(
-        ator=user,
-        verbo__icontains="entrou",
-        content_type=content_type,
-        object_id=partida.id
-    ).delete()
-
-    # ✅ Cria nova atividade de entrada
-    Atividade.objects.create(
-        ator=user,
-        verbo="entrou na partida",
-        content_type=content_type,
-        object_id=partida.id
-    )
-
     messages.success(request, f"Você entrou na partida '{partida.titulo}'.")
     return redirect('feed')
 
 # ... (Mantenha o resto do arquivo como estava) ...
 @login_required
+@require_POST
 @transaction.atomic
 def sair_da_partida(request, partida_id):
     # Busca otimizada da partida
@@ -130,20 +116,6 @@ def sair_da_partida(request, partida_id):
             object_id=partida.id
         ).filter(verbo__icontains="entrou").delete()
 
-        Atividade.objects.filter(
-            ator=user,
-            content_type=content_type,
-            object_id=partida.id
-        ).filter(verbo__icontains="saiu").delete()
-
-        # ✅ Cria nova atividade limpa de saída
-        Atividade.objects.create(
-            ator=user,
-            verbo='saiu da partida',
-            content_type=content_type,
-            object_id=partida.id
-        )
-
         messages.info(request, f'Você saiu da partida "{partida.titulo}".')
 
     else:
@@ -152,6 +124,7 @@ def sair_da_partida(request, partida_id):
     return redirect('feed')
 
 @login_required
+@require_POST
 @transaction.atomic
 def cancelar_partida(request, partida_id):
     partida = get_object_or_404(Partida, id=partida_id, organizador=request.user)

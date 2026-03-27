@@ -169,6 +169,13 @@ body {
     font-size: 0.95rem;
 }
 
+.profile-meta {
+    text-align: center;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
 /* stats */
 .side-stats {
     display: flex;
@@ -219,6 +226,12 @@ body {
 .profile-center {
     min-width: 0;
     padding-top: 1rem; /* reduz o espaçamento do topo */
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
 }
 
 /* card headings */
@@ -477,10 +490,343 @@ input[type="file"]::file-selector-button:hover {
 }
 
 
+/* ========== ATIVIDADES – ESTILO PREMIUM (COMPATÍVEL) ========== */
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.3rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.activity-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-3px);
+}
+
+/* Bolinha da esquerda */
+.act-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: var(--accent-2);
+    border-radius: 50%;
+}
+
+/* Corpo da atividade */
+.act-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.act-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.act-meta {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+/* Mensagem vazia */
+.empty-activity {
+    padding: 1rem;
+    text-align: center;
+    color: var(--muted);
+}
+
+
+/* ========================================== */
+/*   🔥 Correção final do bug das datas       */
+/* ========================================== */
+
+.activity-item,
+.activity-title,
+.activity-time,
+.act-body,
+.act-title,
+.act-meta {
+    font-feature-settings: normal !important;
+    font-variant-numeric: normal !important;
+    unicode-bidi: normal !important;
+    direction: ltr !important;
+    quotes: initial !important;
+}
+
+
+/* ========== GRID DE AMIGOS (SEÇÃO PERMANENTE NO MEIO) ========== */
+
+.friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.friend-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.2rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.friend-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(229, 57, 53, 0.15);
+    border-color: var(--accent);
+}
+
+/* Foto do amigo */
+.friend-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.8rem;
+    border: 2px solid var(--glass-border);
+    transition: border-color 0.3s ease;
+}
+
+.friend-card:hover .friend-photo {
+    border-color: var(--accent);
+}
+
+.friend-photo.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    border: 2px solid var(--accent);
+}
+
+/* Nome do amigo */
+.friend-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    display: block;
+    word-break: break-word;
+    transition: color 0.2s ease;
+}
+
+.friend-card:hover .friend-name {
+    color: var(--accent-2);
+}
+
+/* Informações (dias, amigos comuns) */
+.friend-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    width: 100%;
+}
+
+.friend-info small {
+    display: block;
+    word-break: break-word;
+}
+
+
+/* ========== GRID DE AMIGOS (VERSÃO SIDEBAR - COMPACTA) ========== */
+
+.friends-grid-sidebar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+.friend-card-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    z-index: 1;
+}
+
+/* Status badge para online/offline - BASEADO EM REDIS (CONFIÁVEL) */
+.friend-status-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 10;
+}
+
+.status-online {
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.8));
+    animation: pulse-online 2s infinite;
+}
+
+.status-offline {
+    filter: drop-shadow(0 0 2px rgba(158, 158, 158, 0.4));
+}
+
+@keyframes pulse-online {
+    0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 6px rgba(76, 175, 80, 1));
+    }
+}
+
+.friend-card-sidebar:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-6px);
+    border-color: var(--accent-2);
+    box-shadow: 0 10px 20px rgba(229, 57, 53, 0.25), inset 0 0 1px rgba(255, 107, 107, 0.2);
+}
+
+/* Link wrapper para não quebrar o card */
+.friend-card-sidebar a {
+    all: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* Foto do amigo (sidebar) */
+.friend-photo-sidebar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.7rem;
+    border: 2.5px solid var(--glass-border);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.friend-card-sidebar:hover .friend-photo-sidebar {
+    border-color: var(--accent-2);
+    transform: scale(1.05);
+}
+
+.friend-photo-sidebar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    border: 2.5px solid var(--accent-2);
+}
+
+/* Nome do amigo (sidebar) */
+.friend-name-sidebar {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    display: block;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+    width: 100%;
+}
+
+.friend-card-sidebar:hover .friend-name-sidebar {
+    color: var(--accent-2);
+}
+
+/* Informações (sidebar) - MELHORADO */
+.friend-info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.82rem;
+    width: 100%;
+    color: var(--accent-2);
+    font-weight: 500;
+}
+
+.friend-info-sidebar small {
+    display: block;
+    line-height: 1.4;
+}
+
+
 /* Responsividade para telas menores */
 @media (max-width: 991.98px) { 
     .profile-right {
         max-width: none; 
         margin-top: 1.5rem; 
+    }
+    
+    .friends-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+    
+    .friends-grid-sidebar {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        max-height: 520px;
+    }
+}
+
+@media (max-width: 768px) {
+    .friends-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .friends-grid-sidebar {
+        grid-template-columns: repeat(4, 1fr);
     }
 }

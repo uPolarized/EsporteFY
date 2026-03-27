@@ -1,6 +1,26 @@
 from django.conf import settings
+import hmac
+import hashlib
+import time
+
+
+def _build_ws_token(request):
+    user = getattr(request, 'user', None)
+    if not user or not user.is_authenticated:
+        return ''
+
+    ts = int(time.time())
+    payload = f"{user.id}:{user.username}:{ts}"
+    signature = hmac.new(
+        settings.SECRET_KEY.encode('utf-8'),
+        payload.encode('utf-8'),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"{payload}:{signature}"
+
 
 def recaptcha_keys(request):
     return {
         'RECAPTCHA_PUBLIC_KEY': getattr(settings, 'RECAPTCHA_PUBLIC_KEY', None),
+        'WS_AUTH_TOKEN': _build_ws_token(request),
     }

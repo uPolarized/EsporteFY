@@ -35,6 +35,11 @@ def atividade_jogador_movimento(sender, instance, action, pk_set, **kwargs):
     if action == "post_add":
         for user_pk in pk_set:
             jogador = User.objects.get(pk=user_pk)
+            
+            # NÃO CRIA atividade "entrou" se é o criador
+            # (já tem atividade "criou" do post_save)
+            if jogador == instance.organizador:
+                continue
 
             # Evita duplicações
             Atividade.objects.filter(

@@ -2,6 +2,8 @@
 import traceback
 from google.cloud import vision
 import time
+from io import BytesIO
+from PIL import Image
 # Mapeamento (caso a API retorne strings ou enums)
 LIKELIHOOD_MAP = {
     "UNKNOWN": 0,
@@ -47,11 +49,26 @@ def analisar_imagem(path_imagem):
 
     try:
         client = vision.ImageAnnotatorClient()
-        with open(path_imagem, "rb") as img_file:
-            content = img_file.read()
+
+        # Pré-processa a imagem para reduzir latência:
+        # - GIF: analisa o primeiro frame (mais rápido e suficiente para moderação inicial)
+        # - Demais formatos: redimensiona para no máximo 1024px no maior lado
+        # Em ambos os casos, converte para JPEG otimizado para reduzir payload na API.
+        with Image.open(path_imagem) as img:
+            if getattr(img, "is_animated", False):
+                img.seek(0)
+                frame = img.convert("RGB")
+            else:
+                frame = img.convert("RGB")
+
+            frame.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+
+            buffer = BytesIO()
+            frame.save(buffer, format="JPEG", quality=82, optimize=True)
+            content = buffer.getvalue()
 
         image = vision.Image(content=content)
-        response = client.safe_search_detection(image=image)
+        response = client.safe_search_detection(image=image, timeout=8.0)
         safe = response.safe_search_annotation
 
         # Converter para escala numérica (1–5)

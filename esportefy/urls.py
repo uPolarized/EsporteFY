@@ -2,9 +2,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from app.views import EsporteFYConfirmEmailView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Override de URL de confirmacao antes do allauth para redirecionar ao feed
+    path('accounts/confirm-email/<str:key>/', EsporteFYConfirmEmailView.as_view(), name='account_confirm_email'),
     path('accounts/', include('allauth.urls')),
     path('', include('app.urls')),
     path('perfis/', include('perfis.urls')),

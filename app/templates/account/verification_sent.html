@@ -1,7 +1,7 @@
 {% extends "account/base.html" %}
 {% load static %}
 
-{% block title %}Verifique seu E-mail{% endblock %}
+{% block title %}Confirme seu E-mail - EsporteFY{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/login/verification_sent.css' %}">
@@ -14,24 +14,73 @@
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
             <div class="card verification-sent-card">
+
+                <div class="vs-header">
+                    <i class="bi bi-shield-lock-fill vs-shield-icon"></i>
+                    <h2 class="vs-title">Confirme seu E-mail</h2>
+                    <p class="vs-subtitle">Etapa de segurança obrigatória</p>
+                </div>
+
                 <div class="card-body">
 
-                    <div class="icon">
-                        <i class="bi bi-envelope-check-fill"></i>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="vs-envelope-wrap">
+                        <i class="bi bi-envelope-paper-fill vs-envelope-icon"></i>
                     </div>
-                    
-                    <h3 class="card-title">Passo Final: Confirme seu E-mail</h3>
-                    
-                    <p class="text-muted mt-3 mb-4">
-                        Enviamos um e-mail de verificação para o endereço que você forneceu.
-                        <br><br>
-                        <strong>Por favor, abra seu e-mail e clique no link para ativar sua conta no EsporteFY.</strong>
+
+                    <p class="vs-description">
+                        Enviamos um link de ativação para:
                     </p>
-                    
-                    <div class="spinner-border text-primary mt-3" role="status">
-                        <span class="visually-hidden">Aguardando confirmação...</span>
+
+                    {% if request.user.is_authenticated %}
+                        <div class="vs-email-badge">
+                            <i class="bi bi-at me-1"></i>{{ request.user.email }}
+                        </div>
+                    {% endif %}
+
+                    <p class="vs-instructions">
+                        Abra seu e-mail e clique no botão <strong>"Confirmar e-mail"</strong> para ativar sua conta e acessar o EsporteFY.
+                    </p>
+
+                    <div class="vs-steps">
+                        <div class="vs-step">
+                            <span class="vs-step-num">1</span>
+                            <span>Abra sua caixa de entrada</span>
+                        </div>
+                        <div class="vs-step">
+                            <span class="vs-step-num">2</span>
+                            <span>Procure o e-mail do <strong>EsporteFY</strong></span>
+                        </div>
+                        <div class="vs-step">
+                            <span class="vs-step-num">3</span>
+                            <span>Clique em <strong>"Confirmar e-mail"</strong></span>
+                        </div>
                     </div>
-                    <p class="text-muted small mt-2">Aguardando confirmação...</p>
+
+                    <hr class="vs-divider">
+
+                    <p class="vs-resend-label">Não recebeu o e-mail?</p>
+
+                    {% if request.user.is_authenticated %}
+                        <form method="post" action="{% url 'resend_verification' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn vs-resend-btn w-100">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reenviar e-mail
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    <p class="vs-spam-hint">
+                        <i class="bi bi-info-circle me-1"></i>Verifique também a pasta de <strong>Spam</strong> ou <strong>Lixo Eletrônico</strong>.
+                    </p>
 
                 </div>
             </div>

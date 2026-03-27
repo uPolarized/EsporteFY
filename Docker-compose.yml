@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   db:
     image: postgres:15-alpine
@@ -21,7 +19,8 @@ services:
 
   # === SERVIÇO FASTAPI (WebSocket Realtime) ===
   chat:
-    build: .
+    image: esportefy_app:dev
+    pull_policy: never
     container_name: esportefy_chat
     # Comando aponta para a pasta social/app.py
     command: uvicorn social.app:app --host 0.0.0.0 --port 8080 --reload
@@ -29,14 +28,18 @@ services:
       - .:/app
     ports:
       - "8080:8080" # Exposto para o navegador conectar via ws://localhost:8080
+    env_file:
+      - ./.env
     depends_on:
       - redis
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CORS_ALLOWED_ORIGINS=http://localhost:8000
 
   # === SERVIÇO DJANGO (HTTP + Admin) ===
   web:
     build: .
+    image: esportefy_app:dev
     container_name: esportefy_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:

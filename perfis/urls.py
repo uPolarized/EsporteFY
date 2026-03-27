@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from perfis.views import CustomPasswordSetView
+from .views import api_check_status, api_solicitacoes_amizade # Importe a view nova
+
 
 app_name = 'perfis'
 
@@ -21,4 +23,7 @@ urlpatterns = [
 
     path('remover-amigo/<int:user_id>/', views.remover_amigo, name='remover_amigo'),
     path('accounts/password/set/', CustomPasswordSetView.as_view(), name='account_set_password'),
+    path('api/status/', api_check_status, name='api_check_status'),
+    path('api/atividades/', views.api_atividades, name='api_atividades'),
+    path('api/solicitacoes/', api_solicitacoes_amizade, name='api_solicitacoes_amizade'),
 ]

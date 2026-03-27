@@ -244,6 +244,191 @@ html, body {
     color: #f1f1f1;
 }
 
+
+/* ================================================== */
+/* ===== 4. ESTILOS DE NOTIFICAÇÕES (CORRIGIDO) ===== */
+/* ================================================== */
+
+/* Container do Dropdown (Fundo Escuro Garantido) */
+.notificacoes-dropdown {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333 !important;
+    border-radius: 12px !important;
+    width: 340px;
+    padding: 0;
+    overflow: hidden; /* Garante que bordas arredondadas funcionem */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Cabeçalho do Dropdown */
+.notificacoes-dropdown .dropdown-header {
+    color: #adb5bd !important;
+    background-color: #1e1e1e !important;
+    border-bottom: 1px solid #333;
+    padding: 10px 15px;
+}
+
+/* --- ITEM DE NOTIFICAÇÃO --- */
+.notificacao-item {
+    background-color: transparent;
+    border-bottom: 1px solid #2c2c2c;
+    padding: 12px 15px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    text-decoration: none !important; /* Remove sublinhado de links */
+}
+
+/* Remove a borda do último item */
+.notificacao-item:last-child {
+    border-bottom: none;
+}
+
+/* HOVER: Fica cinza claro, NÃO branco */
+.notificacao-item:hover,
+.notificacao-item:focus {
+    background-color: #2a2a2a !important; /* Cinza um pouco mais claro */
+    cursor: pointer;
+}
+
+/* Garante que TODO texto dentro do item seja claro */
+.notificacao-item, 
+.notificacao-item div,
+.notificacao-item h6,
+.notificacao-item small,
+.notificacao-item p,
+.notificacao-item a {
+    color: #e0e0e0 !important; 
+}
+
+/* Ícone da notificação */
+.notificacao-icone {
+    font-size: 1.3rem;
+    margin-top: 2px;
+}
+
+/* Título e Mensagem */
+.notificacao-titulo {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #ffffff !important;
+    display: block;
+}
+
+.notificacao-msg {
+    font-size: 0.85rem;
+    color: #b0b0b0 !important;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+/* Link "Ver todas" no rodapé */
+.notificacoes-dropdown .dropdown-item {
+    color: #6ea8fe !important; /* Azul claro */
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+}
+.notificacoes-dropdown .dropdown-item:hover {
+    background-color: #2a2a2a !important;
+    color: #9ec5fe !important;
+}
+
+/* ========================================= */
+/* ===== 5. BOTÕES DE AÇÃO (Aceitar/Recusar) ===== */
+/* ========================================= */
+
+.notificacao-acoes {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.notificacao-acoes button {
+    border: none;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn-aceitar {
+    background-color: #198754 !important; /* Verde Bootstrap */
+    color: #fff !important;
+}
+.btn-recusar {
+    background-color: transparent !important;
+    border: 1px solid #dc3545 !important; /* Vermelho Borda */
+    color: #dc3545 !important;
+}
+
+.btn-aceitar:hover { opacity: 0.9; transform: scale(1.05); }
+.btn-recusar:hover { background-color: #dc3545 !important; color: #fff !important; }
+
+/* ========================================= */
+/* ===== 6. ANIMAÇÕES E BADGES ===== */
+/* ========================================= */
+
+.badge-animada {
+    animation: pulse 0.5s ease-in-out;
+}
+
+.sino-animado {
+    animation: shake 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1) translate(-50%, -50%); }
+    50% { transform: scale(1.4) translate(-50%, -50%); }
+    100% { transform: scale(1) translate(-50%, -50%); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    50% { transform: rotate(15deg); }
+    75% { transform: rotate(-10deg); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Aplica fade-in nos novos itens */
+.notificacao-item {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+
+/* 🎵 ANIMAÇÕES */
+@keyframes shake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-15deg); }
+  50% { transform: rotate(15deg); }
+  75% { transform: rotate(-10deg); }
+}
+.sino-animado {
+  animation: shake 0.6s ease-in-out;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🔴 BADGE */
+.badge-animada { animation: ping 0.5s ease-in-out; }
+@keyframes ping {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+
 /* 🔹 Fallback para iPhones antigos e navegadores legados */
 @supports not (height: 100dvh) {
     html, body {
