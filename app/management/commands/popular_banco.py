@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
+from scripts.popular_banco.configurar_social_github import run as run_social_github
 from scripts.popular_banco.configurar_social_google import run as run_social_google
 from scripts.popular_banco.criar_superusuario_padrao import run as run_superuser
 from scripts.popular_banco.seed_partidas_demo import run as run_seed_partidas
@@ -37,12 +38,18 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS(f"Superusuario '{su_result['username']}' atualizado."))
 
-        self.stdout.write('4/4 Configuracao do Google SocialApp...')
-        social_result = run_social_google()
-        if social_result['created']:
+        self.stdout.write('4/4 Configuracao dos SocialApps (Google e GitHub)...')
+        social_google_result = run_social_google()
+        if social_google_result['created']:
             self.stdout.write(self.style.SUCCESS('Google SocialApp criada.'))
         else:
             self.stdout.write(self.style.SUCCESS('Google SocialApp ja existia.'))
+
+        social_github_result = run_social_github()
+        if social_github_result['created']:
+            self.stdout.write(self.style.SUCCESS('GitHub SocialApp criada.'))
+        else:
+            self.stdout.write(self.style.SUCCESS('GitHub SocialApp ja existia.'))
 
         if not options['sem_partidas']:
             self.stdout.write('Extra: Seed de partidas demo...')

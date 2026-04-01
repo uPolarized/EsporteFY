@@ -44,7 +44,7 @@ docker compose run --rm web python manage.py migrate
 Comando unico (recomendado):
 
 ```bash
-docker compose run --rm web python manage.py popular_banco --organizador nome
+docker compose run --rm web python manage.py popular_banco
 ```
 
 Esse comando executa:
@@ -68,7 +68,7 @@ docker compose run --rm web python manage.py seed_esporte
 docker compose run --rm web python manage.py seed_quadras
 ```
 
-## 6) Criar superusuario generico (como solicitado)
+## 6) Criar superusuario generico 
 
 Usuario generico padrao:
 
@@ -82,10 +82,10 @@ Para criar/atualizar esse usuario:
 docker compose run --rm web python create_user.py
 ```
 
-## 7) Aviso importante![alt text](image-1.png)
+## 7) Aviso importante
 
 - O usuario acima e apenas para ambiente de desenvolvimento.
-- Em ambiente real, troque username e senha par![alt text](image.png)a dados seus e use senha forte.
+- Em ambiente real, troque username e senha para dados seus e use senha forte.
 
 ## 8) Acessar admin
 

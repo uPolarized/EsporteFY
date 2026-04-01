@@ -12,7 +12,7 @@ Esse comando executa, em ordem:
 1. `seed_esporte`
 2. `seed_quadras`
 3. Criacao/atualizacao do superusuario padrao (`jao` / `123`)
-4. Configuracao do SocialApp Google
+4. Configuracao dos SocialApps Google e GitHub
 5. Seed de partidas demo (quando possivel)
 
 ## Opcoes
