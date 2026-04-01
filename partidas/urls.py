@@ -1,4 +1,4 @@
-from django.urls import path
+﻿from django.urls import path
 from . import views
 
 app_name = 'partidas'
@@ -19,4 +19,6 @@ urlpatterns = [
     path('statuses/', views.partidas_statuses, name='partidas_statuses'),
 
     path('<int:partida_id>/avaliar/', views.avaliar_partida, name='avaliar_partida'),
+    path('api/esportes/', views.api_esportes, name='api_esportes'),
 ]
+

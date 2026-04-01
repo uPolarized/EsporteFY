@@ -11,288 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'css/login/base.css' %}">
     
-    <style>
-        :root {
-            --notify-bg: #11151c;
-            --notify-surface: #161b22;
-            --notify-border: rgba(255, 255, 255, 0.08);
-            --notify-text: #e8edf2;
-            --notify-muted: #9aa4b2;
-            --notify-shadow: 0 14px 34px rgba(3, 6, 12, 0.52);
-            --notify-accent: #e53935;
-        }
-
-        .notificacao-item {
-            border-bottom: 1px solid var(--notify-border);
-            padding: 12px;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-        .notificacao-item:hover {
-            background-color: rgba(229, 57, 53, 0.08);
-            transform: translateX(2px);
-        }
-        .notificacao-item:last-child {
-            border-bottom: none;
-        }
-
-        .badge-animada {
-            animation: pulse 0.5s ease-in-out;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1) translate(-50%, -50%); }
-            50% { transform: scale(1.35) translate(-50%, -50%); }
-            100% { transform: scale(1) translate(-50%, -50%); }
-        }
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateY(-8px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Sistema global de popups/notificações */
-        .toast-stack {
-            z-index: 1080;
-            margin-top: 4rem;
-        }
-        .toast.esportefy-toast {
-            border-radius: 16px;
-            overflow: hidden;
-            min-width: 330px;
-            border: 1px solid var(--notify-border);
-            box-shadow: var(--notify-shadow);
-            animation: toastIn 0.25s ease;
-            background: var(--notify-surface);
-        }
-        .toast.esportefy-toast .toast-header {
-            border-bottom: 0;
-            color: #fff;
-            font-weight: 700;
-            padding: 0.62rem 0.78rem;
-            letter-spacing: 0.01em;
-        }
-        .toast.esportefy-toast .toast-header small {
-            color: rgba(255, 255, 255, 0.78);
-        }
-        .toast.esportefy-toast .btn-close {
-            filter: invert(1);
-            opacity: 0.9;
-        }
-        .toast.esportefy-toast .btn-close:hover {
-            opacity: 1;
-        }
-        .toast.esportefy-toast .toast-body {
-            background: linear-gradient(180deg, #171d26 0%, #121820 100%);
-            color: var(--notify-text);
-            font-size: 0.95rem;
-            line-height: 1.45;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 0.75rem 0.85rem;
-        }
-
-        .toast.is-success .toast-header {
-            background: linear-gradient(120deg, #0f7a46, #17a664);
-        }
-        .toast.is-error .toast-header {
-            background: linear-gradient(120deg, #b71c1c, #e53935);
-        }
-        .toast.is-warning .toast-header {
-            background: linear-gradient(120deg, #a95b00, #dd8a11);
-        }
-        .toast.is-info .toast-header {
-            background: linear-gradient(120deg, #24589c, #2d7ad4);
-        }
-
-        .toast.is-success .toast-body { border-left: 4px solid #1bb56f; }
-        .toast.is-error .toast-body { border-left: 4px solid #f04444; }
-        .toast.is-warning .toast-body { border-left: 4px solid #f5a623; }
-        .toast.is-info .toast-body { border-left: 4px solid #4092f5; }
-
-        /* Dropdown do usuário padronizado com o tema das notificações */
-        .dropdown-menu.esportefy-user-menu {
-            background: linear-gradient(180deg, #171d26 0%, #121820 100%);
-            border: 1px solid var(--notify-border);
-            border-radius: 14px;
-            box-shadow: var(--notify-shadow);
-            min-width: 220px;
-            padding: 0.42rem;
-        }
-        .dropdown-menu.esportefy-user-menu .dropdown-item {
-            color: var(--notify-text);
-            border-radius: 10px;
-            font-weight: 500;
-            padding: 0.54rem 0.72rem;
-            transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
-        }
-        .dropdown-menu.esportefy-user-menu .dropdown-item:hover,
-        .dropdown-menu.esportefy-user-menu .dropdown-item:focus {
-            background: rgba(229, 57, 53, 0.14);
-            color: #ffffff;
-            transform: translateX(2px);
-        }
-        .dropdown-menu.esportefy-user-menu .dropdown-divider {
-            border-color: var(--notify-border);
-            margin: 0.42rem 0;
-        }
-        .dropdown-menu.esportefy-user-menu .dropdown-item.text-danger {
-            color: #ff8a8a;
-        }
-        .dropdown-menu.esportefy-user-menu .dropdown-item.text-danger:hover {
-            background: rgba(183, 28, 28, 0.26);
-            color: #ffc8c8;
-        }
-
-        @media (max-width: 576px) {
-            .toast-stack {
-                left: 0;
-                right: 0;
-                padding: 0.75rem;
-            }
-            .toast.esportefy-toast {
-                min-width: 100%;
-                width: 100%;
-            }
-        }
-
-        /* ─── NOTIFICAÇÕES DROPDOWN ─── */
-        .notificacao-item-amizade {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--notify-border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s ease;
-        }
-        .notificacao-item-amizade:hover {
-            background-color: rgba(229, 57, 53, 0.08);
-        }
-        .notificacao-item-amizade:last-child {
-            border-bottom: none;
-        }
-        .notificacao-item-amizade img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        .notificacao-item-amizade .info {
-            flex: 1;
-            min-width: 0;
-        }
-        .notificacao-item-amizade .username {
-            font-weight: 500;
-            color: var(--notify-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .notificacao-item-amizade .tipo {
-            font-size: 0.75rem;
-            color: var(--notify-muted);
-        }
-        .notificacao-acoes {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .notificacao-acoes .btn-sm {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        .notificacao-acoes .btn-accept {
-            background: #0f7a46;
-            color: white;
-            border: none;
-        }
-        .notificacao-acoes .btn-accept:hover {
-            background: #17a664;
-            transform: scale(1.05);
-        }
-        .notificacao-acoes .btn-reject {
-            background: #b71c1c;
-            color: white;
-            border: none;
-        }
-        .notificacao-acoes .btn-reject:hover {
-            background: #e53935;
-            transform: scale(1.05);
-        }
-
-        /* NAVBAR INFERIOR MOBILE */
-        .mobile-bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1100;
-            height: 62px;
-            background: rgba(18, 24, 34, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.35);
-        }
-        .navbar .nav-link,
-        .mobile-bottom-nav .nav-item,
-        .mobile-bottom-nav .nav-item span {
-            text-decoration: none !important;
-        }
-        .navbar .nav-link:hover,
-        .mobile-bottom-nav .nav-item:hover {
-            text-decoration: none !important;
-            color: #ffffff !important;
-        }
-
-        .mobile-bottom-nav .nav-item {
-            flex: 1 1 auto;
-            max-width: 90px;
-            min-width: 64px;
-            text-align: center;
-            color: #aab1c1;
-            font-size: 0.72rem;
-            line-height: 1.1;
-            transition: color 0.16s ease;
-        }
-        .mobile-bottom-nav .nav-item.active {
-            color: #ff5252;
-        }
-        .mobile-bottom-nav .nav-item i {
-            font-size: 1.25rem;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        @media (max-width: 992px) {
-            .navbar-toggler {
-                display: none !important;
-            }
-            .mobile-bottom-nav {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .mobile-bottom-nav .nav-item {
-                display: inline-flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 2px;
-                padding-top: 6px;
-                padding-bottom: 4px;
-                font-size: 0.70rem;
-            }
-            body {
-                padding-bottom: 72px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/auth-base.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -300,9 +19,20 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         {% if user.is_authenticated %}
-            <a class="navbar-brand" href="{% url 'feed' %}">EsporteFY</a>
+            <a class="navbar-brand" id="navBrandEsporteFY" href="{% url 'feed' %}" data-feed-desktop-url="{% url 'feed' %}" data-feed-mobile-url="{% url 'feed' %}?aba=partidas">EsporteFY</a>
         {% else %}
             <a class="navbar-brand" href="{% url 'home' %}">EsporteFY</a>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <div class="navbar-quick-actions d-lg-none d-flex flex-row flex-nowrap align-items-center ms-auto me-2">
+            <a class="nav-link nav-quick-link" href="#" id="navTopNotificacoesBtn" title="Notificações" aria-label="Notificações">
+                <i class="bi bi-bell"></i>
+            </a>
+            <a class="nav-link nav-quick-link text-danger" href="{% url 'account_logout' %}" title="Sair" aria-label="Sair">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
         {% endif %}
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -315,10 +45,16 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'perfis:lista_usuarios' %}">Encontrar Jogadores</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'feedback' %}">Suporte</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lgpd_hub' %}">LGPD</a>
+                    </li>
 
-                    <li class="nav-item dropdown me-3 position-relative">
-                        <a class="nav-link position-relative d-flex align-items-center justify-content-center"
-                           href="#" id="notificacoesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                    <li class="nav-item dropdown me-3 position-relative" data-bs-auto-close="outside">
+                                <a class="nav-link position-relative d-flex align-items-center justify-content-center"
+                                    href="#" id="notificacoesDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                            style="width: 36px; height: 36px;">
                             <i id="icone-sino" class="bi bi-bell fs-5"></i>
                             <span id="badge-notificacoes"
@@ -328,26 +64,19 @@
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow notificacoes-dropdown esportefy-user-menu"
-                            aria-labelledby="notificacoesDropdown" style="width: 350px; max-height: 500px; overflow-y: auto;">
+                            aria-labelledby="notificacoesDropdown">
                             <li>
-                                <h6 class="dropdown-header text-uppercase text-muted fw-bold small px-3">
-                                    <i class="bi bi-heart-handshake me-2"></i>Pedidos de Amizade
-                                </h6>
+                                <div class="notificacoes-header-wrap px-3">
+                                    <h6 class="dropdown-header notificacoes-header mb-0 px-0">
+                                        <i class="bi bi-bell-fill me-2"></i>Notificações
+                                    </h6>
+                                    <button id="btn-limpar-notificacoes" type="button" class="btn-limpar-notificacoes">Limpar tudo</button>
+                                </div>
                             </li>
 
-                            <div id="lista-solicitacoes-recebidas" class="px-0">
-                                <!-- Solicitações recebidas aqui -->
+                            <div id="lista-notificacoes" class="px-0">
+                                <div class="placeholder-msg px-3 py-3 text-muted small text-center">Sem notificações no momento.</div>
                             </div>
-
-                            <li><hr class="dropdown-divider m-0" id="divider-solicitacoes"></li>
-
-                            <div id="lista-solicitacoes-enviadas" class="px-0" style="display: none;">
-                                <!-- Solicitações enviadas aqui -->
-                            </div>
-
-                            <li id="msg-vazio" class="px-3 py-3">
-                                <p class="text-muted small text-center mb-0">Nenhum pedido de amizade.</p>
-                            </li>
                         </ul>
                     </li>
 
@@ -371,6 +100,8 @@
                         </ul>
                     </li>
                 {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'feedback' %}">Suporte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'lgpd_hub' %}">LGPD</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'account_signup' %}">Registrar</a></li>
                 {% endif %}
@@ -382,19 +113,19 @@
 {% block content %}{% endblock %}
 
 <div id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Navegação inferior">
-    <a class="nav-item" href="#" data-nav="feed" title="Feed">
-        <i class="bi bi-house-door"></i>
-        <span>Feed</span>
-    </a>
-    <a class="nav-item" href="#" data-nav="partidas" title="Partidas">
+    <a class="nav-item {% if request.path == '/feed/' and request.GET.aba|default:'partidas' == 'partidas' %}is-active{% endif %}" href="{% url 'feed' %}?aba=partidas" data-nav="partidas-page" title="Partidas" id="nav-btn-partidas">
         <i class="bi bi-basket"></i>
         <span>Partidas</span>
     </a>
-    <a class="nav-item" href="#" data-nav="noticias" title="Notícias">
+    <a class="nav-item {% if request.path == '/feed/' and request.GET.aba == 'atividades' %}is-active{% endif %}" href="{% url 'feed' %}?aba=atividades" data-nav="atividades-page" title="Atividades" id="nav-btn-atividades">
+        <i class="bi bi-activity"></i>
+        <span>Atividades</span>
+    </a>
+    <a class="nav-item {% if request.path == '/feed/' and request.GET.aba == 'noticias' %}is-active{% endif %}" href="{% url 'feed' %}?aba=noticias" data-nav="noticias-page" title="Noticias">
         <i class="bi bi-newspaper"></i>
         <span>Notícias</span>
     </a>
-    <a class="nav-item profile-nav" href="{% url 'perfis:meu_perfil' %}" data-nav="perfil" title="Perfil">
+    <a class="nav-item profile-nav" href="#" data-bs-toggle="offcanvas" data-bs-target="#mobileProfileOffcanvas" aria-controls="mobileProfileOffcanvas" title="Perfil">
         {% if user.is_authenticated and user.perfil.foto %}
             <img src="{{ user.perfil.foto.url|media_bust }}" alt="{{ user.username }}" class="rounded-circle" width="26" height="26" style="object-fit: cover; border: 1px solid #fff;" loading="lazy">
         {% else %}
@@ -402,17 +133,48 @@
         {% endif %}
         <span>Perfil</span>
     </a>
-    <a class="nav-item" href="{% url 'account_logout' %}" data-nav="logout" title="Sair">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Sair</span>
-    </a>
-    <a class="nav-item" href="#" data-nav="notificacoes" id="navNotificacoesBtn" title="Notificações">
-        <i class="bi bi-bell"></i>
-        <span>Notificações</span>
-    </a>
 </div>
 
-<audio id="notification-audio" preload="auto">
+<!-- Offcanvas Perfil Mobile -->
+<div class="offcanvas offcanvas-bottom d-lg-none shadow-lg" tabindex="-1" id="mobileProfileOffcanvas" aria-labelledby="mobileProfileOffcanvasLabel" style="border-top-left-radius: 20px; border-top-right-radius: 20px; height: auto; background-color: #1e1e1e; color: #fff;">
+    <div class="offcanvas-header border-bottom border-dark">
+        <h5 class="offcanvas-title fw-bold" id="mobileProfileOffcanvasLabel" style="font-size: 1.1rem;"><i class="bi bi-person-circle me-2 text-danger"></i> Minha Conta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body p-0 pb-3" style="max-height: 60vh; overflow-y: auto;">
+        <div class="list-group list-group-flush bg-transparent">
+            <a href="{% url 'perfis:meu_perfil' %}" class="list-group-item list-group-item-action bg-transparent text-white py-3 border-dark"><i class="bi bi-person me-3 text-secondary"></i>Meu Perfil</a>
+            <a href="{% url 'perfis:editar_perfil' %}" class="list-group-item list-group-item-action bg-transparent text-white py-3 border-dark"><i class="bi bi-pencil-square me-3 text-secondary"></i>Editar Perfil</a>
+            <a href="{% url 'lgpd_hub' %}" class="list-group-item list-group-item-action bg-transparent text-white py-3 border-dark"><i class="bi bi-shield-check me-3 text-secondary"></i>Privacidade (LGPD)</a>
+            <button class="list-group-item list-group-item-action bg-transparent text-white py-3 border-dark w-100 text-start" onclick="triggerPopupTeste(); bootstrap.Offcanvas.getInstance(document.getElementById('mobileProfileOffcanvas')).hide();"><i class="bi bi-volume-up-fill me-3 text-secondary"></i>Testar Notificações</button>
+            <a href="{% url 'account_logout' %}" class="list-group-item list-group-item-action bg-transparent text-danger fw-bold py-3"><i class="bi bi-box-arrow-right me-3 text-danger"></i>Sair da Conta</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade mobile-notifications-modal" id="mobileNotificationsModal" tabindex="-1" aria-labelledby="mobileNotificationsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mobileNotificationsTitle">
+                    <i class="bi bi-bell-fill me-2"></i>Notificações
+                </h5>
+                <div class="mobile-notifications-actions d-flex align-items-center gap-3">
+                    <button type="button" class="btn btn-outline-info btn-sm rounded-pill fw-bold" onclick="triggerPopupTeste(); $(this).closest('.modal').modal('hide')" style="font-size: 0.75rem; padding: 2px 10px;">Testar <i class="bi bi-volume-up-fill ms-1"></i></button>
+                    <button id="btn-limpar-notificacoes-mobile" type="button" class="btn-limpar-notificacoes fw-bold" style="font-size: 0.8rem;">Limpar</button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div id="lista-notificacoes-mobile" class="px-0">
+                    <div class="placeholder-msg px-3 py-3 text-muted small text-center">Sem notificações no momento.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio id="notification-audio" preload="none">
     <source src="{% static 'sounds/notification.mp3' %}" type="audio/mpeg">
 </audio>
 
@@ -446,572 +208,59 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/auth-base.js' %}"></script>
+{% if user.is_authenticated %}
+<script>
+    (function () {
+        const brand = document.getElementById('navBrandEsporteFY');
+        if (!brand) return;
+
+        const desktopUrl = brand.dataset.feedDesktopUrl;
+        const mobileUrl = brand.dataset.feedMobileUrl;
+        const mobileQuery = window.matchMedia('(max-width: 991.98px)');
+
+        function syncBrandHref() {
+            brand.setAttribute('href', mobileQuery.matches ? mobileUrl : desktopUrl);
+        }
+        
+        function checkFeedLayoutSwitch(e) {
+            const isFeedPage = window.location.pathname.includes('/feed/');
+            const hasAbaParam = window.location.search.includes('aba=');
+            
+            if (isFeedPage) {
+                if (!e.matches && hasAbaParam) {
+                    // Mobile -> Desktop: Remove parâmetros e vai pro Feed Geral
+                    window.location.href = desktopUrl;
+                } else if (e.matches && !hasAbaParam) {
+                    // Desktop -> Mobile: Coloca na visualização da aba Partidas
+                    window.location.href = mobileUrl;
+                }
+            }
+        }
+
+        syncBrandHref();
+
+        if (typeof mobileQuery.addEventListener === 'function') {
+            mobileQuery.addEventListener('change', function(e) {
+                syncBrandHref();
+                checkFeedLayoutSwitch(e);
+            });
+        } else if (typeof mobileQuery.addListener === 'function') {
+            mobileQuery.addListener(function(e) {
+                syncBrandHref();
+                checkFeedLayoutSwitch(e);
+            });
+        }
+    })();
+</script>
+{% endif %}
 
 {% if user.is_authenticated %}
     {{ user.id|json_script:"json-user-id" }}
     {{ user.username|json_script:"json-username" }}
     {{ WS_AUTH_TOKEN|json_script:"json-ws-token" }}
+    {{ request.session.session_key|json_script:"json-session-key" }}
 {% endif %}
-
-<script>
-/* ======= Helper: pega csrftoken do cookie ======= */
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
-
-function escapeHtml(value) {
-    const div = document.createElement('div');
-    div.innerText = value == null ? '' : String(value);
-    return div.innerHTML;
-}
-
-function toastMeta(kind) {
-    if (kind === 'success') return { title: 'Sucesso!', icon: 'bi-check-circle-fill', css: 'is-success' };
-    if (kind === 'error') return { title: 'Erro!', icon: 'bi-x-octagon-fill', css: 'is-error' };
-    if (kind === 'warning') return { title: 'Atenção!', icon: 'bi-exclamation-triangle-fill', css: 'is-warning' };
-    return { title: 'Aviso', icon: 'bi-info-circle-fill', css: 'is-info' };
-}
-
-function showToast(kind, text, delayMs = 5000) {
-    const stack = document.getElementById('toast-stack');
-    if (!stack || !window.bootstrap) return;
-
-    const meta = toastMeta(kind);
-    const wrapper = document.createElement('div');
-    wrapper.className = `toast esportefy-toast ${meta.css}`;
-    wrapper.setAttribute('role', 'alert');
-    wrapper.setAttribute('aria-live', 'assertive');
-    wrapper.setAttribute('aria-atomic', 'true');
-    wrapper.setAttribute('data-bs-delay', String(delayMs));
-    wrapper.innerHTML = `
-        <div class="toast-header">
-            <i class="bi ${meta.icon} me-2"></i>
-            <strong class="me-auto">${meta.title}</strong>
-            <small class="text-white-50">agora</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">${escapeHtml(text)}</div>
-    `;
-
-    stack.prepend(wrapper);
-    const instance = new bootstrap.Toast(wrapper);
-    instance.show();
-}
-
-function dismissAllToasts() {
-    if (!window.bootstrap) return;
-    const toastNodes = document.querySelectorAll('.toast.esportefy-toast');
-    toastNodes.forEach((toastNode) => {
-        const instance = bootstrap.Toast.getInstance(toastNode) || new bootstrap.Toast(toastNode);
-        instance.hide();
-    });
-}
-
-function playNotificationSound() {
-    const audio = document.getElementById('notification-audio');
-    if (!audio) return;
-    try {
-        audio.volume = 0.22;
-        audio.currentTime = 0;
-        const promise = audio.play();
-        if (promise && typeof promise.then === 'function') {
-            promise.then(() => {
-                window.esportefyPendingSuccessSound = false;
-            }).catch(() => {
-                // Navegador bloqueou autoplay; guarda para tocar após desbloqueio por interação
-                window.esportefyPendingSuccessSound = true;
-            });
-        }
-    } catch (_) {}
-}
-
-function setFeedSection(sectionKey) {
-    const feedBase = window.location.pathname.replace(/\/$/, '');
-    const expectedFeed = '{% url "feed" %}'.replace(/\/$/, '');
-    if (!feedBase.startsWith(expectedFeed)) return;
-
-    // Aplica comportamento em qualquer largura: cada aba mostra apenas sua seção.
-    const mapping = {
-        feed: ['feed-atividades', 'feed-partidas', 'feed-noticias'],
-        partidas: ['feed-partidas'],
-        noticias: ['feed-noticias'],
-    };
-
-    const allSections = ['feed-atividades', 'feed-partidas', 'feed-noticias'];
-    const toShow = mapping[sectionKey] || allSections;
-
-    allSections.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        const sectionWrapper = el.closest('section, div');
-
-        const hide = sectionKey !== 'feed' && !toShow.includes(id);
-
-        el.classList.toggle('d-none', hide);
-        if (sectionWrapper) {
-            sectionWrapper.classList.toggle('d-none', hide);
-        }
-
-        // fallback: caso parent ainda contenha elementos, controlar via inline display
-        if (sectionWrapper && sectionWrapper.classList.contains('d-none')) {
-            sectionWrapper.style.display = 'none';
-        } else if (sectionWrapper) {
-            sectionWrapper.style.display = '';
-        }
-    });
-
-    const navItems = document.querySelectorAll('.mobile-bottom-nav .nav-item');
-    navItems.forEach((item) => {
-        const itemKey = item.dataset.nav;
-        if (!itemKey) return;
-        if (sectionKey === 'feed') {
-            item.classList.toggle('active', itemKey === 'feed');
-        } else {
-            item.classList.toggle('active', itemKey === sectionKey);
-        }
-    });
-}
-
-function updateFeedSectionFromHash() {
-    const hash = window.location.hash || '#feed-atividades';
-    if (hash === '#feed-partidas') {
-        setFeedSection('partidas');
-    } else if (hash === '#feed-noticias') {
-        setFeedSection('noticias');
-    } else if (hash === '#feed-atividades') {
-        setFeedSection('feed');
-    }
-}
-
-function unlockNotificationAudio() {
-    const audio = document.getElementById('notification-audio');
-    if (!audio || window.esportefyAudioUnlocked) return;
-
-    try {
-        audio.muted = true;
-        const promise = audio.play();
-        if (promise && typeof promise.then === 'function') {
-            promise.then(() => {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.muted = false;
-                window.esportefyAudioUnlocked = true;
-
-                if (window.esportefyPendingSuccessSound) {
-                    setTimeout(() => playNotificationSound(), 120);
-                }
-            }).catch(() => {
-                audio.muted = false;
-            });
-        }
-    } catch (_) {
-        audio.muted = false;
-    }
-}
-
-function triggerPopupTeste() {
-    const mensagens = [
-        'Teste rapido: notificacoes ativas.',
-        'Tudo certo! Popup e som funcionando.',
-        'Nova interacao de teste recebida.',
-    ];
-    const mensagem = mensagens[Math.floor(Math.random() * mensagens.length)];
-    showToast('info', mensagem, 6000);
-    playNotificationSound();
-}
-
-/* ─── GERENCIADOR DE NOTIFICAÇÕES DE AMIZADE ─── */
-async function carregarSolicitacoesAmizade() {
-    try {
-        const response = await fetch('/perfis/api/solicitacoes/', {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        
-        if (!response.ok) return;
-        
-        const data = await response.json();
-        renderizarSolicitacoes(data.recebidas, data.enviadas);
-    } catch (err) {
-        console.error('Erro ao carregar solicitações:', err);
-    }
-}
-
-function renderizarSolicitacoes(recebidas, enviadas) {
-    const contRecibidas = document.getElementById('lista-solicitacoes-recebidas');
-    const contEnviadas = document.getElementById('lista-solicitacoes-enviadas');
-    const msgVazio = document.getElementById('msg-vazio');
-    const badge = document.getElementById('badge-notificacoes');
-    const divider = document.getElementById('divider-solicitacoes');
-
-    contRecibidas.innerHTML = '';
-    contEnviadas.innerHTML = '';
-
-    // Renderizar recebidas
-    recebidas.forEach(sol => {
-        const item = document.createElement('div');
-        item.className = 'notificacao-item-amizade';
-        item.id = `sol-recebida-${sol.id}`;
-        item.innerHTML = `
-            <img src="${sol.foto_url}" alt="${sol.username}">
-            <div class="info">
-                <div class="username">${escapeHtml(sol.username)}</div>
-                <div class="tipo">Quer ser seu amigo </div>
-            </div>
-            <div class="notificacao-acoes">
-                <button class="btn-sm btn-accept" onclick="aceitarAmizade(${sol.id}, this)">
-                    <i class="bi bi-check"></i>
-                </button>
-                <button class="btn-sm btn-reject" onclick="recusarAmizade(${sol.id}, this)">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>
-        `;
-        contRecibidas.appendChild(item);
-    });
-
-    // Renderizar enviadas
-    enviadas.forEach(sol => {
-        const item = document.createElement('div');
-        item.className = 'notificacao-item-amizade';
-        item.id = `sol-enviada-${sol.id}`;
-        item.innerHTML = `
-            <img src="${sol.foto_url}" alt="${sol.username}">
-            <div class="info">
-                <div class="username">${escapeHtml(sol.username)}</div>
-                <div class="tipo">Pedido pendente ⏳</div>
-            </div>
-            <span class="badge bg-warning text-dark" style="height: fit-content;">Aguardando</span>
-        `;
-        contEnviadas.appendChild(item);
-    });
-
-    // Atualizar UI
-    const total = recebidas.length + enviadas.length;
-    
-    if (total === 0) {
-        msgVazio.style.display = 'block';
-        divider.style.display = 'none';
-        badge.classList.add('d-none');
-    } else {
-        msgVazio.style.display = 'none';
-        badge.textContent = total;
-        badge.classList.remove('d-none');
-        
-        if (enviadas.length > 0) {
-            contEnviadas.style.display = 'block';
-            divider.style.display = 'block';
-        } else {
-            contEnviadas.style.display = 'none';
-            divider.style.display = 'none';
-        }
-    }
-}
-
-async function aceitarAmizade(solicitacaoId, botao) {
-    const token = getCookie('csrftoken');
-    const item = botao.closest('.notificacao-item-amizade');
-    
-    try {
-        const response = await fetch(`/perfis/solicitacao/aceitar/${solicitacaoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': token,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        if (response.ok) {
-            item.innerHTML = `<div class="py-2 px-3 text-success small"><i class="bi bi-check-circle"></i> Amizade aceita!</div>`;
-            setTimeout(() => {
-                item.remove();
-                actualizarBadge();
-            }, 1500);
-            showToast('success', 'Novo amigo adicionado! 🎉', 5000);
-            playNotificationSound();
-        }
-    } catch (err) {
-        console.error('Erro ao aceitar:', err);
-        showToast('error', 'Erro ao aceitar solicitação', 5000);
-    }
-}
-
-async function recusarAmizade(solicitacaoId, botao) {
-    const token = getCookie('csrftoken');
-    const item = botao.closest('.notificacao-item-amizade');
-    
-    try {
-        const response = await fetch(`/perfis/solicitacao/recusar/${solicitacaoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': token,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        if (response.ok) {
-            item.innerHTML = `<div class="py-2 px-3 text-muted small"><i class="bi bi-x-circle"></i> Recusado</div>`;
-            setTimeout(() => {
-                item.remove();
-                actualizarBadge();
-            }, 1500);
-            showToast('info', 'Solicitação recusada', 5000);
-            playNotificationSound();
-        }
-    } catch (err) {
-        console.error('Erro ao recusar:', err);
-        showToast('error', 'Erro ao recusar solicitação', 5000);
-    }
-}
-
-function actualizarBadge() {
-    carregarSolicitacoesAmizade();
-}
-
-// Carregar solicitações ao abrir o dropdown
-document.addEventListener('DOMContentLoaded', () => {
-    const notificDropdown = document.getElementById('notificacoesDropdown');
-    if (notificDropdown) {
-        notificDropdown.addEventListener('click', carregarSolicitacoesAmizade);
-        // Carregar também no início
-        carregarSolicitacoesAmizade();
-        // E a cada 10 segundos em tempo real
-        setInterval(carregarSolicitacoesAmizade, 10000);
-    }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    window.esportefyAudioUnlocked = false;
-    window.esportefyPendingSuccessSound = false;
-
-    // Desbloqueia áudio na primeira interação do usuário (política dos navegadores)
-    const unlockOnce = () => unlockNotificationAudio();
-    document.addEventListener('click', unlockOnce, { once: true });
-    document.addEventListener('keydown', unlockOnce, { once: true });
-    document.addEventListener('touchstart', unlockOnce, { once: true });
-    document.addEventListener('pointerdown', unlockOnce, { once: true });
-    document.addEventListener('mousemove', unlockOnce, { once: true });
-    document.addEventListener('wheel', unlockOnce, { once: true });
-
-    // Permite fechar rapidamente as notificações clicando/toquando em qualquer ponto da página.
-    document.addEventListener('pointerdown', () => {
-        dismissAllToasts();
-    }, true);
-
-    // Inicializa toasts renderizados pelo servidor
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-    toastElList.map(function (toastEl) {
-      return new bootstrap.Toast(toastEl).show();
-    });
-
-    // Toca som para mensagens de sucesso vindas do backend (ex.: login)
-    const hasSuccessToast = toastElList.some((el) => el.classList.contains('is-success'));
-    if (hasSuccessToast) {
-        window.esportefyPendingSuccessSound = true;
-        setTimeout(() => playNotificationSound(), 160);
-        setTimeout(() => {
-            if (window.esportefyPendingSuccessSound) {
-                playNotificationSound();
-            }
-        }, 900);
-    }
-
-    // --- Lógica de Notificações ---
-    const userIdElement = document.getElementById('json-user-id');
-    const usernameElement = document.getElementById('json-username');
-    const wsTokenElement = document.getElementById('json-ws-token');
-
-    const userId = userIdElement ? JSON.parse(userIdElement.textContent) : null;
-    const username = usernameElement ? JSON.parse(usernameElement.textContent) : null;
-    const wsToken = wsTokenElement ? JSON.parse(wsTokenElement.textContent) : null;
-
-    if (userId && username && wsToken) {
-        initNotificationSocket(userId, username, wsToken);
-    }
-
-    function initNotificationSocket(uid, uname, token) {
-        const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-        const host = window.location.hostname;
-        
-        const port = (window.location.port === '8000' || window.location.port === '8080') ? ':8080' : '';
-        
-        const url = `${protocol}${host}${port}/ws/notifications/?user=${encodeURIComponent(uid)}&username=${encodeURIComponent(uname)}&token=${encodeURIComponent(token)}`;
-
-        try {
-            const socket = new WebSocket(url);
-            window.notificationSocket = socket;
-            socket.onopen = () => {};
-
-            socket.onclose = (e) => {
-                setTimeout(() => initNotificationSocket(uid), 5000);
-            };
-
-            socket.onerror = () => {};
-
-            socket.onmessage = (e) => {
-                const data = JSON.parse(e.data);
-                
-                // Verificar se é um evento de amizade
-                if (data.type === 'send_generic_notification' || data.type === 'amizade_notification') {
-                    carregarSolicitacoesAmizade();
-                    
-                    // Mostrar toast informando
-                    let toastMsg = data.mensagem || 'Nova solicitação de amizade!';
-                    showToast('info', toastMsg, 6000);
-                    playNotificationSound();
-                    return;
-                }
-                
-                const lista = document.getElementById('lista-notificacoes');
-                const badge = document.getElementById('badge-notificacoes');
-                
-                let conteudoHTML = '';
-                let popupTexto = data.mensagem || 'Você tem uma nova notificação.';
-
-                if (data.type === 'notification' || data.type === 'new_message_notification') {
-                    const remetente = escapeHtml(data.remetente || 'Contato');
-                    const mensagem = escapeHtml(data.mensagem || 'Nova mensagem recebida.');
-                    const avatarUrl = data.foto_url ? escapeHtml(data.foto_url) : '';
-                    const freshAvatarUrl = avatarUrl
-                        ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
-                        : '';
-                    const avatar = freshAvatarUrl
-                        ? `<img src="${freshAvatarUrl}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">`
-                        : `<div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">${remetente.charAt(0).toUpperCase()}</div>`;
-                    
-                    const link = escapeHtml(data.conversa_url || '#');
-                    const timestamp = escapeHtml(data.timestamp || 'agora');
-
-                    conteudoHTML = `
-                        <a href="${link}" class="d-flex align-items-center text-decoration-none text-dark gap-2 p-2 border-bottom">
-                            <div class="position-relative">
-                                ${avatar}
-                                <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle"></span>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.9rem;">${remetente}</h6>
-                                    <small class="text-muted" style="font-size: 0.7rem;">${timestamp}</small>
-                                </div>
-                                <p class="mb-0 text-muted text-truncate small" style="max-width: 220px;">${mensagem}</p>
-                            </div>
-                        </a>
-                    `;
-                    popupTexto = `${data.remetente || 'Contato'}: ${data.mensagem || 'Nova mensagem recebida.'}`;
-                } else {
-                    conteudoHTML = `
-                        <div class="d-flex align-items-center gap-2 p-2 border-bottom">
-                            <i class="bi bi-bell-fill text-warning fs-4"></i>
-                            <div>
-                                <h6 class="mb-0 small fw-bold">Nova notificação</h6>
-                                <small class="text-muted">Você tem uma nova interação.</small>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                showToast('info', popupTexto, 6000);
-                playNotificationSound();
-
-                if (!lista) return;
-
-                const vazio = lista.querySelector('.placeholder-msg');
-                if (vazio) vazio.remove();
-
-                const item = document.createElement('div');
-                item.classList.add('notificacao-item');
-
-                item.innerHTML = conteudoHTML;
-                lista.prepend(item);
-
-                if (badge) {
-                    let count = parseInt(badge.innerText) || 0;
-                    badge.innerText = count + 1;
-                    badge.classList.remove('d-none');
-                    badge.classList.add('badge-animada');
-                    setTimeout(() => badge.classList.remove('badge-animada'), 500);
-                }
-            };
-
-        } catch (err) {
-            showToast('warning', 'Não foi possível iniciar as notificações em tempo real.');
-        }
-    }
-
-    // Ativa navegação inferior no mobile e gerência de selecionado
-    const mobileNav = document.getElementById('mobileBottomNav');
-    if (mobileNav) {
-        const currentPath = window.location.pathname.replace(/\/$/, '');
-        const currentHash = window.location.hash;
-        const navItems = mobileNav.querySelectorAll('.nav-item');
-
-        navItems.forEach((item) => {
-            const target = item.dataset.nav;
-
-            if (currentPath === '{% url "feed" %}'.replace(/\/$/, '')) {
-                if (target === 'feed' && (!currentHash || currentHash === '#feed-atividades')) {
-                    item.classList.add('active');
-                }
-                if (target === 'partidas' && currentHash === '#feed-partidas') {
-                    item.classList.add('active');
-                }
-                if (target === 'noticias' && currentHash === '#feed-noticias') {
-                    item.classList.add('active');
-                }
-            } else {
-                if (target === 'feed' && currentPath === '{% url "feed" %}'.replace(/\/$/, '')) {
-                    item.classList.add('active');
-                } else if (target === 'perfil' && currentPath.startsWith('{% url "perfis:meu_perfil" %}'.replace(/\/$/, ''))) {
-                    item.classList.add('active');
-                } else if (target === 'jogadores' && currentPath.startsWith('{% url "perfis:lista_usuarios" %}'.replace(/\/$/, ''))) {
-                    item.classList.add('active');
-                }
-            }
-
-            item.addEventListener('click', (event) => {
-                const targetTab = event.currentTarget.dataset.nav;
-                const feedUrl = '{% url "feed" %}'.replace(/\/$/, '');
-
-                if (['feed','partidas','noticias'].includes(targetTab)) {
-                    event.preventDefault();
-
-                    // Se não estiver na página de feed, redireciona para feed com hash.
-                    if (currentPath !== feedUrl) {
-                        window.location.href = `${feedUrl}#${targetTab === 'feed' ? 'feed-atividades' : 'feed-' + targetTab}`;
-                        return;
-                    }
-
-                    // Dentro do feed: apenas mostra a seção escolhida
-                    setFeedSection(targetTab);
-                    history.replaceState(null, '', `#${targetTab === 'feed' ? 'feed-atividades' : 'feed-' + targetTab}`);
-
-                    // Força reposicionamento levemente no topo para UI consistente
-                    window.scrollTo({ top: 0, behavior: 'auto' });
-                }
-
-                if (targetTab === 'notificacoes') {
-                    event.preventDefault();
-                    const drop = new bootstrap.Dropdown(document.getElementById('notificacoesDropdown'));
-                    drop.show();
-                }
-
-                navItems.forEach((nav) => nav.classList.remove('active'));
-                event.currentTarget.classList.add('active');
-            });
-        });
-
-        if (currentPath === '{% url "feed" %}'.replace(/\/$/, '')) {
-            updateFeedSectionFromHash();
-            window.addEventListener('hashchange', updateFeedSectionFromHash);
-        }
-    }
-});
-</script>
 
 {% block extra_js %}{% endblock %}
 </body>

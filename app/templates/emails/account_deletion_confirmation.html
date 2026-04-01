@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirmacao de exclusao de conta</title>
+  <style>
+    body { margin: 0; padding: 0; background: #0f1115; color: #e5ebf2; font-family: Arial, sans-serif; }
+    .wrap { max-width: 620px; margin: 24px auto; background: #161b22; border: 1px solid #2a3340; border-radius: 12px; overflow: hidden; }
+    .head { padding: 24px; background: linear-gradient(120deg, #ef4444, #be123c); }
+    .head h1 { margin: 0; font-size: 24px; color: #fff; }
+    .body { padding: 24px; line-height: 1.6; }
+    .meta { margin: 14px 0; padding: 12px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #cbd5e1; }
+    .btn { display: inline-block; padding: 12px 18px; border-radius: 8px; text-decoration: none; color: #fff !important; font-weight: 700; }
+    .btn-danger { background: #ef4444; }
+    .btn-muted { background: #334155; }
+    .actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .foot { padding: 18px 24px; border-top: 1px solid #2a3340; color: #94a3b8; font-size: 13px; }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1>Exclusao de conta no EsporteFY</h1>
+    </div>
+    <div class="body">
+      <p>Ola, {{ username }}.</p>
+      <p>Recebemos uma solicitacao para excluir sua conta. Para confirmar, use o botao abaixo.</p>
+      <div class="meta">
+        <strong>Prazo:</strong> este link expira em {{ expires_at }} (48 horas).<br>
+        Se voce nao solicitou, ignore este e-mail.
+      </div>
+      <div class="actions">
+        <a class="btn btn-danger" href="{{ confirm_url }}">Confirmar exclusao</a>
+        <a class="btn btn-muted" href="{{ cancel_url }}">Abrir central LGPD</a>
+      </div>
+    </div>
+    <div class="foot">
+      Dúvidas? Fale com a equipe: <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+    </div>
+  </div>
+</body>
+</html>

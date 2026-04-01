@@ -1,0 +1,295 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Privacidade & Dados Pessoais - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/lgpd/privacidade.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-lg privacidade-container">
+    <!-- HEADER -->
+    <div class="privacidade-header">
+        <h1>Privacidade & Dados Pessoais</h1>
+        <p>Controle seus dados e consentimentos na plataforma EsporteFY</p>
+    </div>
+
+    <!-- ABAS -->
+    <ul class="nav nav-tabs privacidade-tabs" role="tablist">
+        <!-- Política (Sempre visível) -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if tab_ativa == 'politica' %}active{% endif %}" 
+                    id="aba-politica" data-bs-toggle="tab" data-bs-target="#conteudo-politica" 
+                    type="button" role="tab">
+                Política de Privacidade
+            </button>
+        </li>
+
+        <!-- Termos (Sempre visível) -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if tab_ativa == 'termos' %}active{% endif %}" 
+                    id="aba-termos" data-bs-toggle="tab" data-bs-target="#conteudo-termos" 
+                    type="button" role="tab">
+                Termos de Serviço
+            </button>
+        </li>
+
+        <!-- Meus Dados (Apenas logados) -->
+        {% if user.is_authenticated %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if tab_ativa == 'meus-dados' %}active{% endif %}" 
+                    id="aba-dados" data-bs-toggle="tab" data-bs-target="#conteudo-dados" 
+                    type="button" role="tab">
+                Meus Dados
+            </button>
+        </li>
+
+        <!-- Consentimento (Apenas logados) -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if tab_ativa == 'consentimento' %}active{% endif %}" 
+                    id="aba-consentimento" data-bs-toggle="tab" data-bs-target="#conteudo-consentimento" 
+                    type="button" role="tab">
+                Consentimento
+            </button>
+        </li>
+
+        <!-- Deletar (Apenas logados) -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if tab_ativa == 'deletar' %}active{% endif %}" 
+                    id="aba-deletar" data-bs-toggle="tab" data-bs-target="#conteudo-deletar" 
+                    type="button" role="tab">
+                Deletar Conta
+            </button>
+        </li>
+        {% endif %}
+    </ul>
+
+    <!-- CONTEÚDO DAS ABAS -->
+    <div class="tab-content privacidade-conteudo">
+        
+        <!-- ABA 1: POLÍTICA -->
+        <div class="tab-pane {% if tab_ativa == 'politica' %}active{% endif %}" 
+             id="conteudo-politica" role="tabpanel" tabindex="0">
+            {% if politica %}
+                <div class="politica-conteudo">
+                    {{ politica.content|safe }}
+                    <footer class="politica-footer">
+                        <small class="text-muted">
+                            Versão {{ politica.version }} — Válida desde {{ politica.effective_date|date:"d \\d\\e M \\d\\e Y" }}
+                        </small>
+                    </footer>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    Política não disponível no momento
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ABA 2: TERMOS -->
+        <div class="tab-pane {% if tab_ativa == 'termos' %}active{% endif %}" 
+             id="conteudo-termos" role="tabpanel" tabindex="0">
+            {% if termos %}
+                <div class="termos-conteudo">
+                    {{ termos.content|safe }}
+                    <footer class="termos-footer">
+                        <small class="text-muted">
+                            Versão {{ termos.version }} — Válida desde {{ termos.effective_date|date:"d \\d\\e M \\d\\e Y" }}
+                        </small>
+                    </footer>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    Termos não disponíveis no momento
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ABA 3: MEUS DADOS (Apenas logados) -->
+        {% if user.is_authenticated %}
+        <div class="tab-pane {% if tab_ativa == 'meus-dados' %}active{% endif %}" 
+             id="conteudo-dados" role="tabpanel" tabindex="0">
+            <div class="meus-dados-conteudo">
+                <h3>Baixar Meus Dados</h3>
+                <p>Solicite um arquivo com TODOS os seus dados pessoais armazenados na plataforma.</p>
+                <div class="dados-info-box mb-3">
+                    <p class="mb-2"><strong>Como funciona:</strong> ao solicitar, o sistema prepara um pacote estruturado em JSON com suas informações de perfil, interações sociais, dados de partidas, registros de consentimento e metadados relacionados à sua conta.</p>
+                    <p class="mb-2">Para manter segurança e conformidade LGPD, o arquivo pode levar alguns minutos para ser processado em fila interna. Assim que estiver pronto, o botão de download é liberado no seu histórico.</p>
+                    <p class="mb-0">A solicitação fica registrada para auditoria e transparência, facilitando o acompanhamento das suas ações de privacidade dentro da plataforma.</p>
+                </div>
+                
+                <form method="post" action="{% url 'lgpd:request_data_access' %}" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reason-data" class="form-label">Motivo da solicitação <span class="text-muted">(opcional)</span></label>
+                        <textarea id="reason-data" name="reason" class="form-control" rows="2" placeholder="Ex.: conferência de dados pessoais"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Solicitar Download
+                    </button>
+                </form>
+
+                <div class="dados-historico-wrap">
+                <h5 class="mb-2">Histórico de Solicitações</h5>
+                {% if requisicoes_dados %}
+                    <div class="requisicoes-tabela">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requisicoes_dados %}
+                                <tr>
+                                    <td>{{ req.requested_at|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge badge-status-{{ req.status }}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if req.status == 'completed' %}
+                                            <a href="{% url 'lgpd:download_user_data' req.id %}" class="btn btn-sm btn-success">
+                                                Download
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">Em processamento</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma solicitação encontrada.</p>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 4: CONSENTIMENTO (Apenas logados) -->
+        <div class="tab-pane {% if tab_ativa == 'consentimento' %}active{% endif %}" 
+             id="conteudo-consentimento" role="tabpanel" tabindex="0">
+            <div class="consentimento-conteudo">
+                <h3>Gerenciar Consentimentos</h3>
+                <p>Controle quais tipos de dados você autoriza que processemos:</p>
+                
+                <div class="consentimento-lista">
+                    {% for tipo_consent, info_consent in consentimentos.items %}
+                    <div class="consentimento-item">
+                        <label class="switch">
+                            <input type="checkbox" 
+                                   class="toggle-consent" 
+                                   data-tipo="{{ tipo_consent }}"
+                                   data-csrf="{{ csrf_token }}"
+                                data-url-template="{% url 'lgpd:update_consent' 'TYPE' %}"
+                                   {% if info_consent.accepted %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="consentimento-info">
+                            <strong>{{ info_consent.display_name }}</strong>
+                            {% if info_consent.timestamp %}
+                            <small class="text-muted d-block mt-1">
+                                Atualizado: {{ info_consent.timestamp|date:"d/m/Y \\a\\s H:i" }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 5: DELETAR CONTA (Apenas logados) -->
+        <div class="tab-pane {% if tab_ativa == 'deletar' %}active{% endif %}" 
+             id="conteudo-deletar" role="tabpanel" tabindex="0">
+            <div class="deletar-conteudo">
+                <h3>Deletar Minha Conta</h3>
+                
+                <div class="alert alert-danger" role="alert">
+                    <strong>Aviso Importante!</strong><br>
+                    Esta ação é <strong>permanente</strong>,você receberá um email de confirmação com um link que expira em 48 horas.
+                </div>
+
+                <form method="post" action="{% url 'lgpd:request_account_deletion' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label">
+                            Por que deseja deletar sua conta? <span class="text-muted">(opcional)</span>
+                        </label>
+                        <textarea id="motivo" name="reason" class="form-control" 
+                                  placeholder="Sua resposta nos ajuda a melhorar..." 
+                                  rows="3"></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="confirmar" name="confirmar" required>
+                        <label class="form-check-label" for="confirmar">
+                            Confirmo que quero deletar permanentemente minha conta e todos os meus dados
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger">
+                        Solicitar Exclusão de Conta
+                    </button>
+                </form>
+
+                <hr>
+                <h5>Solicitações de exclusão:</h5>
+                {% if requisicoes_delecao %}
+                    <div class="requisicoes-tabela">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requisicoes_delecao %}
+                                <tr>
+                                    <td>{{ req.requested_at|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge badge-status-{{ req.status }}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if req.status == 'pending' or req.status == 'confirmed' %}
+                                            <form method="post" action="{% url 'lgpd:cancel_account_deletion' req.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-light">
+                                                    Cancelar
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-muted small">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Nenhuma solicitação de exclusão realizada</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- JAVASCRIPT para Toggle de Consentimentos -->
+<script src="{% static 'js/pages/lgpd-centro-privacidade-legacy.js' %}"></script>
+
+{% endblock %}
+

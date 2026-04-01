@@ -1,0 +1,60 @@
+{% extends "account/base.html" %}
+{% load i18n static crispy_forms_tags %}
+
+{% block title %}Cadastrar-se{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login/signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="signup-page-dark">
+    <div class="signup-wrapper">
+        <div class="signup-card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-3">Cadastrar-se</h3>
+                <p class="text-muted text-center mb-4">
+                    Voce esta prestes a usar sua conta social para entrar no EsporteFY. Complete os dados abaixo para finalizar.
+                </p>
+
+                {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Nao foi possivel concluir:</strong>
+                    <ul class="my-2 mb-0">
+                        {% for field, error_list in form.errors.items %}
+                            {% for error in error_list %}
+                                <li>{{ error|escape }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" action="">
+                    {% csrf_token %}
+
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-12">
+                            {% for field in form %}
+                                {{ field|as_crispy_field }}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary mb-3">Finalizar cadastro</button>
+                    </div>
+                </form>
+
+                <p class="text-center mt-2 text-muted">
+                    Ja possui conta? <a href="{% url 'account_login' %}" class="link-light">Entrar</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

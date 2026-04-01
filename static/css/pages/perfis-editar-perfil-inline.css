@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════
+           MODAIS DE CROP (avatar + banner)
+        ═══════════════════════════════════════════ */
+        .crop-modal-content {
+            background: #13141a;
+            border: 1px solid rgba(255,255,255,0.07);
+            color: #eef1f3;
+        }
+        .crop-modal-content .modal-header,
+        .crop-modal-content .modal-footer {
+            border-color: rgba(255,255,255,0.07);
+        }
+        .crop-container {
+            background: #0b0d10;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .crop-container img { display: block; max-width: 100%; }
+
+        /* Preview circular (avatar) */
+        .crop-preview-wrap { text-align: center; }
+        .crop-preview-circle {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 3px solid #e53935;
+            background: #0b0d10;
+        }
+
+        /* Preview banner (16:5 aprox) */
+        .crop-preview-banner {
+            width: 100%;
+            height: 80px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid #e53935;
+            background: #0b0d10;
+            margin: 0 auto 0.5rem;
+        }
+
+        /* avatar na sidebar */
+        .avatar-wrap { position: relative; }
+        .avatar-preview-badge {
+            position: absolute; bottom: 4px; right: 4px;
+            background: #e53935; color: #fff;
+            font-size: 10px; font-weight: 700;
+            padding: 2px 7px; border-radius: 20px;
+            display: none;
+        }
+
+        /* ═══════════════════════════════════════════
+           SEÇÃO DE BANNER NO FORMULÁRIO
+        ═══════════════════════════════════════════ */
+        .banner-upload-section {
+            position: relative;
+            width: 100%;
+            height: 240px; /* IGUAL ao --banner-h do perfil_social.css → posição % fica idêntica */
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px dashed rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #0d0f14 0%, #070810 100%);
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            margin-bottom: 0.75rem;
+        }
+        .banner-upload-section:hover {
+            border-color: rgba(229,57,53,0.5);
+        }
+
+        /* Preview da imagem/GIF do banner */
+        #banner-preview-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 50%;
+            display: none;
+            transition: object-position 0s; /* posição muda via JS */
+            pointer-events: none;
+        }
+        #banner-preview-img.visible { display: block; }
+
+        /* Overlay de placeholder */
+        .banner-placeholder-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .banner-placeholder-overlay .icon { font-size: 2.5rem; }
+        #banner-preview-img.visible + .banner-drag-hint { display: flex; }
+        .banner-drag-hint {
+            display: none;
+            position: absolute;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .banner-upload-section:hover .banner-drag-hint { opacity: 1; }
+
+        /* Cursor de arrastar quando o banner está carregado */
+        .banner-upload-section.has-image { cursor: grab; border-style: solid; border-color: rgba(255,255,255,0.1); }
+        .banner-upload-section.has-image:active { cursor: grabbing; }
+
+        /* Botões de ação do banner */
+        .banner-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* GIF tag badge */
+        .gif-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(229,57,53,0.85);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            padding: 2px 7px;
+            border-radius: 4px;
+            pointer-events: none;
+            display: none;
+        }
+        .gif-badge.visible { display: block; }
+
+        /* Tag de posição salva */
+        .position-tag {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+            display: none;
+        }
+        .banner-upload-section.has-image .position-tag { display: block; }
+
+        /* Hint de drag para GIF */
+        .gif-drag-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(229,57,53,0.8);
+            color: #fff;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            pointer-events: none;
+            white-space: nowrap;
+            display: none;
+        }
+        .banner-upload-section.has-image .gif-drag-hint { display: block; }

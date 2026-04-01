@@ -1,0 +1,247 @@
+<!-- Modal Criar Partida (Rolagem Horizontal, Tema Escuro) -->
+<div class="modal fade" id="modalCriarPartida" tabindex="-1" aria-labelledby="modalCriarPartidaLabel" aria-hidden="true" data-bs-theme="dark">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable wizard-mobile-dialog">
+    <div class="modal-content bg-dark text-light border-0 shadow-lg rounded-4 overflow-hidden wizard-mobile-content">
+      
+      <!-- Cabeçalho -->
+      <div class="modal-header border-secondary pb-3 position-relative">
+        <h4 class="modal-title fw-bolder w-100 text-center m-0" id="modalCriarPartidaLabel" style="font-size: 1.5rem;">
+          <i class="fa-solid fa-trophy text-danger me-2"></i>Criar Partida
+        </h4>
+        <button type="button" class="btn-close btn-close-white position-absolute end-0 me-4" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Barra de Progresso Superior -->
+      <div class="position-relative w-100 bg-secondary bg-opacity-50" style="height: 4px;">
+        <div class="position-absolute bg-danger h-100" id="wizardProgressBar" style="width: 33.33%; transition: width 0.4s ease;"></div>
+      </div>
+
+      <!-- Corpo com as Etapas em formato Carrossel -->
+      <div class="modal-body p-0 custom-scrollbar" style="overflow-x: hidden !important; width: 100%; max-width: 100%; overscroll-behavior-y: contain;">
+        
+        <form id="formCriarPartida" action="{% url 'partidas:criar_partida' %}" method="POST" class="h-100">
+            {% csrf_token %}
+            
+            <!-- CONTÊINER DO CARROSSEL DE ETAPAS -->
+            <div id="wizardStepContainer" class="d-flex h-100" style="transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); width: 100%; flex-wrap: nowrap;">
+                
+                <!-- ETAPA 1: Onde -->
+                <div id="wizardStep1" class="wizard-step p-2 p-md-4" style="flex: 0 0 100%; min-width: 100%; max-width: 100%; padding-bottom: 1rem !important;">
+                    <div class="text-center mb-3 mt-2">
+                        <h5 class="fw-bolder text-light fs-4 position-relative d-inline-block" style="letter-spacing: 1px;">
+                            Escolha a Quadra
+                            <div class="bg-danger position-absolute start-50 translate-middle-x rounded-pill" style="height: 3px; width: 60px; bottom: -12px; box-shadow: 0 0 8px rgba(220,53,69,0.8);"></div>
+                        </h5>
+                    </div>
+                    
+                    <input type="hidden" name="quadra" id="wizardQuadraId" required>
+                    
+                    <!-- Lista de Quadras com Rolagem Horizontal tipo Filtro e Setas -->
+                    <div class="position-relative w-100 mb-2">
+                        <div class="d-flex overflow-x-auto gap-3 pb-4 pt-2 snap-x-mandatory custom-scrollbar px-md-4" id="wizardListaQuadras">
+                        <div class="text-center w-100 py-5 text-secondary">
+                            <div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div> Carregando...
+                        </div>
+                    </div>
+                    </div> <!-- FIM WRAPPER COM SETAS -->
+                    
+                    <div id="step1Error" class="text-danger small d-none mt-2 text-center w-100"><i class="fa-solid fa-circle-exclamation me-1"></i> Por favor, selecione uma quadra.</div>
+                </div>
+
+                                <!-- ETAPA 2: Detalhes -->
+                <div id="wizardStep2" class="wizard-step position-relative pb-4" style="flex: 0 0 100%; min-width: 100%; max-width: 100%; overflow: hidden; margin-top: -1px;">
+                    
+                    <!-- BANNER DA QUADRA FULL-WIDTH -->
+                    <div id="step2SelectedQuadra" class="w-100 position-relative mb-4" style="height: 200px; background-color: #1a1d20; background-size: cover; background-position: center; transition: all 0.4s ease;">
+                         <!-- Conteúdo gerado via JS -->
+                    </div>
+
+                    <div class="text-center mb-4 mt-2">
+                        <h5 class="fw-bolder text-light fs-4 position-relative d-inline-block" style="letter-spacing: 1px;">
+                            Detalhes da Partida
+                            <div class="bg-danger position-absolute start-50 translate-middle-x rounded-pill" style="height: 3px; width: 60px; bottom: -12px; box-shadow: 0 0 8px rgba(220,53,69,0.8);"></div>
+                        </h5>
+                    </div>
+                    
+                    <div class="mx-auto px-3 px-md-4" style="max-width: 550px;">
+
+                        <div class="form-group mb-3">
+                            <label class="form-label text-secondary small fw-bold">Título da Partida</label>
+                            <input type="text" name="titulo" class="form-control rounded-3 border-secondary bg-dark text-light py-2 px-3" placeholder="Ex: Pelada dos Amigos" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label text-secondary small fw-bold">Esporte</label>
+                            <select name="esporte" id="wizardEsporteSelect" class="form-select rounded-3 border-secondary bg-dark text-light py-2 px-3" required>
+                                <option value="">Selecione um esporte...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row g-3 mb-2">
+                            <div class="col-sm-7 form-group">
+                                <label class="form-label fw-bold text-secondary small">Data e Hora</label>
+                                <input type="datetime-local" id="wizardDataHora" name="data_hora" class="form-control border-secondary bg-dark text-light rounded-3 py-2 px-3" required>
+                            </div>
+                            
+                            <div class="col-sm-5 form-group">
+                                <label class="form-label fw-bold text-secondary small">Vagas</label>
+                                <div class="input-group rounded-3 overflow-hidden border border-secondary">
+                                    <span class="input-group-text bg-dark border-0 text-danger px-3"><i class="fa-solid fa-users"></i></span>
+                                    <input type="number" name="jogadores_necessarios" id="wizardVagas" class="form-control border-0 bg-dark text-light fw-bold py-2" min="2" max="50" placeholder="-" required>
+                                </div>
+                                <div class="form-text text-secondary mt-1" style="font-size: 0.65rem;"><i class="fa-solid fa-magic me-1 text-danger"></i>Auto (Altere se precisar)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 3: Resumo Final -->
+                <div id="wizardStep3" class="wizard-step p-3 p-md-4 text-center d-flex flex-column justify-content-center"" style="flex: 0 0 100%; min-width: 100%; max-width: 100%; padding-bottom: 2rem !important;">
+                    <div class="mb-3 d-inline-flex mx-auto align-items-center justify-content-center bg-danger bg-opacity-25 text-danger rounded-circle" style="width: 60px; height: 60px;">
+                        <i class="fa-solid fa-check fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold fs-4 mb-2 text-light">Confirmar Partida</h5>
+                    <p class="text-secondary small mb-4">Deslize pelas informações. Se estiver tudo certo, é só criar!</p>
+                    
+                    <div class="card border-secondary bg-dark shadow-sm rounded-4 text-start overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <p class="text-secondary small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Esporte</p>
+                                    <p class="fw-medium mb-1 text-light" id="resumoEsporteText">-</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-secondary small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Vagas</p>
+                                    <p class="fw-medium mb-1 text-light"><span id="resumoVagasText">-</span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p class="text-secondary small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Localização</p>
+                                    <p class="fw-medium mb-1 text-truncate text-light" id="resumoQuadraText">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <p class="text-secondary small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Quando</p>
+                                    <p class="fw-medium mb-0 text-danger" id="resumoDataText">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="wizardAlertError" class="alert alert-danger mt-3 d-none text-start small border-0 shadow-sm d-flex align-items-center rounded-3">
+                        <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                        <span id="wizardFormErrorText">Um erro ocorreu.</span>
+                    </div>
+                </div>
+
+            </div> <!-- FIM CONTAINER CARROSSEL -->
+        </form>
+      </div>
+
+      <!-- Rodapé Interativo -->
+      <div class="modal-footer border-secondary pb-3 pt-3 px-4 d-flex justify-content-between rounded-bottom-4 bg-dark">
+        <button type="button" class="btn btn-dark border border-secondary text-light rounded-pill px-3 px-md-4 fw-medium" id="btnWizardVoltar" style="visibility: hidden;">
+            <i class="fa-solid fa-chevron-left me-1"></i>Voltar
+        </button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 px-md-5 fw-bold shadow-sm" id="btnWizardAvancar">
+            Próximo<i class="fa-solid fa-chevron-right ms-2"></i>
+        </button>
+        <button type="button" class="btn btn-success d-none rounded-pill px-5 fw-bold shadow" id="btnWizardConfirmar">
+            Criar<i class="fa-solid fa-check ms-2"></i>
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<style>
+/* Ajustes para travar scroll no mobile e garantir altura acima da navbar */
+@media (max-width: 768px) {
+    .wizard-mobile-dialog {
+        margin: 10px auto 100px auto !important; /* Margem inferior FORTE para afastar da barra de baixo */
+        max-height: calc(100vh - 120px) !important; /* Trava a altura máxima do modal */
+        align-items: flex-start !important; /* FORÇA O MODAL A SUBIR para o topo da tela */
+    }
+    .wizard-mobile-content {
+        max-height: calc(100vh - 120px) !important;
+        display: flex;
+        flex-direction: column;
+        overscroll-behavior: contain;
+    }
+    .modal-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+    }
+}
+
+/* Scroller Horizontal (Quadras) */
+.snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px; /* Reduzi espaço para caber melhor o botão */
+    padding-top: 5px;
+}
+.quadra-card-wrapper {
+    flex: 0 0 85%; /* Menor um pingo pra dar a dica visual na beira da tela */
+    scroll-snap-align: center;
+    transition: transform 0.3s ease;
+    min-width: 85%;
+}
+@media (min-width: 768px) {
+    .quadra-card-wrapper { flex: 0 0 54%; min-width: 54%; } /* Em telas maiores */
+}
+
+/* Card Visual - Efeito Foco 3D / Cover Flow */
+.quadra-card {
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.4s, box-shadow 0.4s;
+    cursor: pointer;
+    border: 2px solid transparent !important;
+    transform: scale(0.88); /* Joga as laterais pro fundo */
+    filter: brightness(0.65); /* Escurece levemente o fundo, mantendo a cor sem ficar cinza */
+    transform-origin: center center;
+}
+.quadra-card:active {
+    transform: scale(0.85);
+}
+.quadra-card.selected {
+    border-color: var(--bs-danger) !important;
+    transform: scale(1.02); /* O item selecionado avança e fica gigante */
+    filter: brightness(1); /* Iluminação total */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important; /* Sombra pesada para destacar a elevação */
+    z-index: 10;
+}
+.quadra-card .select-indicator {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--bs-danger);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+.quadra-card.selected .select-indicator {
+    display: flex;
+}
+
+/* Oculta totalmente a barra de rolagem horizontal (Scroll Suave Nativo) */
+.custom-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+.custom-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Inputs focados */
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+</style>

@@ -1,0 +1,47 @@
+{% extends 'account/base.html' %}
+
+{% load static %}
+
+{% block title %}LGPD - Politica de Privacidade{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/account-lgpd-doc.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="lgpd-doc-page">
+  <div class="container py-4 py-md-5">
+    <div class="lgpd-doc-card">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="lgpd-doc-title mb-0">Politica de Privacidade</h1>
+        <a href="{% url 'lgpd_hub' %}" class="btn btn-outline-light btn-sm">Voltar para Central LGPD</a>
+      </div>
+
+      <p class="lgpd-doc-meta">Atualizado em 30/03/2026</p>
+
+      <h2>1. Quais dados coletamos</h2>
+      <p>Podemos coletar dados de cadastro, perfil esportivo, interacoes no feed, participacao em partidas, mensagens e registros tecnicos de acesso para seguranca da conta e operacao da plataforma.</p>
+
+      <h2>2. Como usamos seus dados</h2>
+      <p>Utilizamos os dados para autenticar sua conta, personalizar o feed, conectar jogadores, exibir partidas relevantes, prevenir abuso, cumprir obrigacoes legais e melhorar continuamente o produto.</p>
+
+      <h2>3. Base legal e consentimento</h2>
+      <p>O tratamento e realizado com base em execucao de contrato, legitimo interesse e consentimento quando aplicavel, conforme a LGPD.</p>
+
+      <h2>4. Compartilhamento</h2>
+      <p>Podemos compartilhar dados estritamente necessarios com provedores de infraestrutura e servicos essenciais, sempre com medidas de seguranca e finalidade definida.</p>
+
+      <h2>5. Retencao e seguranca</h2>
+      <p>Guardamos dados pelo tempo necessario para cumprir finalidades legitimas e legais, adotando controles tecnicos e organizacionais para proteger as informacoes.</p>
+
+      <h2>6. Seus direitos</h2>
+      <p>Voce pode solicitar confirmacao de tratamento, acesso, correcao, anonimização, portabilidade e exclusao de dados, quando aplicavel.</p>
+
+      <h2>7. Contato</h2>
+      <p>Para duvidas de privacidade ou exercicio de direitos, contate: <a href="mailto:contato.esportefy@gmail.com">contato.esportefy@gmail.com</a>.</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

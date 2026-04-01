@@ -1,0 +1,24 @@
+{% load static %}
+
+<!-- Post List Container - apenas estrutura HTML -->
+<!-- Todo o JavaScript é gerenciado por static/js/posts.js -->
+
+<div id="postsList" class="posts-timeline">
+    <!-- Posts will be loaded here dynamically by PostsManager -->
+</div>
+
+<!-- Load More Button -->
+<div class="text-center my-4" id="loadMoreContainer" style="display: none;">
+    <button class="btn btn-outline-primary" onclick="PostsManager.carregarMaisPosts()">Carregar mais</button>
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="text-center py-5" style="display: none;">
+    <i class="bi bi-inbox text-muted" style="font-size: 48px;"></i>
+    <p class="text-muted mt-3">Nenhum post encontrado</p>
+</div>
+
+<!-- Injetar GIPHY_API_KEY do Django no contexto frontend -->
+<script>
+    window.GIPHY_API_KEY = '{{ giphy_api_key }}';
+</script>

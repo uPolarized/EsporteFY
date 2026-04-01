@@ -1,79 +1,325 @@
-{% extends "account/base.html" %}
-{% load static allauth i18n socialaccount %}
+﻿{% extends "account/base.html" %}
+{% load static allauth i18n socialaccount custom_filters %}
 
 {% block title %}
     {% trans "Conexões de Conta" %} - EsporteFY
 {% endblock title %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/email_change.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login/editar_perfil.css' %}">
+    <style>
+        .settings-section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .settings-section-title i {
+            color: #ff5a5f;
+            font-size: 1.3rem;
+        }
+        .settings-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+        }
+        .settings-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .settings-desc {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .list-group-custom .list-group-item {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.75rem;
+            border-radius: 8px !important;
+            padding: 1rem;
+        }
+        .btn-action-rounded {
+            border-radius: 50rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.5rem 1.25rem;
+            transition: transform 0.15s ease;
+        }
+        .btn-action-rounded:active {
+            transform: scale(0.97);
+        }
+        .provider-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .provider-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+    </style>
 {% endblock extra_head %}
 
 {% block content %}
-<div class="manage-account-layout">
+<div class="profile-layout-wrapper">
+    <div class="profile-layout container py-4 py-md-5">
 
-    <!-- MENU LATERAL PADRONIZADO -->
-    <div class="account-menu-container">
-        <ul class="account-menu">
+        <!-- ══ LADO ESQUERDO ══ -->
+        <div class="profile-left">
+            <div class="side-card">
+                <div class="avatar-wrap">
+                    {% if user.perfil.foto %}
+                        <img src="{{ user.perfil.foto.url|media_bust }}" alt="Foto de {{ user.username }}" class="avatar">
+                    {% else %}
+                        <div class="avatar placeholder"><span>{{ user.username|first|upper }}</span></div>
+                    {% endif %}
+                </div>
+                <h5 class="username">{{ user.username }}</h5>
+                <p class="email">{{ user.email }}</p>
+                <hr class="my-3">
+                <div class="side-menu">
+                    <a href="{% url 'perfis:meu_perfil' %}" class="side-link">Voltar para o Perfil</a>
+                    <a href="{% url 'perfis:editar_perfil' %}" class="side-link">Editar Perfil</a>
+                    {% if user.is_superuser or not user.socialaccount_set.exists %}
+                        <a href="{% url 'account_email' %}" class="side-link">Alterar e-mail</a>
+                        <a href="{% url 'account_change_password' %}" class="side-link">Alterar senha</a>
+                    {% endif %}
+                    <a href="{% url 'socialaccount_connections' %}" class="side-link active">Configurações de Conta</a>
+                    <a href="{% url 'account_logout' %}" class="side-link text-danger">Sair</a>
+                </div>
+            </div>
+        </div>
 
-            {% if user.is_superuser or not user.socialaccount_set.exists %}
-                <li><a href="{% url 'account_email' %}"><i class="bi bi-envelope-fill me-1"></i> Alterar e-mail</a></li>
-                <li><a href="{% url 'account_change_password' %}"><i class="bi bi-key-fill me-1"></i> Alterar senha</a></li>
-            {% else %}
-                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar e-mail (desativado)</li>
-                <li class="disabled-link"><i class="bi bi-lock-fill me-1"></i> Alterar senha (desativado)</li>
-            {% endif %}
+        <!-- ══ CENTRO ══ -->
+        <div class="profile-center">
+            <div class="card-glass shadow-lg p-4 p-md-5" style="border-radius: 16px;">
+                <h4 class="mb-1 text-light fw-bold">Configurações de Segurança</h4>
+                <p class="text-secondary mb-4 pb-2">Centralize as permissões de privacidade, login social e dispositivos conectados à sua conta.</p>
 
-            <li><a href="{% url 'socialaccount_connections' %}" class="active"><i class="bi bi-people-fill me-1"></i> Conexões de conta</a></li>
-            <li><a href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right me-1"></i> Sair</a></li>
-        </ul>
-    </div>
+                <!-- CONEXÕES ATUAIS -->
+                <div class="settings-card">
+                    <div class="settings-section-title">
+                        <i class="bi bi-link-45deg"></i> Contas Sociais Vinculadas
+                    </div>
+                    <p class="settings-desc">Provedores que você já vinculou. O vínculo permite usar o Google, por exemplo, para acessar o EsporteFY de forma mais rápida sem precisar da senha.</p>
+                    
+                    {% if form.accounts %}
+                        <form method="post" class="mb-2">
+                            {% csrf_token %}
+                            <ul class="list-group list-group-custom mb-3">
+                                {% for account in form.accounts %}
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input class="form-check-input mt-0" type="radio" name="account" value="{{ account.id }}" {% if forloop.first %}checked{% endif %}>
+                                        <div class="lh-1">
+                                            <span class="fw-medium d-block text-light mb-2">{{ account }}</span>
+                                            
+                                            {% if account.get_provider.id == 'google' %}
+                                                <span class="badge py-1 px-2 text-white" style="background-color: #ea4335;">
+                                                    <i class="bi bi-google me-1"></i> Sessão via Google
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary opacity-75">Sessão via {{ account.get_provider.name }}</span>
+                                            {% endif %}
+                                            
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% if form.accounts|length > 1 or user.has_usable_password %}
+                                <button type="submit" name="action_remove" class="btn btn-outline-danger btn-action-rounded">Remover Selecionada</button>
+                            {% else %}
+                                <div class="alert alert-warning border-warning border-opacity-25 mt-3 mb-0 small text-warning" style="background: rgba(255,193,7,0.05) !important;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Você não pode remover o vínculo com esta conta social pois é sua única forma de login (você não possui uma senha normal cadastrada). Se remover, perderá o acesso.
+                                </div>
+                            {% endif %}
+                        </form>
+                    {% else %}
+                        <div class="alert alert-dark border-secondary text-muted small d-flex align-items-center gap-2 mb-0" style="background: rgba(0,0,0,0.3) !important;">
+                            <i class="bi bi-info-circle"></i> Nenhuma conta social conectada.
+                        </div>
+                    {% endif %}
+                </div>
 
-    <!-- CARD PRINCIPAL -->
-    <div class="email-container">
-        <div class="email-card">
-            <h2>{% trans "Conexões de Conta" %}</h2>
+                <!-- ADICIONAR CONEXÃO -->
+                {% if unconnected_providers %}
+                <div class="settings-card">
+                    <div class="settings-section-title">
+                        <i class="bi bi-cloud-plus"></i> Adicionar Conexão Social
+                    </div>
+                    <p class="settings-desc"><strong>O que significa isso?</strong> Conectar uma rede social (como o Google) possibilita que você faça login no EsporteFY com apenas 1 clique, usando sua conta lá, pulando a digitação de e-mail e senha no celular e no PC.<br>É prático e muito seguro!</p>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for provider in unconnected_providers %}
+                            <form action="{% provider_login_url provider.id process='connect' %}" method="post" class="m-0 p-0">
+                                {% csrf_token %}
+                                <button type="submit" title="{{ provider.name }}" class="btn provider-btn btn-action-rounded d-inline-flex align-items-center gap-2">
+                                    <i class="bi bi-{{ provider.id }}"></i> Entrar com {{ provider.name|title }}
+                                </button>
+                            </form>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
-            {% if form.accounts %}
-                <p>As seguintes contas sociais estão vinculadas:</p>
-                <form method="post">
-                    {% csrf_token %}
-                    <ul class="email-list">
-                        {% for account in form.accounts %}
-                        <li>
-                            <label>
-                                <input type="radio" name="account" value="{{ account.id }}">
-                                <span>{{ account }}</span>
-                            </label>
-                            <div class="email-statuses">
-                                <span class="email-status status-verified">{{ account.get_provider.name }}</span>
+                <!-- PRIVACIDADE -->
+                <div class="settings-card">
+                    <div class="settings-section-title">
+                        <i class="bi bi-shield-check"></i> Privacidade do Perfil
+                    </div>
+                    <p class="settings-desc">Controle quem pode achar o seu perfil nas abas de busca e de quem você aceita convites de contato.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="showProfilePublic" name="show_profile_public" {% if privacy_settings.show_profile_public %}checked{% endif %}>
+                            <label class="form-check-label text-light opacity-75" for="showProfilePublic">Tornar perfil público na busca</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="showOnlineStatus" name="show_online_status" {% if privacy_settings.show_online_status %}checked{% endif %}>
+                            <label class="form-check-label text-light opacity-75" for="showOnlineStatus">Mostrar meu Status ("Online") para amigos</label>
+                        </div>
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" id="allowFriendRequests" name="allow_friend_requests" {% if privacy_settings.allow_friend_requests %}checked{% endif %}>
+                            <label class="form-check-label text-light opacity-75" for="allowFriendRequests">Permitir chegada de convites de amizade</label>
+                        </div>
+                        <button type="submit" name="action_privacy_save" class="btn btn-primary btn-action-rounded px-4">Salvar Preferências</button>
+                    </form>
+                </div>
+
+                <!-- SEGURANÇA 2FA -->
+                <div class="settings-card border-warning border-opacity-25" style="background: rgba(255,193,7,0.01);">
+                    <div class="settings-section-title text-warning border-warning border-opacity-25">
+                        <i class="bi bi-key"></i> Etapa Dupla de Segurança (2FA)
+                    </div>
+                    <p class="settings-desc">Ao ativar esta proteção, nós enviaremos um código exclusivo de 6 números para o seu e-mail ({{ user.email }}) todas as vezes que tentar logar.</p>
+                    
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="text-light fw-medium">Proteção da Conta:</span>
+                        {% if privacy_settings.two_factor_email_enabled %}
+                            <span class="badge bg-success px-3 py-2 rounded-pill">Ativada e Segura</span>
+                        {% else %}
+                            <span class="badge bg-secondary px-3 py-2 rounded-pill">Desativada</span>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <button type="submit" name="action_2fa_send_code" class="btn {% if privacy_settings.two_factor_email_enabled %}btn-outline-danger{% else %}btn-outline-warning{% endif %} btn-action-rounded">
+                            {% if privacy_settings.two_factor_email_enabled %}Desativar 2FA (Verificar Código){% else %}Ativar 2FA (Receber Código){% endif %}
+                        </button>
+                    </form>
+
+                    {% if two_factor_pending %}
+                    <form method="post" class="bg-dark bg-opacity-75 p-4 rounded-3 border border-warning border-opacity-50 mt-4">
+                        {% csrf_token %}
+                        <label for="twoFactorCode" class="form-label text-warning fw-medium mb-3"><i class="bi bi-clock-history"></i> Código de 6 dígitos enviado para {{ user.email|truncatechars:20 }}</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-dark text-light border-warning text-center fs-5" id="twoFactorCode" name="two_factor_code" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="------" required>
+                            <button type="submit" name="action_2fa_verify" class="btn btn-warning fw-bold px-4">Confirmar Código</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <!-- SESSÕES ATIVAS -->
+                <div class="settings-card">
+                    <div class="settings-section-title">
+                        <i class="bi bi-pc-display-horizontal"></i> Dispositivos Conectados
+                    </div>
+                    <p class="settings-desc">Celulares ou computadores logados na sua conta agora. Em caso de dúvidas sobre um local desconhecido, encerre tudo pelo botão abaixo.</p>
+                    
+                    <ul class="list-group list-group-custom mb-4">
+                        {% for s in active_sessions %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="d-block text-light mb-2">
+                                    {% if s.is_current %}<i class="bi bi-phone"></i> Aparelho Atual{% else %}<i class="bi bi-laptop"></i> Sessão Alternativa{% endif %}
+                                    {% if s.is_current %}<span class="badge bg-success ms-2" style="font-size: 0.65rem;">Conectado</span>{% endif %}
+                                </strong>
+                                <div class="text-secondary small">
+                                    <span class="d-block mb-1">IP de Rede: {{ s.ip }}</span>
+                                    <span class="text-muted" style="font-size:0.75rem;">{{ s.user_agent|truncatechars:65 }}</span>
+                                </div>
                             </div>
                         </li>
+                        {% empty %}
+                        <li class="list-group-item bg-transparent text-muted text-center border-0 py-3">Somente esta sessão ativa.</li>
                         {% endfor %}
                     </ul>
-                    <div class="form-actions">
-                        <button type="submit" name="action_remove" class="btn btn-outline">Remover</button>
-                    </div>
-                </form>
-            {% else %}
-                <p>Você ainda não possui contas sociais conectadas.</p>
-            {% endif %}
-
-            <hr>
-            <h2>Adicionar nova conexão</h2>
-            {% if socialaccount_providers %}
-                <div class="provider-list">
-                    {% for provider in socialaccount_providers %}
-                        <a title="{{ provider.name }}" class="btn btn-provider provider-{{ provider.id }}" 
-                           href="{% provider_login_url provider.id process='connect' %}">
-                            {{ provider.name }}
-                        </a>
-                    {% endfor %}
+                    
+                    {% if active_sessions|length > 1 %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="action_sessions_logout_others" class="btn btn-outline-warning btn-action-rounded">
+                            <i class="bi bi-box-arrow-right"></i> Deslogar de aparelhos desconhecidos
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p>Nenhum provedor social configurado.</p>
-            {% endif %}
+
+                <!-- HISTÓRICO -->
+                <div class="settings-card mb-0">
+                    <div class="settings-section-title">
+                        <i class="bi bi-calendar-event"></i> Histórico Recente de Logins
+                    </div>
+                    <div class="alert alert-dark border-primary border-opacity-25 text-light small opacity-75 mb-4 lh-base" style="background: rgba(0,0,0,0.3) !important;">
+                        <i class="bi bi-shield-lock-fill text-primary me-2"></i> 
+                        <strong>Seus acessos estão seguros e monitorados</strong><br>
+                        Para sua segurança, registramos os locais virtuais (IP) de onde você se conecta ao EsporteFY, nossos sistemas mantêm essas exatas informações de monitoramento privadas só para você.
+                    </div>
+                    
+                    <div class="table-responsive border border-secondary border-opacity-25 rounded-3">
+                        <table class="table table-dark table-hover align-middle mb-0" style="background: rgba(0,0,0,0.15); border-collapse: collapse;">
+                            <thead style="background: rgba(0,0,0,0.4);">
+                                <tr>
+                                    <th class="fw-medium text-secondary py-3 px-3 border-end border-secondary border-opacity-10" style="width: 35%;">Data e Hora</th>
+                                    <th class="fw-medium text-secondary py-3 px-3 border-end border-secondary border-opacity-10" style="width: 30%;">Método Usado</th>
+                                    <th class="fw-medium text-secondary py-3 px-3" style="width: 35%;">Endereço Identificado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in login_events %}
+                                <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                                    <td class="text-light small py-3 px-3 border-end border-secondary border-opacity-10">
+                                        {{ event.created_at|date:"d M Y - H:i" }}
+                                    </td>
+                                    <td class="py-3 px-3 border-end border-secondary border-opacity-10">
+                                        <span class="badge opacity-75" style="background: rgba(255,255,255,0.1); color: #d1d5db;">
+                                            {{ event.get_login_method_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-secondary small py-3 px-3">
+                                        <i class="bi bi-globe me-1"></i> {{ event.ip_address|default:'IP Oculto' }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted border-0 py-5">
+                                        Nenhum acesso novo monitorado pelo sistema ainda.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
+
     </div>
 </div>
 {% endblock content %}

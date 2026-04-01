@@ -8,6 +8,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 OPENWEATHER_API_KEY = env('OPENWEATHER_API_KEY', default=None)
 NEWS_API_KEY = env('NEWS_API_KEY', default=None)
+GIPHY_API_KEY = env('GIPHY_API_KEY', default='dc6zaTOxFJmzC')
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
@@ -16,8 +17,14 @@ RECAPTCHA_REQUIRED_SCORE = 0.5
 # --- Configuração Híbrida ---
 # URL usada pelas Views do Django para publicar mensagens no Redis
 REDIS_URL = env('REDIS_URL', default='redis://redis:6379/0')
+SOCIAL_CONTENT_ENCRYPTION_KEY = env('SOCIAL_CONTENT_ENCRYPTION_KEY', default='')
+SOCIAL_ALLOWED_GIF_HOSTS = tuple(env.list('SOCIAL_ALLOWED_GIF_HOSTS', default=[
+    'giphy.com',
+    'giphyusercontent.com',
+    'media.tenor.com',
+    'tenor.com',
+]))
 
-<<<<<<< Updated upstream
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -34,18 +41,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
-=======
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
-    '.ngrok-free.app',
-    'localhost',
-    '127.0.0.1',
-    
-])
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
-    'http://localhost:8000',
-    'https://a9b6a9e85d43.ngrok-free.app',
-])
->>>>>>> Stashed changes
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
@@ -78,11 +73,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'esportefy.security_headers.SecurityHeadersMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'perfis.middleware.TrackSessionSecurityMetadataMiddleware',
+    'perfis.middleware.RequireLgpdConsentMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -144,7 +143,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_LOGIN_METHODS = ['username', 'email']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SIGNUP_FORM_CLASS = 'perfis.signup_form.CustomSignupForm'
 ACCOUNT_ADAPTER = 'perfis.adapters.AsyncAccountAdapter'
@@ -163,6 +162,13 @@ SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
+    },
+    "github": {
+        "APP": {
+            "client_id": env("GITHUB_CLIENT_ID", default=""),
+            "secret": env("GITHUB_CLIENT_SECRET", default=""),
+            "key": ""
+        }
     }
 }
 
@@ -202,3 +208,44 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'esportefy-local-cache',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        },
+    }
+}
+
+# Limites de upload para mídia social (posts/comentários)
+SOCIAL_IMAGE_MAX_UPLOAD_BYTES = env.int('SOCIAL_IMAGE_MAX_UPLOAD_BYTES', default=5 * 1024 * 1024)
+SOCIAL_ALLOWED_IMAGE_MIME_TYPES = tuple(env.list('SOCIAL_ALLOWED_IMAGE_MIME_TYPES', default=[
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+]))
+
+# CSP em modo report-only para observabilidade sem bloquear produção.
+CSP_REPORT_ONLY_ENABLED = env.bool('CSP_REPORT_ONLY_ENABLED', default=True)
+CSP_REPORT_ONLY_POLICY = env(
+    'CSP_REPORT_ONLY_POLICY',
+    default=(
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.google.com https://www.gstatic.com; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+        "img-src 'self' data: blob: https:; "
+        "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+        "connect-src 'self' https: ws: wss:; "
+        "media-src 'self' data: https:; "
+        "frame-src 'self' https://www.google.com https://www.gstatic.com; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "report-uri /security/csp-report/;"
+    )
+)

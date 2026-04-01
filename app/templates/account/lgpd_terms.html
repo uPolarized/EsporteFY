@@ -1,0 +1,47 @@
+{% extends 'account/base.html' %}
+
+{% load static %}
+
+{% block title %}LGPD - Termos de Servico{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/account-lgpd-doc.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="lgpd-doc-page">
+  <div class="container py-4 py-md-5">
+    <div class="lgpd-doc-card">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="lgpd-doc-title mb-0">Termos de Servico</h1>
+        <a href="{% url 'lgpd_hub' %}" class="btn btn-outline-light btn-sm">Voltar para Central LGPD</a>
+      </div>
+
+      <p class="lgpd-doc-meta">Atualizado em 30/03/2026</p>
+
+      <h2>1. Aceite dos termos</h2>
+      <p>Ao utilizar o EsporteFY, voce concorda com estes termos e com as politicas de privacidade vigentes.</p>
+
+      <h2>2. Uso da plataforma</h2>
+      <p>O usuario se compromete a manter comportamento respeitoso, veracidade de informacoes e uso adequado dos recursos sociais e de partidas.</p>
+
+      <h2>3. Conta e seguranca</h2>
+      <p>Voce e responsavel por proteger credenciais de acesso e por atividades executadas na sua conta.</p>
+
+      <h2>4. Conteudo do usuario</h2>
+      <p>Publicacoes, comentarios e demais interacoes devem respeitar a legislacao e nao podem conter conteudo ofensivo, fraudulento ou ilegal.</p>
+
+      <h2>5. Moderacao e medidas</h2>
+      <p>Podemos remover conteudos, limitar funcionalidades ou suspender contas em casos de abuso, fraude, risco de seguranca ou violacao das regras.</p>
+
+      <h2>6. Disponibilidade do servico</h2>
+      <p>Buscamos manter estabilidade e disponibilidade, mas podem ocorrer indisponibilidades temporarias por manutencao, atualizacoes ou eventos externos.</p>
+
+      <h2>7. Contato</h2>
+      <p>Para atendimento sobre termos e uso da plataforma: <a href="mailto:contato.esportefy@gmail.com">contato.esportefy@gmail.com</a>.</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

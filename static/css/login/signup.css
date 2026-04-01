@@ -91,7 +91,7 @@ label.required::after {
 }
 
 /* Botão Google */
-.btn-google {
+.btn-google, .btn-github {
     background: #1e1e1e;
     border: 1px solid #444;
     color: #ddd;
@@ -110,7 +110,11 @@ label.required::after {
     height: 22px;
 }
 
-.btn-google:hover {
+.btn-github i {
+    font-size: 1.2rem;
+}
+
+.btn-google:hover, .btn-github:hover {
     background: #292929;
     border-color: #ff6b6b;
     color: #fff;
@@ -195,4 +199,60 @@ hr {
     content: " *";
     color: #ff4d4d;
     font-weight: 500;
+}
+
+
+.consent-box {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.9rem 0.9rem 0.8rem;
+}
+
+.consent-box__title {
+    color: #f7f7f7;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.consent-box__subtitle {
+    color: #aeb5bf;
+    font-size: 0.84rem;
+    margin-bottom: 0.65rem;
+}
+
+.consent-box__item {
+    margin-bottom: 0.45rem;
+}
+
+.consent-box__item .form-check-input {
+    margin-top: 0.22rem;
+}
+
+.consent-box__item .form-check-label {
+    color: #d6dbe1;
+    font-size: 0.88rem;
+    line-height: 1.35;
+}
+
+.consent-box__item a {
+    color: #7dd3fc;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.consent-box__item a:hover {
+    color: #bae6fd;
+    text-decoration: underline;
+}
+
+.consent-box__item--optional .form-check-label {
+    color: #b5beca;
+}
+
+.consent-box__error {
+    color: #ff7b7b;
+    font-size: 0.82rem;
+    margin: -0.2rem 0 0.4rem 1.45rem;
 }

@@ -1,32 +1,50 @@
+# Ambiente e segredos
 .env
+.env.*
+keys/*.json
+
+# Virtualenv
 venv/
+
+# Dados locais
 data/
-dotenv_files/
-htmlcov/
 
+# Certificados / configs locais
+certs/
 default.conf
-certs
 
-# Arquivos de cache Python
+# Python cache
 __pycache__/
 *.py[cod]
 *.pyo
 
-# Banco de dados local
-db.sqlite3
 
-# Arquivos de ambiente
-.env
-
-# Arquivos temporários / de build
+# Logs e temporários
 *.log
 *.tmp
+*.bak
+*.swp
 
-# Arquivos de IDE
+# Mídia e arquivos gerados
+media/
+staticfiles/
+
+# Testes / arquivos temporários específicos
+/testes
+__feed_head_snapshot.html
+
+# Ferramentas Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# IDEs
 .vscode/
 .idea/
 
 # Sistema operacional
 .DS_Store
 Thumbs.db
-keys/*.json

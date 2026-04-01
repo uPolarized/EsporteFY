@@ -1,0 +1,42 @@
+{% extends 'account/base.html' %}
+{% load static %}
+
+{% block title %}LGPD - Central de Privacidade{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/account-lgpd-hub.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="lgpd-page">
+  <div class="container py-5">
+    <div class="lgpd-hero text-center mb-4">
+      <p class="lgpd-kicker mb-2">Privacidade e Transparencia</p>
+      <h1 class="lgpd-title mb-2">Central LGPD</h1>
+      <p class="lgpd-subtitle mb-0">Acesse as politicas da plataforma e entenda como tratamos seus dados pessoais no EsporteFY.</p>
+    </div>
+
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-6">
+        <a class="lgpd-card h-100 d-block text-decoration-none" href="{% url 'lgpd_privacy_policy' %}">
+          <div class="lgpd-card__icon"><i class="bi bi-shield-lock"></i></div>
+          <h2 class="lgpd-card__title">Politica de Privacidade</h2>
+          <p class="lgpd-card__text">Veja quais dados coletamos, como usamos, por quanto tempo guardamos e quais controles voce tem.</p>
+          <span class="lgpd-card__cta">Abrir politica <i class="bi bi-arrow-right-short"></i></span>
+        </a>
+      </div>
+
+      <div class="col-md-6">
+        <a class="lgpd-card h-100 d-block text-decoration-none" href="{% url 'lgpd_terms' %}">
+          <div class="lgpd-card__icon"><i class="bi bi-file-earmark-text"></i></div>
+          <h2 class="lgpd-card__title">Termos de Servico</h2>
+          <p class="lgpd-card__text">Consulte regras de uso da plataforma, responsabilidades do usuario e limites operacionais.</p>
+          <span class="lgpd-card__cta">Abrir termos <i class="bi bi-arrow-right-short"></i></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

@@ -106,13 +106,13 @@
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.previous_page_number }}">&laquo;</a>
+                        <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">&laquo;</a>
                     </li>
                 {% endif %}
                 <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:page_obj.next_page_number }}">&raquo;</a>
+                        <a class="page-link" href="{% querystring page=page_obj.next_page_number %}">&raquo;</a>
                     </li>
                 {% endif %}
             </ul>
@@ -121,68 +121,10 @@
 </div>
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Verifica se o WebSocket global existe
-  if (!window.notificationSocket) {
-    console.warn("🔌 WebSocket ainda não iniciado, aguardando...");
-    return;
-  }
-
-  console.log("🎯 Monitorando notificações em tempo real na lista de usuários...");
-
-  // Intercepta mensagens recebidas do socket
-  const originalHandler = window.notificationSocket.onmessage;
-  window.notificationSocket.onmessage = function(e) {
-    if (originalHandler) originalHandler.call(this, e); // mantém notificações visuais
-
-    let data;
-    try {
-      data = JSON.parse(e.data);
-    } catch {
-      console.error("❌ JSON inválido:", e.data);
-      return;
-    }
-
-    const titulo = (data.titulo || "").toLowerCase();
-    const msg = (data.mensagem || "").toLowerCase();
-
-    // --- 🟢 CASO 1: amizade aceita → atualizar botão
-    if (titulo.includes("amizade aceita") && data.solicitante_username) {
-  const username = data.solicitante_username;
-  const botoes = document.querySelectorAll(".list-group-item .btn.btn-secondary[disabled]");
-  botoes.forEach(btn => {
-    const container = btn.closest(".list-group-item");
-    if (container && container.textContent.includes(username)) {
-      btn.outerHTML = `<span class="badge bg-success p-2">Amigos</span>`;
-      console.log(`✅ Atualizado para 'Amigos' com ${username}`);
-    }
-  });
-}
-
-
-    // --- 🔴 CASO 2: pedido recusado → voltar botão para "Adicionar Amigo"
-    if (titulo.includes("pedido de amizade recusado")) {
-      const usernameMatch = msg.match(/([a-zA-Z0-9_]+)/);
-      if (usernameMatch) {
-        const username = usernameMatch[1];
-        const botoes = document.querySelectorAll(".list-group-item .btn.btn-secondary[disabled]");
-        botoes.forEach(btn => {
-          const container = btn.closest(".list-group-item");
-          if (container && container.textContent.includes(username)) {
-            btn.outerHTML = `
-              <a href="/perfis/solicitacao/enviar/${btn.dataset.userid}/" 
-                 class="btn btn-sm btn-primary">Adicionar Amigo</a>`;
-            console.log(`↩️ Pedido recusado — botão restaurado para ${username}`);
-          }
-        });
-      }
-    }
-  };
-});
-</script>
+<script src="{% static 'js/pages/perfis-lista-usuarios.js' %}"></script>
 
 
 
 
 {% endblock %}
+

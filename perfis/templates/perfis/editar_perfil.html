@@ -1,189 +1,102 @@
-{% extends "account/base.html" %}
+﻿{% extends "account/base.html" %}
 {% load crispy_forms_tags static custom_filters %}
 
-{% block title %}Editar Perfil - EsporteFY{% endblock %}
+{% block title %}Editar Perfil - EsporteFY<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
+
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
+            }
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
+
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
+            }
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
+
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/login/editar_perfil.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-    <style>
-        /* ═══════════════════════════════════════════
-           MODAIS DE CROP (avatar + banner)
-        ═══════════════════════════════════════════ */
-        .crop-modal-content {
-            background: #13141a;
-            border: 1px solid rgba(255,255,255,0.07);
-            color: #eef1f3;
-        }
-        .crop-modal-content .modal-header,
-        .crop-modal-content .modal-footer {
-            border-color: rgba(255,255,255,0.07);
-        }
-        .crop-container {
-            background: #0b0d10;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .crop-container img { display: block; max-width: 100%; }
+    <link rel="stylesheet" href="{% static 'css/pages/perfis-editar-perfil-inline.css' %}">
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
 
-        /* Preview circular (avatar) */
-        .crop-preview-wrap { text-align: center; }
-        .crop-preview-circle {
-            width: 110px; height: 110px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto;
-            border: 3px solid #e53935;
-            background: #0b0d10;
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
+            }
         }
-
-        /* Preview banner (16:5 aprox) */
-        .crop-preview-banner {
-            width: 100%;
-            height: 80px;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid #e53935;
-            background: #0b0d10;
-            margin: 0 auto 0.5rem;
-        }
-
-        /* avatar na sidebar */
-        .avatar-wrap { position: relative; }
-        .avatar-preview-badge {
-            position: absolute; bottom: 4px; right: 4px;
-            background: #e53935; color: #fff;
-            font-size: 10px; font-weight: 700;
-            padding: 2px 7px; border-radius: 20px;
-            display: none;
-        }
-
-        /* ═══════════════════════════════════════════
-           SEÇÃO DE BANNER NO FORMULÁRIO
-        ═══════════════════════════════════════════ */
-        .banner-upload-section {
-            position: relative;
-            width: 100%;
-            height: 240px; /* IGUAL ao --banner-h do perfil_social.css → posição % fica idêntica */
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px dashed rgba(255,255,255,0.1);
-            background: linear-gradient(135deg, #0d0f14 0%, #070810 100%);
-            cursor: pointer;
-            transition: border-color 0.2s ease;
-            margin-bottom: 0.75rem;
-        }
-        .banner-upload-section:hover {
-            border-color: rgba(229,57,53,0.5);
-        }
-
-        /* Preview da imagem/GIF do banner */
-        #banner-preview-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: 50% 50%;
-            display: none;
-            transition: object-position 0s; /* posição muda via JS */
-            pointer-events: none;
-        }
-        #banner-preview-img.visible { display: block; }
-
-        /* Overlay de placeholder */
-        .banner-placeholder-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: rgba(255,255,255,0.3);
-            font-size: 0.9rem;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .banner-placeholder-overlay .icon { font-size: 2.5rem; }
-        #banner-preview-img.visible + .banner-drag-hint { display: flex; }
-        .banner-drag-hint {
-            display: none;
-            position: absolute;
-            inset: 0;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.45);
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 600;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-        }
-        .banner-upload-section:hover .banner-drag-hint { opacity: 1; }
-
-        /* Cursor de arrastar quando o banner está carregado */
-        .banner-upload-section.has-image { cursor: grab; border-style: solid; border-color: rgba(255,255,255,0.1); }
-        .banner-upload-section.has-image:active { cursor: grabbing; }
-
-        /* Botões de ação do banner */
-        .banner-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        /* GIF tag badge */
-        .gif-badge {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(229,57,53,0.85);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            padding: 2px 7px;
-            border-radius: 4px;
-            pointer-events: none;
-            display: none;
-        }
-        .gif-badge.visible { display: block; }
-
-        /* Tag de posição salva */
-        .position-tag {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.6);
-            color: rgba(255,255,255,0.6);
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            pointer-events: none;
-            display: none;
-        }
-        .banner-upload-section.has-image .position-tag { display: block; }
-
-        /* Hint de drag para GIF */
-        .gif-drag-hint {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(229,57,53,0.8);
-            color: #fff;
-            font-size: 0.72rem;
-            padding: 3px 10px;
-            border-radius: 20px;
-            pointer-events: none;
-            white-space: nowrap;
-            display: none;
-        }
-        .banner-upload-section.has-image .gif-drag-hint { display: block; }
-    </style>
+    });
+</script>
 {% endblock %}
 
 {% block content %}
@@ -206,7 +119,7 @@
                 <hr class="my-3">
                 <div class="side-menu">
                     <a href="{% url 'perfis:meu_perfil' %}" class="side-link">Voltar para o Perfil</a>
-                    <a href="{% url 'socialaccount_connections' %}" class="side-link">Conexões de Conta</a>
+                    <a href="{% url 'socialaccount_connections' %}" class="side-link">Configurções de Conta</a>
                     <a href="{% url 'account_logout' %}" class="side-link">Sair</a>
                 </div>
             </div>
@@ -229,17 +142,17 @@
                             
 
                             <!-- Preview do banner (clicável para upload) -->
-                            <div class="banner-upload-section" id="banner-drop-zone">
-                                <img id="banner-preview-img" src="" alt="Banner preview">
+                            <div class="banner-upload-section{% if user.perfil.banner %} has-image{% endif %}" id="banner-drop-zone" data-initial-gif="{% if user.perfil.banner and '.gif' in user.perfil.banner.url|lower %}1{% else %}0{% endif %}">
+                                <img id="banner-preview-img" src="{% if user.perfil.banner %}{{ user.perfil.banner.url|media_bust }}{% endif %}" alt="Banner preview" class="{% if user.perfil.banner %}visible{% endif %}" style="object-position: {{ user.perfil.banner_position|default:'50% 50%' }};">
                                 <span class="gif-badge" id="banner-gif-badge">GIF</span>
-                                <div class="banner-placeholder-overlay" id="banner-placeholder">
+                                <div class="banner-placeholder-overlay" id="banner-placeholder"{% if user.perfil.banner %} style="display:none"{% endif %}>
                                     
                                     <span>Clique para escolher banner</span>
                                     <span style="font-size:0.75rem; color:rgba(255,255,255,0.2)">JPG, PNG, GIF • até 10MB</span>
                                 </div>
                                 <div class="banner-drag-hint">✋ Arraste para reposicionar</div>
                                 <div class="gif-drag-hint" id="gif-drag-hint">✋ Arraste o GIF para reposicionar</div>
-                                <div class="position-tag" id="position-tag">pos: 50% 50%</div>
+                                <div class="position-tag" id="position-tag">pos: {{ user.perfil.banner_position|default:"50% 50%" }}</div>
                             </div>
 
                             <!-- Inputs ocultos do banner -->
@@ -247,26 +160,7 @@
                             <input type="hidden" id="id_banner_position" name="banner_position" value="{{ user.perfil.banner_position|default:'50% 50%' }}">
                             <input type="hidden" id="id_banner_clear" name="banner-clear" value="">
 
-                            {% if user.perfil.banner %}
-                                <!-- Mostra o banner atual como prévia inicial -->
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        var img = document.getElementById('banner-preview-img');
-                                        img.src = "{{ user.perfil.banner.url|media_bust }}";
-                                        img.classList.add('visible');
-                                        img.style.objectPosition = "{{ user.perfil.banner_position|default:'50% 50%' }}";
-                                        document.getElementById('banner-drop-zone').classList.add('has-image');
-                                        document.getElementById('banner-placeholder').style.display = 'none';
-                                        document.getElementById('position-tag').textContent = 'pos: {{ user.perfil.banner_position|default:"50% 50%" }}';
-                                        // Verifica se é GIF
-                                        var url = "{{ user.perfil.banner.url }}";
-                                        if (url.toLowerCase().includes('.gif')) {
-                                            document.getElementById('banner-gif-badge').classList.add('visible');
-                                            document.getElementById('gif-drag-hint').style.display = 'block';
-                                        }
-                                    });
-                                </script>
-                            {% endif %}
+
 
                             <!-- Botões de ação do banner -->
                             <div class="banner-actions mt-2">
@@ -293,22 +187,22 @@
                         ════════════════════════════════ -->
                         <div class="col-12 profile-photo-upload-section">
                             <label class="form-label fw-semibold"> Foto de Perfil</label>
-                            <div class="alert alert-warning py-2 px-3 mb-2 small" role="alert">
+                            <div class="alert alert-warning profile-photo-security-alert" role="alert">
                                 ⚠️ A foto ou GIF passará por análise de segurança antes de ser aprovado.
                             </div>
 
                             {% if form.foto.value %}
-                                <p id="current-photo-status" class="small text-muted mb-0">
-                                    Atualmente: <a href="{{ form.foto.value.url }}" target="_blank" class="current-photo-link">{{ form.foto.value.name|filename }}</a>
+                                <p id="current-photo-status" class="small text-muted mb-0 d-none">
+                                    Foto atual definida.
                                 </p>
                             {% else %}
-                                <p id="current-photo-status" class="small text-muted mb-0">Nenhuma imagem definida.</p>
+                                <p id="current-photo-status" class="small text-muted mb-0 d-none">Nenhuma imagem definida.</p>
                             {% endif %}
 
                             <div class="upload-controls d-flex gap-2 mt-2 flex-wrap">
                                 <input type="file" id="id_foto" name="foto" class="d-none" accept="image/*,.gif">
                                 <label for="id_foto" class="btn btn-sm btn-primary custom-file-upload"> Escolher Foto</label>
-                                <span id="file-name-display" class="file-name-display text-muted align-self-center">Nenhum arquivo escolhido</span>
+                                <span id="file-name-display" class="file-name-display text-muted align-self-center d-none"></span>
                                 {% if form.foto.value %}
                                     <button type="button" class="btn btn-sm btn-outline-secondary remove-photo-btn ms-auto">Remover</button>
                                     <input type="hidden" name="foto-clear" id="id_foto-clear" value="">
@@ -326,10 +220,13 @@
                              CAMPOS DO PERFIL
                         ════════════════════════════════ -->
                         <div class="col-md-6">{{ form.mini_bio|as_crispy_field }}</div>
-                        <div class="col-md-6">{{ form.esportes_preferidos|as_crispy_field }}</div>
-                        <div class="col-md-6">{{ form.nivel_habilidade|as_crispy_field }}</div>
-                        <div class="col-md-6">{{ form.idade|as_crispy_field }}</div>
-                        <div class="col-md-6">{{ form.cidade|as_crispy_field }}</div>
+                        <div class="col-md-6 profile-fields-right-stack">
+                            {{ form.esportes_preferidos|as_crispy_field }}
+                            {{ form.nivel_habilidade|as_crispy_field }}
+                            {{ form.bairro_base|as_crispy_field }}
+                            {{ form.idade|as_crispy_field }}
+                            {{ form.cidade|as_crispy_field }}
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4 gap-2">
@@ -342,6 +239,28 @@
 
     </div><!-- /profile-layout -->
 </div><!-- /profile-layout-wrapper -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
+
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
+            }
+        }
+    });
+</script>
 {% endblock %}
 
 
@@ -369,8 +288,8 @@
                             <div class="crop-preview-circle" id="crop-preview-circle"></div>
                             <p class="small text-muted mt-3 mb-2">Ferramentas</p>
                             <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-zoom-in">＋ Zoom In</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-zoom-out">－ Zoom Out</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-zoom-in">+ Zoom In</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-zoom-out">- Zoom Out</button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-rotate-cw">↻ Girar 90°</button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-flip-h">↔ Espelhar</button>
                                 <button type="button" class="btn btn-sm btn-outline-danger" id="btn-reset">↺ Resetar</button>
@@ -410,8 +329,8 @@
                             <div class="crop-preview-banner" id="crop-preview-banner"></div>
                             <p class="small text-muted mt-3 mb-2">Ferramentas</p>
                             <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-zoom-in">＋ Zoom In</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-zoom-out">－ Zoom Out</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-zoom-in">+ Zoom In</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-zoom-out">- Zoom Out</button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-rotate">↻ Girar 90°</button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-banner-flip">↔ Espelhar</button>
                                 <button type="button" class="btn btn-sm btn-outline-danger" id="btn-banner-reset">↺ Resetar</button>
@@ -432,374 +351,28 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="{% static 'js/pages/perfis-editar-perfil.js' %}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('focus') === 'bairro') {
+            const bairroInput = document.querySelector('select[name="bairro_base"]');
+            if(bairroInput) {
+                bairroInput.scrollIntoView({behavior: "smooth", block: "center"});
+                bairroInput.style.transition = "all 0.3s ease";
+                bairroInput.style.transform = "scale(1.05)";
+                bairroInput.style.boxShadow = "0 0 10px #00ff88";
+                bairroInput.style.borderColor = "#00ff88";
 
-    /* ════════════════════════════════════════════
-       UTILITÁRIOS
-    ════════════════════════════════════════════ */
-    function isGif(file) {
-        if (!file) return false;
-        return file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
-    }
-
-    function showToastSafe(type, msg, duration) {
-        if (typeof window.showToast === 'function') window.showToast(type, msg, duration || 4000);
-    }
-
-
-    /* ════════════════════════════════════════════
-       CROP — AVATAR
-    ════════════════════════════════════════════ */
-    const fileInput       = document.getElementById('id_foto');
-    const fileNameDisplay = document.getElementById('file-name-display');
-    const removePhotoBtn  = document.querySelector('.remove-photo-btn');
-    const clearPhotoInput = document.getElementById('id_foto-clear');
-    const avatarPreview   = document.getElementById('avatar-preview-live');
-    const previewBadge    = document.getElementById('preview-badge');
-    const cropImageEl     = document.getElementById('crop-image');
-    const previewCircle   = document.getElementById('crop-preview-circle');
-
-    let avatarCropper = null;
-    let avatarFlippedH = false;
-
-    function openAvatarCropper(file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            cropImageEl.src = e.target.result;
-            const modal = new bootstrap.Modal(document.getElementById('cropModal'));
-            modal.show();
-            document.getElementById('cropModal').addEventListener('shown.bs.modal', function handler() {
-                if (avatarCropper) { avatarCropper.destroy(); avatarCropper = null; }
-                avatarFlippedH = false;
-                avatarCropper = new Cropper(cropImageEl, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.85,
-                    responsive: true,
-                    restore: false,
-                    guides: true,
-                    highlight: false,
-                    preview: previewCircle,
-                });
-                this.removeEventListener('shown.bs.modal', handler);
-            }, { once: true });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    document.getElementById('btn-zoom-in')  .addEventListener('click', () => avatarCropper?.zoom(0.15));
-    document.getElementById('btn-zoom-out') .addEventListener('click', () => avatarCropper?.zoom(-0.15));
-    document.getElementById('btn-rotate-cw').addEventListener('click', () => avatarCropper?.rotate(90));
-    document.getElementById('btn-flip-h')   .addEventListener('click', () => {
-        avatarFlippedH = !avatarFlippedH;
-        avatarCropper?.scaleX(avatarFlippedH ? -1 : 1);
-    });
-    document.getElementById('btn-reset').addEventListener('click', () => {
-        avatarCropper?.reset(); avatarFlippedH = false;
-    });
-
-    document.getElementById('btn-confirmar-crop').addEventListener('click', function () {
-        if (!avatarCropper) return;
-        avatarCropper.getCroppedCanvas({ width: 512, height: 512, imageSmoothingQuality: 'high' })
-            .toBlob(function (blob) {
-                const croppedFile = new File([blob], 'foto_perfil.jpg', { type: 'image/jpeg' });
-                const dt = new DataTransfer(); dt.items.add(croppedFile);
-                fileInput.files = dt.files;
-                fileNameDisplay.textContent = 'foto_perfil.jpg ✔';
-                if (clearPhotoInput) clearPhotoInput.value = '';
-                if (avatarPreview) avatarPreview.src = URL.createObjectURL(blob);
-                if (previewBadge) previewBadge.style.display = 'block';
-                bootstrap.Modal.getInstance(document.getElementById('cropModal')).hide();
-            }, 'image/jpeg', 0.92);
-    });
-
-    document.getElementById('btn-cancelar-crop').addEventListener('click', () => {
-        fileInput.value = '';
-        fileNameDisplay.textContent = 'Nenhum arquivo escolhido';
-    });
-
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            const file = fileInput.files[0];
-            if (!file) return;
-            if (isGif(file)) {
-                fileNameDisplay.textContent = file.name + ' ✔ (GIF animado)';
-                if (clearPhotoInput) clearPhotoInput.value = '';
-                if (avatarPreview) avatarPreview.src = URL.createObjectURL(file);
-                if (previewBadge) previewBadge.style.display = 'block';
-                showToastSafe('info', 'GIF animado selecionado. O recorte foi desativado para preservar a animação.', 4200);
-                return;
+                setTimeout(() => {
+                    bairroInput.style.transform = "scale(1)";
+                    bairroInput.style.boxShadow = "none";
+                    bairroInput.style.borderColor = "";
+                    bairroInput.focus();
+                }, 1500);
             }
-            openAvatarCropper(file);
-        });
-    }
-
-    if (removePhotoBtn && clearPhotoInput) {
-        removePhotoBtn.addEventListener('click', function () {
-            fileInput.value = '';
-            fileNameDisplay.textContent = 'Nenhum arquivo escolhido';
-            clearPhotoInput.value = 'true';
-            removePhotoBtn.style.display = 'none';
-            if (previewBadge) previewBadge.style.display = 'none';
-            if (avatarPreview) avatarPreview.src = '/media/fotos_perfil/default.jpg?v=' + Date.now();
-            document.getElementById('current-photo-status').textContent = 'Nenhuma imagem (salve para confirmar).';
-        });
-    }
-
-    const currentFileLink = document.querySelector('.current-photo-link');
-    if (currentFileLink && !fileInput.files.length)
-        fileNameDisplay.textContent = currentFileLink.textContent.trim();
-
-
-    /* ════════════════════════════════════════════
-       BANNER — VARIÁVEIS
-    ════════════════════════════════════════════ */
-    const bannerInput    = document.getElementById('id_banner');
-    const bannerClearInp = document.getElementById('id_banner_clear');
-    const bannerPosInp   = document.getElementById('id_banner_position');
-    const bannerDropZone = document.getElementById('banner-drop-zone');
-    const bannerPreview  = document.getElementById('banner-preview-img');
-    const bannerPlaceholder = document.getElementById('banner-placeholder');
-    const bannerGifBadge = document.getElementById('banner-gif-badge');
-    const bannerPosTag   = document.getElementById('position-tag');
-    const gifDragHint    = document.getElementById('gif-drag-hint');
-    const btnCropBanner  = document.getElementById('btn-crop-banner');
-    const btnRemoveBanner = document.getElementById('btn-remove-banner');
-
-    let bannerCropper = null;
-    let bannerFlippedH = false;
-    let bannerIsGif = false;
-
-    /* ── Activar estado "tem imagem" ── */
-    function activateBannerPreview(src, isGifFile) {
-        bannerIsGif = isGifFile || false;
-        bannerPreview.src = src;
-        bannerPreview.classList.add('visible');
-        bannerDropZone.classList.add('has-image');
-        bannerPlaceholder.style.display = 'none';
-        bannerGifBadge.classList.toggle('visible', bannerIsGif);
-        gifDragHint.style.display = bannerIsGif ? 'block' : 'none';
-        // Botão de recorte só faz sentido para imagem estática
-        btnCropBanner.style.display = bannerIsGif ? 'none' : 'inline-flex';
-        btnRemoveBanner.style.display = 'inline-flex';
-        bannerClearInp.value = '';
-    }
-
-    /* ── Desativar banner ── */
-    function deactivateBannerPreview() {
-        bannerPreview.src = '';
-        bannerPreview.classList.remove('visible');
-        bannerDropZone.classList.remove('has-image');
-        bannerPlaceholder.style.display = '';
-        bannerGifBadge.classList.remove('visible');
-        gifDragHint.style.display = 'none';
-        btnCropBanner.style.display = 'none';
-        btnRemoveBanner.style.display = 'none';
-        bannerPosTag.textContent = 'pos: 50% 50%';
-        bannerPreview.style.objectPosition = '50% 50%';
-        bannerPosInp.value = '50% 50%';
-        bannerIsGif = false;
-    }
-
-    /* ── Upload do banner ── */
-    bannerInput.addEventListener('change', function () {
-        const file = bannerInput.files[0];
-        if (!file) return;
-
-        const isGifFile = isGif(file);
-        const objectURL = URL.createObjectURL(file);
-
-        if (isGifFile) {
-            // GIF: não recorta — só seta preview + permite drag para reposicionar
-            activateBannerPreview(objectURL, true);
-            showToastSafe('info', 'GIF animado carregado! Arraste no preview para ajustar a posição.', 4500);
-        } else {
-            // Imagem estática: abre o cropper
-            activateBannerPreview(objectURL, false);
-            openBannerCropper(file);
         }
     });
-
-    /* ── Clique na zona do banner abre o file picker (sem arrastar) ── */
-    bannerDropZone.addEventListener('click', function (e) {
-        // Se já tem imagem, o clique é para drag — não abre picker
-        if (bannerDropZone.classList.contains('has-image')) return;
-        bannerInput.click();
-    });
-
-    /* ── Botão Recortar Banner ── */
-    btnCropBanner.addEventListener('click', function () {
-        if (!bannerInput.files[0]) return;
-        openBannerCropper(bannerInput.files[0]);
-    });
-
-    /* ── Botão Remover Banner ── */
-    btnRemoveBanner.addEventListener('click', function () {
-        bannerInput.value = '';
-        bannerClearInp.value = 'true';
-        deactivateBannerPreview();
-        showToastSafe('info', 'Banner removido. Clique em Salvar para confirmar.', 3500);
-    });
-
-
-    /* ════════════════════════════════════════════
-       BANNER — DRAG TO REPOSITION
-       Funciona para GIF E para imagem estática
-       Não modifica o arquivo — apenas salva object-position
-    ════════════════════════════════════════════ */
-    let isDraggingBanner = false;
-    let dragStartX = 0, dragStartY = 0;
-    let currentPosX = 50, currentPosY = 50; // em %
-
-    function parseBannerPosition() {
-        const val = bannerPosInp.value || '50% 50%';
-        const parts = val.split(' ');
-        currentPosX = parseFloat(parts[0]) || 50;
-        currentPosY = parseFloat(parts[1]) || 50;
-    }
-    parseBannerPosition();
-
-    function updateBannerPosition(px, py) {
-        const x = Math.min(100, Math.max(0, px));
-        const y = Math.min(100, Math.max(0, py));
-        currentPosX = x; currentPosY = y;
-        const val = x.toFixed(1) + '% ' + y.toFixed(1) + '%';
-        bannerPreview.style.objectPosition = val;
-        bannerPosInp.value = val;
-        bannerPosTag.textContent = 'pos: ' + val;
-    }
-
-    bannerDropZone.addEventListener('mousedown', function (e) {
-        if (!bannerDropZone.classList.contains('has-image')) return;
-        isDraggingBanner = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        bannerDropZone.style.cursor = 'grabbing';
-        e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', function (e) {
-        if (!isDraggingBanner) return;
-        const rect = bannerDropZone.getBoundingClientRect();
-        // Sensibilidade: 1px de movimento = 0.15% de mudança na posição
-        const sensitivity = 0.15;
-        const dx = (dragStartX - e.clientX) * sensitivity;
-        const dy = (dragStartY - e.clientY) * sensitivity;
-        updateBannerPosition(currentPosX + dx, currentPosY + dy);
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-    });
-
-    document.addEventListener('mouseup', function () {
-        if (!isDraggingBanner) return;
-        isDraggingBanner = false;
-        bannerDropZone.style.cursor = bannerDropZone.classList.contains('has-image') ? 'grab' : 'pointer';
-    });
-
-    // Touch support (mobile)
-    bannerDropZone.addEventListener('touchstart', function (e) {
-        if (!bannerDropZone.classList.contains('has-image')) return;
-        const t = e.touches[0];
-        isDraggingBanner = true;
-        dragStartX = t.clientX;
-        dragStartY = t.clientY;
-        e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchmove', function (e) {
-        if (!isDraggingBanner) return;
-        const t = e.touches[0];
-        const sensitivity = 0.2;
-        const dx = (dragStartX - t.clientX) * sensitivity;
-        const dy = (dragStartY - t.clientY) * sensitivity;
-        updateBannerPosition(currentPosX + dx, currentPosY + dy);
-        dragStartX = t.clientX;
-        dragStartY = t.clientY;
-        e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchend', () => { isDraggingBanner = false; });
-
-    // Aplica a posição salva ao carregar (banner atual)
-    if (bannerPreview.classList.contains('visible')) {
-        bannerPreview.style.objectPosition = bannerPosInp.value || '50% 50%';
-        bannerPosTag.textContent = 'pos: ' + (bannerPosInp.value || '50% 50%');
-    }
-
-
-    /* ════════════════════════════════════════════
-       BANNER — CROP (apenas imagens estáticas)
-    ════════════════════════════════════════════ */
-    function openBannerCropper(file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const cropImg = document.getElementById('crop-banner-image');
-            cropImg.src = e.target.result;
-            const modal = new bootstrap.Modal(document.getElementById('cropBannerModal'));
-            modal.show();
-            document.getElementById('cropBannerModal').addEventListener('shown.bs.modal', function handler() {
-                if (bannerCropper) { bannerCropper.destroy(); bannerCropper = null; }
-                bannerFlippedH = false;
-                bannerCropper = new Cropper(cropImg, {
-                    // Proporção do banner: largura ÷ altura ≈ 4.5 (ex: 1350×300)
-                    aspectRatio: 4.5,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.9,
-                    responsive: true,
-                    restore: false,
-                    guides: true,
-                    highlight: false,
-                    preview: document.getElementById('crop-preview-banner'),
-                });
-                this.removeEventListener('shown.bs.modal', handler);
-            }, { once: true });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    document.getElementById('btn-banner-zoom-in') .addEventListener('click', () => bannerCropper?.zoom(0.1));
-    document.getElementById('btn-banner-zoom-out').addEventListener('click', () => bannerCropper?.zoom(-0.1));
-    document.getElementById('btn-banner-rotate')  .addEventListener('click', () => bannerCropper?.rotate(90));
-    document.getElementById('btn-banner-flip')    .addEventListener('click', () => {
-        bannerFlippedH = !bannerFlippedH;
-        bannerCropper?.scaleX(bannerFlippedH ? -1 : 1);
-    });
-    document.getElementById('btn-banner-reset').addEventListener('click', () => {
-        bannerCropper?.reset(); bannerFlippedH = false;
-    });
-
-    document.getElementById('btn-confirmar-banner-crop').addEventListener('click', function () {
-        if (!bannerCropper) return;
-        // Gera o canvas com 1350×300 (proporção 4.5:1 — ótimo para banners)
-        bannerCropper.getCroppedCanvas({ width: 1350, height: 300, imageSmoothingQuality: 'high' })
-            .toBlob(function (blob) {
-                const croppedFile = new File([blob], 'banner.jpg', { type: 'image/jpeg' });
-                const dt = new DataTransfer(); dt.items.add(croppedFile);
-                bannerInput.files = dt.files;
-
-                // Atualiza preview com a imagem recortada
-                const previewUrl = URL.createObjectURL(blob);
-                activateBannerPreview(previewUrl, false);
-                // Reseta posição para centro
-                updateBannerPosition(50, 50);
-                bannerClearInp.value = '';
-
-                bootstrap.Modal.getInstance(document.getElementById('cropBannerModal')).hide();
-                showToastSafe('success', 'Banner ajustado! Arraste para reposicionar se quiser.', 4000);
-            }, 'image/jpeg', 0.92);
-    });
-
-    document.getElementById('btn-cancelar-banner-crop').addEventListener('click', () => {
-        // Se não havia banner anterior, limpa o input
-        if (!bannerPreview.classList.contains('visible')) {
-            bannerInput.value = '';
-            deactivateBannerPreview();
-        }
-    });
-
-});
 </script>
 {% endblock %}
+

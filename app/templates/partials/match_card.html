@@ -1,0 +1,104 @@
+<!-- Partial: Match Card for Infinite Scroll -->
+{% with foto=partida.quadra.foto_principal %}
+<div class="match-card fade-card"
+  data-bs-toggle="modal"
+  data-bs-target="#detalhesPartidaModal{{ partida.id }}"
+  data-organizador="{% if partida.organizador == user %}true{% else %}false{% endif %}">
+
+  <!-- Foto da quadra -->
+  <div class="match-card__cover">
+    {% if foto %}
+      <img src="{{ foto.imagem.url }}" alt="{{ partida.quadra.nome }}" class="match-card__cover-img" loading="lazy">
+    {% else %}
+      <div class="match-card__cover-placeholder">
+        <i class="bi bi-building"></i>
+      </div>
+    {% endif %}
+    <div class="match-card__cover-overlay">
+      <span class="match-card__sport-chip">
+        <i class="bi bi-dribbble"></i> {{ partida.esporte.nome }}
+      </span>
+      {% if partida.vagas_restantes == 0 %}
+        <span class="match-card__vagas-chip match-card__vagas-chip--lotado"><i class="bi bi-lock-fill"></i> LOTADO</span>
+      {% elif partida.vagas_restantes <= 2 %}
+        <span class="match-card__vagas-chip match-card__vagas-chip--quase">
+          {{ partida.vagas_restantes }} VAGA{% if partida.vagas_restantes > 1 %}S{% endif %}
+        </span>
+      {% else %}
+        <span class="match-card__vagas-chip match-card__vagas-chip--aberta">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="match-card__body">
+    <h5 class="match-card__title">{{ partida.titulo }}</h5>
+    <div class="match-card__meta-row">
+      <span class="match-card__meta-item">
+        <i class="bi bi-geo-alt-fill"></i>
+        {{ partida.quadra.nome }} · {{ partida.quadra.get_bairro_display }}
+      </span>
+      <span class="match-card__meta-item">
+        <i class="bi bi-calendar-event"></i>
+        {{ partida.data_hora|date:"d/m \\à\\s H:i" }}
+      </span>
+    </div>
+
+    <!-- Barra de progresso de vagas -->
+    <div class="match-card__progress-wrap">
+      <div class="match-card__progress-track">
+        <div class="match-card__progress-fill
+          {% if partida.vagas_restantes == 0 %}match-card__progress-fill--lotado
+          {% elif partida.vagas_restantes <= 2 %}match-card__progress-fill--quase{% endif %}"
+          style="width: {% widthratio partida.vagas_preenchidas partida.jogadores_necessarios 100 %}%">
+        </div>
+      </div>
+      <span class="match-card__progress-label">
+        {{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }} jogadores
+      </span>
+    </div>
+
+    <!-- Ações -->
+    <div class="match-card__actions" onclick="event.stopPropagation()">
+      {% if user == partida.organizador %}
+        <button type="button" class="match-btn match-btn--cancel"
+          data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+      {% elif user in partida.jogadores_confirmados.all %}
+        <form method="post" action="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="match-btn match-btn--leave">
+            <i class="bi bi-box-arrow-left me-1"></i>Sair
+          </button>
+        </form>
+      {% elif partida.vagas_restantes > 0 %}
+        <form method="post" action="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="match-btn match-btn--join">
+            <i class="bi bi-check-circle me-1"></i>Participar
+          </button>
+        </form>
+      {% else %}
+        <button class="match-btn match-btn--full" disabled>
+          <i class="bi bi-lock-fill me-1"></i>Lotado
+        </button>
+      {% endif %}
+      <div class="match-players-mini" aria-label="{{ partida.vagas_preenchidas }} jogadores confirmados">
+        <div class="match-players-mini__icons">
+          {% for jogador in partida.jogadores_confirmados.all|slice:":3" %}
+            {% if jogador.perfil.foto %}
+              <img src="{{ jogador.perfil.foto.url|media_bust }}" alt="{{ jogador.username }}" class="match-players-mini__avatar" data-profile-modal="{{ jogador.id }}" style="cursor: pointer;">
+            {% else %}
+              <span class="match-players-mini__avatar match-players-mini__avatar--placeholder" data-profile-modal="{{ jogador.id }}" style="cursor: pointer;">{{ jogador.username|first|upper }}</span>
+            {% endif %}
+          {% empty %}
+            <span class="match-players-mini__avatar match-players-mini__avatar--placeholder">-</span>
+          {% endfor %}
+        </div>
+        <span class="match-players-mini__count">{{ partida.vagas_preenchidas }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}

@@ -1,4 +1,4 @@
-﻿{% extends "account/base.html" %}
+{% extends "account/base.html" %}
 {% load static custom_filters %}
 
 {% block title %}{{ object.username }} — Perfil{% endblock %}
@@ -6,10 +6,11 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/login/perfil_layout2.css' %}">
+<link rel="stylesheet" href="{% static 'css/posts.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-page" data-profile-user-id="{{ object.id }}" data-activity-page="1" data-activity-page-size="{{ activities_page_size|default:8 }}">
+<div class="profile-page" data-profile-user-id="{{ object.id }}">
 
   <!-- BANNER -->
   <div class="profile-banner-wrap">
@@ -97,38 +98,9 @@
     <div class="content-grid">
 
       <div class="profile-left-col">
-        <div class="pcard" id="atividade">
-          <h4 class="pcard-title">Atividade Recente</h4>
-
-          <div class="activity-scroll" id="activityScroll">
-            {% if activities_page %}
-              <div id="activityList" class="activity-list">
-                {% for a in activities_page %}
-                  {% with obj=a.get_objeto %}
-                    <div class="activity-item">
-                      {% if obj and obj.quadra and obj.quadra.fotos.first %}
-                        <img src="{{ obj.quadra.fotos.first.imagem.url|media_bust }}" alt="{{ obj.quadra.nome }}" class="activity-quadra-img">
-                      {% endif %}
-                      <div class="act-dot"></div>
-                      <div class="act-body">
-                        <div class="act-title">{{ a.get_descricao_formatada }}</div>
-                        <div class="act-meta">{{ a.timestamp|date:"d/m/Y H:i" }}{% if obj and obj.quadra %} — {{ obj.quadra.nome }} ({{ obj.quadra.get_bairro_display }}){% endif %}</div>
-                      </div>
-                    </div>
-                  {% endwith %}
-                {% endfor %}
-              </div>
-
-              {% if activities_total > activities_page|length %}
-                <div class="load-more-wrap">
-                  <button id="loadMoreActivities" class="btn-see-all">Carregar mais</button>
-                </div>
-              {% endif %}
-
-            {% else %}
-              <div class="empty-activity">Nenhuma atividade recente.</div>
-            {% endif %}
-          </div>
+        <div class="pcard" id="feed-social-perfil">
+          <h4 class="pcard-title">Postagens e Comentários</h4>
+          {% include "social/components/post_list.html" %}
         </div>
       </div>
 
@@ -191,103 +163,9 @@
   </div>
 </div>
 
-<script>
-function abrirModalAmigos() { document.getElementById('modalAmigos').classList.add('open'); }
-function fecharModalAmigos() { document.getElementById('modalAmigos').classList.remove('open'); }
-window.addEventListener('click', function(e){ const modal=document.getElementById('modalAmigos'); if(e.target===modal) fecharModalAmigos(); });
-
-function renderActivityItem(item) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'activity-item';
-
-  if (item.quadra_foto_url) {
-    const img = document.createElement('img');
-    img.className = 'activity-quadra-img';
-    img.src = item.quadra_foto_url;
-    img.alt = item.quadra_nome || 'Quadra';
-    wrapper.appendChild(img);
-  }
-
-  const dot = document.createElement('div');
-  dot.className = 'act-dot';
-  wrapper.appendChild(dot);
-
-  const body = document.createElement('div');
-  body.className = 'act-body';
-
-  const title = document.createElement('div');
-  title.className = 'act-title';
-  title.textContent = item.descricao || item.verbo || 'Atividade registrada';
-
-  const meta = document.createElement('div');
-  meta.className = 'act-meta';
-  meta.textContent = `${item.timestamp}` + (item.quadra_nome ? ` — ${item.quadra_nome} (${item.quadra_bairro || ''})` : '');
-
-  body.appendChild(title);
-  body.appendChild(meta);
-  wrapper.appendChild(body);
-
-  return wrapper;
-}
-
-function atualizarStatusAmigos() {
-  const cards = document.querySelectorAll('.friend-card-sidebar[data-friend-id]');
-  if (!cards.length) return;
-  const ids = Array.from(cards).map(c => c.dataset.friendId).join(',');
-  fetch(`/perfis/api/status/?ids=${ids}`)
-    .then(r => r.json())
-    .then(data => {
-      for (const [userId, isOnline] of Object.entries(data)) {
-        const badge = document.getElementById(`status-badge-${userId}`);
-        if (badge) {
-          badge.innerHTML = isOnline
-            ? '<span class="status-online" title="Online agora">🟢</span>'
-            : '<span title="Offline">⚫</span>';
-        }
-      }
-    })
-    .catch(err => console.error('Status tickrate error:', err));
-}
-
-function loadMoreActivities() {
-  const pageInfo = document.querySelector('.profile-page');
-  if (!pageInfo) return;
-
-  let activityPage = parseInt(pageInfo.dataset.activityPage, 10) || 1;
-  const pageSize = parseInt(pageInfo.dataset.activityPageSize, 10) || 8;
-  const userId = pageInfo.dataset.profileUserId;
-
-  const nextPage = activityPage + 1;
-  fetch(`/perfis/api/atividades/?user_id=${userId}&page=${nextPage}&page_size=${pageSize}`)
-    .then(r => r.json())
-    .then(data => {
-      const list = document.getElementById('activityList');
-      if (!list || !data.activities) return;
-
-      data.activities.forEach(item => {
-        list.appendChild(renderActivityItem(item));
-      });
-
-      activityPage = nextPage;
-      pageInfo.dataset.activityPage = activityPage;
-
-      if (list.children.length >= data.total) {
-        const btn = document.getElementById('loadMoreActivities');
-        if (btn) btn.style.display = 'none';
-      }
-    })
-    .catch(err => console.error('Erro ao carregar mais atividades:', err));
-}
-
-window.addEventListener('DOMContentLoaded', function() {
-  const moreBtn = document.getElementById('loadMoreActivities');
-  if (moreBtn) {
-    moreBtn.addEventListener('click', loadMoreActivities);
-  }
-
-  setInterval(atualizarStatusAmigos, 15000);
-  atualizarStatusAmigos();
-});
-</script>
+<script src="{% static 'js/pages/perfis-ver-perfil.js' %}"></script>
+<script src="{% static 'js/gif-picker-v2.js' %}"></script>
+<script src="{% static 'js/posts.js' %}"></script>
 
 {% endblock %}
+

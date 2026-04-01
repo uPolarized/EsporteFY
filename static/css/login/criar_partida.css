@@ -175,7 +175,7 @@ body.criar-partida-page {
     opacity: 1;
 }
 
-/* Corrige o texto do select “Nenhuma quadra selecionada” */
+/* Corrige o texto do select "Nenhuma quadra selecionada" */
 .criar-partida-card select:invalid,
 .criar-partida-card select option[value=""] {
     color: #999;

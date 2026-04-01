@@ -1,0 +1,148 @@
+{% extends 'account/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Enviar Feedback - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/account-feedback.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="feedback-page-wrapper">
+  
+  <!-- Hero Section -->
+  <div class="feedback-hero">
+    <div class="hero-content">
+      <h1 class="hero-title">💡 Seu Feedback Importa</h1>
+      <p class="hero-subtitle">Ajude a gente a melhorar o EsporteFY. Reportes de bugs, sugestões ou qualquer coisa que tenha em mente.</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container-fluid py-5" style="max-width: 1200px;">
+    <div class="row g-5">
+
+      <!-- Left Column - Tips & Info -->
+      <div class="col-lg-4">
+        <!-- User Status Card -->
+        {% if user.is_authenticated %}
+          <div class="info-card user-status-card">
+            <div class="card-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <h4>Logado como</h4>
+            <p class="username-display">{{ user.username }}</p>
+            <small>Seu feedback será associado à sua conta. Responderemos por email se deixar contato.</small>
+          </div>
+        {% else %}
+          <div class="info-card anon-status-card">
+            <div class="card-icon"><i class="bi bi-question-circle-fill"></i></div>
+            <h4>Feedback Anônimo</h4>
+            <p>Você está enviando sem estar logado.</p>
+            <small>Deixe seu email se quiser que respondamos.</small>
+          </div>
+        {% endif %}
+
+        <!-- Tips Cards -->
+        <div class="info-card tip-card">
+          <div class="card-icon bug-icon">🐛</div>
+          <h5>Encontrou um Bug?</h5>
+          <p>Descreva os passos que levaram ao problema e em qual página/funcionalidade aconteceu.</p>
+        </div>
+
+        <div class="info-card tip-card">
+          <div class="card-icon idea-icon">💡</div>
+          <h5>Tem uma Ideia?</h5>
+          <p>Explique sua sugestão e como ela poderia melhorar a experiência no EsporteFY.</p>
+        </div>
+
+        <!-- Success Messages -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="success-banner">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <!-- Right Column - Form -->
+      <div class="col-lg-8">
+        <div class="feedback-form-card">
+          <form method="post" class="feedback-form">
+            {% csrf_token %}
+            
+            <!-- Categoria -->
+            <div class="form-section">
+              <label class="section-label">
+                <i class="bi bi-folder-check"></i> Tipo de Feedback
+              </label>
+              <div class="feedback-categories-grid">
+                {% for radio in form.categoria %}
+                  <div class="form-check-wrapper">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">
+                      {{ radio.choice_label }}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if form.categoria.errors %}
+                <div class="form-error">{{ form.categoria.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Assunto -->
+            <div class="form-section">
+              <label class="section-label">
+                <i class="bi bi-pencil-square"></i> Assunto
+              </label>
+              {{ form.assunto }}
+              <small class="form-hint">Seja breve e direto.</small>
+              {% if form.assunto.errors %}
+                <div class="form-error">{{ form.assunto.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Mensagem -->
+            <div class="form-section">
+              <label class="section-label">
+                <i class="bi bi-chat-left-text"></i> Detalhes
+              </label>
+              {{ form.mensagem }}
+              <small class="form-hint">Quanto mais detalhes, melhor! Inclua links se for bug.</small>
+              {% if form.mensagem.errors %}
+                <div class="form-error">{{ form.mensagem.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="form-section">
+              <label class="section-label">
+                <i class="bi bi-envelope"></i> Email (opcional)
+              </label>
+              {{ form.email_contato }}
+              <small class="form-hint">Deixe para que possamos responder se necessário.</small>
+              {% if form.email_contato.errors %}
+                <div class="form-error">{{ form.email_contato.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+              <button type="submit" class="btn-submit">
+                <i class="bi bi-send"></i> Enviar Feedback
+              </button>
+              <a href="/" class="btn-cancel">
+                <i class="bi bi-x-lg"></i> Voltar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,28 +1,21 @@
 import os
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'esportefy.settings')
+
 import django
+
 django.setup()
 
-from django.contrib.auth.models import User
+from scripts.popular_banco.criar_superusuario_padrao import run
 
-# Criar ou atualizar usuário
-user, created = User.objects.get_or_create(
-    username='jao',
-    defaults={
-        'email': 'jao@teste.com',
-        'is_superuser': True,
-        'is_staff': True,
-    }
-)
 
-user.set_password('123')
-user.save()
+if __name__ == '__main__':
+    result = run()
+    if result['created']:
+        print(f"✓ Superusuario '{result['username']}' criado com sucesso!")
+    else:
+        print(f"✓ Superusuario '{result['username']}' atualizado!")
 
-if created:
-    print("✓ Superusuário 'jao' criado com sucesso!")
-else:
-    print("✓ Superusuário 'jao' atualizado!")
-
-print(f"  Username: jao")
-print(f"  Senha: 123")
-print(f"  Email: {user.email}")
+    print(f"  Username: {result['username']}")
+    print(f"  Senha: {result['password']}")
+    print(f"  Email: {result['email']}")

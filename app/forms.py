@@ -6,6 +6,8 @@ from crispy_forms.layout import Layout
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
+from .models import DataAccessRequest, Feedback
+
 
 # ============================
 # SIGNUP FORM (CADASTRO)
@@ -76,3 +78,47 @@ class CustomChangePasswordForm(ChangePasswordForm):
             'data-size': 'normal',
         })
     )
+
+
+class DataAccessRequestForm(forms.ModelForm):
+    class Meta:
+        model = DataAccessRequest
+        fields = ["motivo"]
+        widgets = {
+            "motivo": forms.Textarea(
+                attrs={
+                    "class": "lgpd-textarea",
+                    "rows": 3,
+                    "placeholder": "Descreva o motivo da solicitacao (opcional).",
+                }
+            )
+        }
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ["categoria", "assunto", "mensagem", "email_contato"]
+        widgets = {
+            "categoria": forms.RadioSelect,
+            "assunto": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Resumo do seu feedback",
+                    "maxlength": 200,
+                }
+            ),
+            "mensagem": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 6,
+                    "placeholder": "Descreva com detalhes para podermos te ajudar melhor.",
+                }
+            ),
+            "email_contato": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "seu@email.com",
+                }
+            ),
+        }

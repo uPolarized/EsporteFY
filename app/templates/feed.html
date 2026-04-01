@@ -1,12 +1,86 @@
-{% extends "account/base.html" %}
+﻿{% extends "account/base.html" %}
 {% load static cache l10n custom_filters %}
 {% block title %}Seu Feed - EsporteFY{% endblock %}
 {% block body_class %}feed-scroll-locked{% endblock %}
 
 {% block extra_head %}
+{% now "U" as feed_css_version %}
 <link rel="stylesheet" href="{% static 'css/feed.css' %}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  @media (max-width: 991.98px) {
+    .feed-col-mobile {
+      display: none !important;
+    }
+    .feed-col-mobile.mobile-active-tab {
+      display: block !important;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    /* Ocultar a saudação genérica redundante em mobile se estiver em outras tabs */
+    #mobile-greeting {
+      display: none !important;
+    }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+    .fab-create {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #dc3545; /* Red color */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    z-index: 1050;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+  }
+  .fab-create i {
+    color: white;
+  }
+  .fab-create:hover, .fab-create:focus {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(220, 53, 69, 0.6);
+    color: white;
+  }
+
+    .fab-create {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #dc3545; /* Red color */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    z-index: 1050;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+  }
+  .fab-create i {
+    color: white;
+  }
+  .fab-create:hover, .fab-create:focus {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(220, 53, 69, 0.6);
+    color: white;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +99,8 @@
       </div>
     </div>
 
-    <div class="col-lg-3 order-md-2 order-lg-1">
+    {% if not is_mobile_client or aba_atual == 'feed' or aba_atual == 'atividades' %}
+    <div class="{% if not is_mobile_client or aba_atual == 'feed' %}col-lg-3 order-md-2 order-lg-1{% else %}col-12{% endif %} feed-col-mobile {% if request.GET.aba == 'atividades' %}mobile-active-tab{% endif %}" id="tab-atividades">
       <section id="feed-atividades" class="activity-feed-shell">
         <div class="activity-feed-header">
           <div class="activity-feed-header__top">
@@ -48,9 +123,6 @@
           </button>
           <button type="button" class="activity-filter-pill" data-filter="partidas">
             Partidas <span data-count-for="partidas">{{ activity_counts.partidas|default:0 }}</span>
-          </button>
-          <button type="button" class="activity-filter-pill" data-filter="amizades">
-            Amizades <span data-count-for="amizades">{{ activity_counts.amizades|default:0 }}</span>
           </button>
           <button type="button" class="activity-filter-pill" data-filter="avaliacoes">
             Avaliacoes <span data-count-for="avaliacoes">{{ activity_counts.avaliacoes|default:0 }}</span>
@@ -126,26 +198,31 @@
           {% empty %}
             <div class="activity-empty-state" id="feed-empty-state">
               <div class="activity-empty-state__icon"><i class="bi bi-stars"></i></div>
-              <h3>A comunidade ainda esta silenciosa</h3>
+              <h3>A comunidade ainda está silenciosa</h3>
               <p>Crie uma partida ou encontre jogadores para começar a movimentar o feed.</p>
               <div class="activity-empty-state__actions">
-                <a href="{% url 'partidas:criar_partida' %}" class="btn btn-primary">Criar Partida</a>
-                <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-secondary">Encontrar Jogadores</a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalCriarPartida" class="btn btn-danger">Criar Partida</a>
+                <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-danger">Encontrar Jogadores</a>
               </div>
             </div>
           {% endfor %}
         </div>
       </section>
-    </div> <div class="col-lg-6 order-md-1 order-lg-2">
+    </div>
+    {% endif %}
+
+    {% if not is_mobile_client or aba_atual == 'feed' or aba_atual == 'partidas' %}
+    <div id="tab-partidas" class="{% if not is_mobile_client or aba_atual == 'feed' %}col-lg-6 order-md-1 order-lg-2{% else %}col-12{% endif %} feed-col-mobile {% if request.GET.aba|default:'partidas' == 'partidas' %}mobile-active-tab{% endif %}">
       <div id="feed-partidas" class="feed-center-rail">
-      <section class="center-intro-panel mb-4">
-      <div class="dashboard-hero">
+        <div class="unified-partidas-container">
+        <section class="center-intro-panel">
+      <div class="dashboard-hero" id="mobile-greeting">
         {% now "H" as hora_atual %}
         <h1 class="dashboard-hero__title">
           {% if hora_atual|add:"0" < 12 %}☀️Bom dia
           {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
           {% else %}🌙Boa noite
-          {% endif %}, {{ user.first_name|default:user.username }}
+          {% endif %}, {{ user.username }}
         </h1>
         <p class="dashboard-hero__subtitle">Seu painel em tempo real para entrar no próximo jogo.</p>
 
@@ -164,8 +241,11 @@
           </div>
         </div>
 
-        <div class="dashboard-hero__actions">
-          <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-secondary">
+        <div class="dashboard-hero__actions d-flex gap-2 align-items-center">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#modalCriarPartida" class="btn btn-danger d-none d-lg-inline-flex align-items-center">
+            <i class="bi bi-plus-lg me-2"></i>Criar Partida
+          </a>
+          <a href="{% url 'perfis:lista_usuarios' %}" class="btn btn-outline-danger align-items-center">
             <i class="bi bi-people-fill me-2"></i>Encontrar jogadores
           </a>
         </div>
@@ -178,21 +258,19 @@
       </div>
 
       <div class="filtro-panel">
-      <div class="filtro-bar d-flex justify-content-end align-items-center flex-wrap gap-2">
+        <div class="filtro-bar">
         <button id="toggle-minhas-partidas" class="btn-filtro-ocultar">
           <i class="bi bi-eye-slash me-1"></i> Ocultar minhas partidas
         </button>
-        <a href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if not nearby_only %}&nearby=1{% endif %}" class="btn-filtro-chip {% if nearby_only %}is-active{% endif %}">
-          <i class="bi bi-geo-alt-fill me-1"></i> Perto de você
-        </a>
+          
         <div class="dropdown">
           <button class="btn-filtro-bairro dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <i class="bi bi-geo-alt me-1"></i> Bairro: <strong>{{ bairro_atual_nome }}</strong>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="?bairro=todos&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">Todos os Bairros</a></li>
+            <li><a class="dropdown-item" href="?bairro=todos&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}">Todos os Bairros</a></li>
             {% for valor, nome in bairros_disponiveis %}
-            <li><a class="dropdown-item" href="?bairro={{ valor }}&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">{{ nome }}</a></li>
+            <li><a class="dropdown-item" href="?bairro={{ valor }}&esporte={{ esporte_atual }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}">{{ nome }}</a></li>
             {% endfor %}
           </ul>
         </div>
@@ -201,9 +279,9 @@
             <i class="bi bi-dribbble me-1"></i> Esporte: <strong>{{ esporte_atual_nome }}</strong>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte=todos&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">Todos os Esportes</a></li>
+            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte=todos&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}">Todos os Esportes</a></li>
             {% for esporte in esportes_disponiveis %}
-            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte.id }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}{% if nearby_only %}&nearby=1{% endif %}">{{ esporte.nome }}</a></li>
+            <li><a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte.id }}&date_filter={{ data_filtro }}{% if custom_date %}&custom_date={{ custom_date }}{% endif %}{% if custom_time %}&custom_time={{ custom_time }}{% endif %}">{{ esporte.nome }}</a></li>
             {% endfor %}
           </ul>
         </div>
@@ -212,14 +290,14 @@
             <i class="bi bi-calendar-event me-1"></i> Quando: <strong>{{ data_filtro_nome }}</strong>
           </button>
           <div class="dropdown-menu dropdown-menu-end filtro-data-menu p-3">
-            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=all{% if nearby_only %}&nearby=1{% endif %}">Qualquer data</a>
-            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=today{% if nearby_only %}&nearby=1{% endif %}">Hoje</a>
-            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=tomorrow{% if nearby_only %}&nearby=1{% endif %}">Amanhã</a>
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=all">Qualquer data</a>
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=today">Hoje</a>
+            <a class="dropdown-item" href="?bairro={{ bairro_atual }}&esporte={{ esporte_atual }}&date_filter=tomorrow">Amanhã</a>
             <div class="dropdown-divider"></div>
             <form method="get" class="filtro-data-form">
               <input type="hidden" name="bairro" value="{{ bairro_atual }}">
               <input type="hidden" name="esporte" value="{{ esporte_atual }}">
-              {% if nearby_only %}<input type="hidden" name="nearby" value="1">{% endif %}
+              
               <input type="hidden" name="date_filter" value="custom">
               <label class="filtro-data-form__label" for="custom-date-input">Data específica</label>
               <input id="custom-date-input" type="date" name="custom_date" class="form-control form-control-sm filtro-data-form__input" value="{{ custom_date }}">
@@ -341,7 +419,7 @@
       {% empty %}
       <div class="card no-match-card matches-grid__empty">
         <div class="card-body text-center text-muted">
-          <i class="bi bi-emoji-frown me-2"></i> Nenhuma partida encontrada. Que tal <a href="{% url 'partidas:criar_partida' %}">criar uma</a>?
+          <i class="bi bi-emoji-frown me-2"></i> Nenhuma partida encontrada. Que tal <a href="#" data-bs-toggle="modal" data-bs-target="#modalCriarPartida">criar uma</a>?
         </div>
       </div>
       {% endfor %}
@@ -489,7 +567,12 @@
       </div>
       {% endfor %}
 
-    </div> <div class="col-lg-3 order-md-3 order-lg-3">
+      </div> <!-- /unified-partidas-container -->
+    </div>
+    {% endif %}
+
+    {% if not is_mobile_client or aba_atual == 'feed' or aba_atual == 'noticias' %}
+    <div id="tab-noticias" class="{% if not is_mobile_client or aba_atual == 'feed' %}col-lg-3 order-md-3 order-lg-3{% else %}col-12{% endif %} feed-col-mobile {% if request.GET.aba == 'noticias' %}mobile-active-tab{% endif %}">
       <div id="feed-noticias" class="feed-right-rail">
       <div class="right-unified-panel">
       
@@ -543,360 +626,135 @@
       {% endcache %} 
       </div>
       </div>
-    </div> 
-    </div> 
-    </div> 
-
-<!-- SCRIPT DE FILTRO -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleBtn = document.getElementById('toggle-minhas-partidas');
-  const partidas = document.querySelectorAll('.match-card');
-  const feedFilterButtons = document.querySelectorAll('.activity-filter-pill');
-  const feedFilterRow = document.getElementById('feed-filter-row');
-  const feedFilterEmpty = document.getElementById('feed-filter-empty');
-  const feedSectionsRoot = document.getElementById('feed-sections');
-  const activityFeedShell = document.querySelector('.activity-feed-shell');
-  const feedToggleFilters = document.getElementById('feed-toggle-filters');
-  let ocultando = false;
-  let activeFeedFilter = 'all';
-
-  toggleBtn.addEventListener('click', () => {
-    ocultando = !ocultando;
-
-    partidas.forEach(card => {
-      const ehMinha = card.dataset.organizador === 'true';
-      if (ehMinha) {
-        if (ocultando) {
-          card.classList.add('fade-out');
-          setTimeout(() => card.style.display = 'none', 200);
-        } else {
-          card.style.display = '';
-          card.classList.remove('fade-out');
-        }
-      }
-    });
-
-    toggleBtn.innerHTML = ocultando
-      ? '<i class="bi bi-eye"></i> Mostrar minhas partidas'
-      : '<i class="bi bi-eye-slash"></i> Ocultar minhas partidas';
-  });
-
-  function escapeFeedValue(value) {
-    if (typeof window.escapeHtml === 'function') {
-      return window.escapeHtml(value == null ? '' : String(value));
-    }
-    const div = document.createElement('div');
-    div.innerText = value == null ? '' : String(value);
-    return div.innerHTML;
-  }
-
-  function renderActivityAvatar(data) {
-    if (data.actor_avatar_url) {
-      const url = `${data.actor_avatar_url}${String(data.actor_avatar_url).includes('?') ? '&' : '?'}v=${Date.now()}`;
-      return `<img src="${escapeFeedValue(url)}" alt="${escapeFeedValue(data.actor_name)}" class="activity-card__avatar">`;
-    }
-    return `<div class="activity-card__avatar activity-card__avatar--placeholder">${escapeFeedValue(data.actor_initial || '?')}</div>`;
-  }
-
-  function renderActivityMeta(data) {
-    if (!Array.isArray(data.meta) || !data.meta.length) return '';
-    return `<div class="activity-card__meta">${data.meta.map((item) => `<span>${escapeFeedValue(item)}</span>`).join('')}</div>`;
-  }
-
-  function renderActivityStats(data) {
-    if (!Array.isArray(data.stats) || !data.stats.length) return '';
-    return `
-      <div class="activity-card__stats">
-        ${data.stats.map((stat) => `
-          <div class="activity-card__stat">
-            <small>${escapeFeedValue(stat.label || '')}</small>
-            <strong>${escapeFeedValue(stat.value || '')}</strong>
-          </div>
-        `).join('')}
-      </div>`;
-  }
-
-  function renderActivityCta(data) {
-    if (data.cta_type === 'like') {
-      const likeClass = data.user_liked ? ' is-liked' : '';
-      const likeCount = data.like_count || 0;
-      return `<button type="button" class="activity-card__cta activity-card__like${likeClass}" data-activity-id="${escapeFeedValue(data.activity_id)}" data-liked="${data.user_liked}" data-like-count="${likeCount}">
-        <i class="bi bi-heart-fill"></i>
-        <span class="like-count">${likeCount}</span>
-      </button>`;
-    }
-    if (data.cta_type === 'modal' && data.cta_target && document.getElementById(data.cta_target)) {
-      return `<button type="button" class="activity-card__cta" data-bs-toggle="modal" data-bs-target="#${escapeFeedValue(data.cta_target)}">${escapeFeedValue(data.cta_label || 'Ver partida')}</button>`;
-    }
-    if (data.cta_url) {
-      return `<a href="${escapeFeedValue(data.cta_url)}" class="activity-card__cta">${escapeFeedValue(data.cta_label || 'Abrir')}</a>`;
-    }
-    return '';
-  }
-
-  function renderActivityCard(data) {
-    const pastClass = data.is_past ? ' activity-card--past' : '';
-    return `
-      <article class="activity-card activity-card--${escapeFeedValue(data.kind || 'generic')}${pastClass}" data-category="${escapeFeedValue(data.category || 'geral')}" data-activity-id="${escapeFeedValue(data.id)}" style="--activity-delay: 0ms;">
-        <div class="activity-card__top">
-          ${renderActivityAvatar(data)}
-          <div class="activity-card__content">
-            <div class="activity-card__badge">
-              <i class="bi ${escapeFeedValue(data.icon || 'bi-lightning-charge-fill')}"></i>
-              ${escapeFeedValue(data.badge_label || 'Atividade')}
-            </div>
-            <h3 class="activity-card__headline">${escapeFeedValue(data.headline || '')}</h3>
-            <p class="activity-card__description">${escapeFeedValue(data.description || '')}</p>
-          </div>
-          <div class="activity-card__time">${escapeFeedValue(data.timestamp_label || 'agora')}</div>
-        </div>
-        ${renderActivityMeta(data)}
-        ${renderActivityStats(data)}
-        <div class="activity-card__actions">${renderActivityCta(data)}</div>
-      </article>`;
-  }
-
-  function updateFilterCounter(category) {
-    const allCounter = document.querySelector('[data-count-for="all"]');
-    if (allCounter) {
-      allCounter.textContent = String((parseInt(allCounter.textContent, 10) || 0) + 1);
-    }
-
-    if (category && ['partidas', 'amizades', 'avaliacoes'].includes(category)) {
-      const counter = document.querySelector(`[data-count-for="${category}"]`);
-      if (counter) {
-        counter.textContent = String((parseInt(counter.textContent, 10) || 0) + 1);
-      }
-    }
-  }
-
-  function updateFeedVisibility() {
-    const cards = document.querySelectorAll('.activity-card');
-    let visibleCount = 0;
-
-    cards.forEach((card) => {
-      const shouldShow = activeFeedFilter === 'all' || card.dataset.category === activeFeedFilter;
-      card.classList.toggle('d-none', !shouldShow);
-      if (shouldShow) visibleCount += 1;
-    });
-
-    document.querySelectorAll('.activity-period').forEach((section) => {
-      const visibleCards = section.querySelectorAll('.activity-card:not(.d-none)');
-      section.classList.toggle('d-none', visibleCards.length === 0);
-    });
-
-    if (feedFilterEmpty) {
-      feedFilterEmpty.classList.toggle('d-none', visibleCount !== 0);
-    }
-  }
-
-  feedFilterButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      activeFeedFilter = button.dataset.filter || 'all';
-      feedFilterButtons.forEach((item) => item.classList.toggle('is-active', item === button));
-      updateFeedVisibility();
-    });
-  });
-
-  if (feedToggleFilters) {
-    feedToggleFilters.addEventListener('click', () => {
-      const expanded = !feedFilterRow.classList.contains('is-collapsed');
-      feedFilterRow.classList.toggle('is-collapsed', expanded);
-      feedToggleFilters.setAttribute('aria-pressed', String(!expanded));
-      feedToggleFilters.classList.toggle('is-active', !expanded);
-    });
-  }
-
-  if (activityFeedShell && feedSectionsRoot && window.innerWidth > 768) {
-    activityFeedShell.addEventListener('wheel', (event) => {
-      const canScrollInside = feedSectionsRoot.scrollHeight > feedSectionsRoot.clientHeight;
-      if (!canScrollInside) return;
-
-      const goingDown = event.deltaY > 0;
-      const atTop = feedSectionsRoot.scrollTop <= 0;
-      const atBottom = Math.ceil(feedSectionsRoot.scrollTop + feedSectionsRoot.clientHeight) >= feedSectionsRoot.scrollHeight;
-
-      if ((goingDown && !atBottom) || (!goingDown && !atTop)) {
-        event.preventDefault();
-        feedSectionsRoot.scrollTop += event.deltaY;
-      }
-    }, { passive: false });
-  }
-
-  window.feedUi = {
-    renderActivityCard,
-    updateFilterCounter,
-    updateFeedVisibility,
-    getActiveFilter: () => activeFeedFilter,
-  };
-
-  updateFeedVisibility();
-  setupLikeButtons();
-
-  // Setup like buttons
-  function setupLikeButtons() {
-    const likeButtons = document.querySelectorAll('.activity-card__like');
-    likeButtons.forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const atividadeId = btn.dataset.activityId;
-        const likeCountSpan = btn.querySelector('.like-count');
-        
-        // Otimistic UI - muda imediatamente
-        const wasLiked = btn.classList.contains('is-liked');
-        btn.classList.toggle('is-liked');
-        
-        if (likeCountSpan) {
-          const currentCount = parseInt(likeCountSpan.textContent, 10) || 0;
-          likeCountSpan.textContent = wasLiked ? currentCount - 1 : currentCount + 1;
-        }
-        
-        try {
-          const response = await fetch(`/social/atividade/${atividadeId}/like/`, {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-              'Content-Type': 'application/json',
-            },
-          });
-          
-          if (!response.ok) throw new Error('Erro na requisição');
-          
-          const data = await response.json();
-          if (data.success) {
-            btn.dataset.liked = data.liked;
-            btn.dataset.likeCount = data.like_count;
-            btn.classList.toggle('is-liked', data.liked);
-            
-            // Atualiza o contador com o valor real do backend
-            if (likeCountSpan) {
-              likeCountSpan.textContent = data.like_count;
-            }
-          }
-        } catch (err) {
-          console.error('Erro ao curtir:', err);
-          // Rollback do otimistic UI
-          btn.classList.toggle('is-liked');
-          if (likeCountSpan) {
-            const currentCount = parseInt(likeCountSpan.textContent, 10) || 0;
-            likeCountSpan.textContent = wasLiked ? currentCount + 1 : currentCount - 1;
-          }
-        }
-      });
-    });
-  }
-
-  setupLikeButtons();
-});
-
-
-const feedSectionLabels = {
-  today: 'Hoje',
-  yesterday: 'Ontem',
-  week: 'Esta semana',
-  older: 'Mais antigas',
-};
-
-function ensureFeedSection(sectionKey) {
-  const sectionsRoot = document.getElementById('feed-sections');
-  if (!sectionsRoot) return null;
-
-  const existing = document.getElementById(`activity-section-items-${sectionKey}`);
-  if (existing) return existing;
-
-  const emptyState = document.getElementById('feed-empty-state');
-  if (emptyState) emptyState.remove();
-
-  const wrapper = document.createElement('section');
-  wrapper.className = 'activity-period';
-  wrapper.dataset.sectionKey = sectionKey;
-  wrapper.id = `activity-section-${sectionKey}`;
-  wrapper.innerHTML = `
-    <div class="activity-period__header">
-      <span>${feedSectionLabels[sectionKey] || 'Agora'}</span>
-      <small>1 item</small>
     </div>
-    <div class="activity-period__items" id="activity-section-items-${sectionKey}"></div>
-  `;
+    {% endif %}
+    </div> 
+    </div> 
 
-  sectionsRoot.prepend(wrapper);
-  return wrapper.querySelector('.activity-period__items');
-}
+    <!-- Floating Action Button (Mobile) -->
+    <a href="#" data-bs-toggle="modal" data-bs-target="#modalCriarPartida" class="fab-create d-lg-none" title="Criar Partida">
+      <i class="bi bi-plus"></i>
+    </a>
+    
+    {% include "partials/modal_criar_partida.html" %}
+{% endblock %}
 
-function refreshSectionCounters() {
-  document.querySelectorAll('.activity-period').forEach((section) => {
-    const headerCounter = section.querySelector('.activity-period__header small');
-    const total = section.querySelectorAll('.activity-card').length;
-    if (headerCounter) {
-      headerCounter.textContent = `${total} item${total === 1 ? '' : 's'}`;
-    }
-  });
-}
+{% block extra_js %}
+<script src="{% static 'js/partida-wizard.js' %}"></script>
 
-const feedProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-const feedSocket = new WebSocket(
-  `${feedProtocol}${window.location.hostname}:8080/ws/feed/?user={{ user.id|urlencode }}&username={{ user.username|urlencode }}&token={{ WS_AUTH_TOKEN|urlencode }}`
-);
-
-feedSocket.onmessage = function(e) {
-  const data = JSON.parse(e.data);
-  if (!window.feedUi) return;
-  const sectionKey = data.section_key || 'today';
-  const container = ensureFeedSection(sectionKey);
-  if (!container) return;
-
-  const alreadyExists = document.querySelector(`.activity-card[data-activity-id="${String(data.id)}"]`);
-  if (alreadyExists) {
-    alreadyExists.remove();
-  }
-
-  container.insertAdjacentHTML('afterbegin', window.feedUi.renderActivityCard(data));
-  refreshSectionCounters();
-  window.feedUi.updateFilterCounter(data.category || 'geral');
-  
-  // Reattach like button handlers para novas atividades
-  setupLikeButtons();
-
-  const filterButtons = document.querySelectorAll('.activity-filter-pill');
-  const activeFilter = window.feedUi.getActiveFilter();
-  document.querySelectorAll('.activity-card').forEach((card) => {
-    const shouldShow = activeFilter === 'all' || card.dataset.category === activeFilter;
-    card.classList.toggle('d-none', !shouldShow);
-  });
-  document.querySelectorAll('.activity-period').forEach((section) => {
-    section.classList.toggle('d-none', section.querySelectorAll('.activity-card:not(.d-none)').length === 0);
-  });
-  const filterEmpty = document.getElementById('feed-filter-empty');
-  if (filterEmpty) {
-    filterEmpty.classList.toggle('d-none', document.querySelectorAll('.activity-card:not(.d-none)').length !== 0);
-  }
-  filterButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.filter === activeFilter));
-};
-
-const modalsDetalhes = document.querySelectorAll('[id^="detalhesPartidaModal"]');
-  
-  modalsDetalhes.forEach(modal => {
-    modal.addEventListener('show.bs.modal', event => {
-      try {
-        // Encontra o iframe *dentro* deste modal específico
-        const iframe = modal.querySelector('.mapa-embed');
-        
-        // Se o iframe existir e ainda não tiver um 'src', defina-o
-        if (iframe && !iframe.getAttribute('src')) {
-          const mapaSrc = iframe.getAttribute('data-src');
-          if (mapaSrc) {
-            iframe.setAttribute('src', mapaSrc);
+<script src="{% static 'js/gif-picker-v2.js' %}"></script>
+<script src="{% static 'js/posts.js' %}"></script>
+<script src="{% static 'js/pages/feed-page.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const feedPartidasContainer = document.getElementById('feed-partidas');
+    
+    // Função para tratar o fetch após obtermos a URL final
+    function processarFiltroAjax(url) {
+      if(feedPartidasContainer) {
+        feedPartidasContainer.style.opacity = '0.5';
+        feedPartidasContainer.style.transition = 'opacity 0.2s';
+      }
+      
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          
+          const novoConteudo = doc.getElementById('feed-partidas');
+          if (novoConteudo && feedPartidasContainer) {
+            feedPartidasContainer.innerHTML = novoConteudo.innerHTML;
+            feedPartidasContainer.style.opacity = '1';
+            
+            const novosFiltros = doc.querySelector('.filtro-panel');
+            const nossosFiltros = document.querySelector('.filtro-panel');
+            if (novosFiltros && nossosFiltros) {
+              nossosFiltros.innerHTML = novosFiltros.innerHTML;
+              reattachFilterEvents(); 
+            }
+            
+            window.history.pushState({path: url}, '', url);
+          } else {
+            window.location.href = url;
           }
-        }
-      } catch (e) {
-        console.error("Erro ao carregar mapa no modal:", e);
+        })
+        .catch(error => {
+          window.location.href = url;
+        });
+    }
+
+    function reattachFilterEvents() {
+      const novosFiltroLinks = document.querySelectorAll('.filtro-bar a, .filtro-panel .dropdown-item');
+      novosFiltroLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const url = this.getAttribute('href');
+          if (url && !url.startsWith('javascript:')) {
+            e.preventDefault();
+              processarFiltroAjax(url);
+          }
+        });
+      });
+      
+      const toggleBtn = document.getElementById('toggle-minhas-partidas');
+      if(toggleBtn) {
+        let ocultando = false;
+        toggleBtn.addEventListener('click', () => {
+          ocultando = !ocultando;
+          const partidas = document.querySelectorAll('.match-card');
+          partidas.forEach(card => {
+            const ehMinha = card.dataset.organizador === 'true';
+            if (ehMinha) {
+              if (ocultando) {
+                card.classList.add('fade-out');
+                setTimeout(() => card.style.display = 'none', 200);
+                setTimeout(() => card.classList.remove('fade-out'), 210);
+              } else {
+                card.style.display = 'block';
+                setTimeout(() => card.classList.add('fade-in'), 10);
+                setTimeout(() => card.classList.remove('fade-in'), 210);
+              }
+            }
+          });
+          const icone = toggleBtn.querySelector('i');
+          if (icone) {
+            icone.className = ocultando ? 'bi bi-eye me-1' : 'bi bi-eye-slash me-1';
+          }
+          toggleBtn.innerHTML = ocultando ? '<i class="bi bi-eye me-1"></i> Mostrar minhas partidas' : '<i class="bi bi-eye-slash me-1"></i> Ocultar minhas partidas';
+        });
+      }
+      
+      // SOLUÇÃO PARA O DROPDOWN FUGINDO NO SCROLL MOBILE / RESIZE
+      const filtroBar = document.querySelector('.filtro-bar');
+      if (filtroBar) {
+        filtroBar.addEventListener('scroll', function() {
+           const openDropdowns = document.querySelectorAll('.filtro-panel .dropdown-toggle.show');
+           openDropdowns.forEach(btn => {
+               // Emula o clique apenas no botão que está aberto para fechá-lo de forma segura
+               btn.click();
+           });
+        });
+      }
+    }
+
+    // Inicialização original
+    reattachFilterEvents();
+
+    // Fecha dropdowns se mudar o tamanho da janela (F12 / desktop para mobile)
+    window.addEventListener('resize', function() {
+        const openDropdowns = document.querySelectorAll('.filtro-panel .dropdown-toggle.show');
+        openDropdowns.forEach(btn => {
+            btn.click();
+        });
+    });
+
+    window.addEventListener('popstate', function(event) {
+      if(event.state && event.state.path) {
+        window.location.href = event.state.path; 
       }
     });
   });
-
-
 </script>
 {% endblock %}
+
+

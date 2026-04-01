@@ -171,10 +171,10 @@ body.feed-scroll-locked {
 
 /* ===== 4. FEED DE ATIVIDADES ===== */
 .activity-feed-shell {
-  background: linear-gradient(180deg, rgba(25,25,25,0.96), rgba(17,17,17,0.94));
+  background: linear-gradient(180deg, #18191c, #111214) !important;
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 22px;
-  box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4);
   padding: 1rem;
   position: static;
   top: auto;
@@ -242,11 +242,11 @@ body.feed-scroll-locked {
 }
 
 .right-unified-panel {
-  background: linear-gradient(180deg, rgba(20,20,20,0.98), rgba(12,12,12,0.96));
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, #18191c, #111214) !important;
+  border: 1px solid rgba(255,255,255,0.08); /* Ou 0.06 pra bater */
   border-radius: 20px;
   padding: 0.95rem;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4);
 }
 
 .feed-right-rail::-webkit-scrollbar {
@@ -760,13 +760,30 @@ body.feed-scroll-locked {
 }
 
 /* ===== 5. ACESSO RÁPIDO ===== */
-.center-intro-panel {
-  background: linear-gradient(180deg, rgba(25,25,25,0.96), rgba(17,17,17,0.94));
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 22px;
+.unified-partidas-container {
+  background: linear-gradient(180deg, #18191c, #111214) !important;
+  border: 1px solid rgba(255,107,107,0.06);
+  border-radius: 20px;
   padding: 1rem;
-  box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.center-intro-panel {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   animation: heroFadeIn 0.45s ease;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 991.98px) {
+  .center-intro-panel {
+    margin-bottom: 0 !important; 
+  }
 }
 
 .dashboard-hero {
@@ -915,6 +932,38 @@ body.feed-scroll-locked {
   padding: 0;
   overflow: visible;
   box-shadow: none;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 991.98px) {
+  .filtro-panel {
+    position: sticky;
+    top: 60px; /* Adapta à navbar base base.html */
+    z-index: 1020;
+    background: #151619; /* Fundo sólido para cobrir scroll */
+    padding: 0.85rem 0 0.85rem 1rem !important; /* Libera a lateral direita para criar ilusão de que continua */
+    margin: 0 -1rem 1.5rem -1rem !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Cria um gradiente suave na lateral direita sugerindo mais conteúdo */
+  .filtro-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 45px;
+    background: linear-gradient(to right, rgba(21, 22, 25, 0) 0%, rgba(21, 22, 25, 1) 100%);
+    pointer-events: none; /* Permite cliques atravessarem */
+    z-index: 5;
+  }
+
+  .filtro-bar {
+    padding-right: 60px !important; /* Espaço de respiro para o último chip não sumir no gradiente */
+    padding-bottom: 5px !important; /* Espaço para mostrar a barrinha de scroll sem colar no botão */
+  }
 }
 
 .create-fab {
@@ -1256,141 +1305,113 @@ body.feed-scroll-locked {
 }
 
 /* ========================================= */
-/* 🎯 BOTÕES DE FILTRO — ESTILO UNIFORME E MODERNO */
+/* 🎯 BOTÕES DE FILTRO — ESTILO CHIPS MODERNOS E CARROSSEL MOBILE */
 /* ========================================= */
 
 .filtro-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 0;
+  gap: 0.75rem;
   background: transparent;
-  padding: 0;
+  padding: 0.2rem 0;
+  
+  /* Comportamento Desktop: Quebra de linha, sem scroll */
+  flex-wrap: wrap;
+  white-space: normal;
+  overflow-x: visible;
+  scrollbar-width: none;
+}
+
+.filtro-bar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .filtro-bar {
+    /* Comportamento Mobile: Linha única com scroll horizontal suave */
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Exibimos uma scrollbar muuuito sutil no mobile para dar hint visual */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 107, 107, 0.2) transparent;
+  }
+  
+  .filtro-bar::-webkit-scrollbar {
+    display: block;
+    height: 4px;
+  }
+
+  .filtro-bar::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 107, 0.4);
+    border-radius: 10px;
+  }
 }
 
 .filtro-bar > * {
-  position: relative;
-  min-width: 0;
+  position: static;
   flex: 0 0 auto;
 }
 
+/* Removido o traço divisor entre os filtros antigos */
 .filtro-bar > * + *::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 28px;
-  background: rgba(255,255,255,0.08);
+  display: none;
 }
 
 .filtro-bar .dropdown {
   width: auto;
 }
 
-/* --- Botão "Ocultar minhas partidas" --- */
-.btn-filtro-ocultar {
-  background: transparent;
-  border: 0;
-  color: #ff6b6b;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  padding: 0.55rem 0.95rem;
-  border-radius: 0;
-  transition: all 0.25s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: none;
-  width: auto;
-  min-height: 0;
-}
-
+/* Base style for all filter chips */
+.btn-filtro-ocultar,
+.btn-filtro-bairro,
 .btn-filtro-chip {
-  background: transparent;
-  border: 0;
-  color: #f1f1f1;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  padding: 0.55rem 0.95rem;
-  border-radius: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d7dde4 !important;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  transition: all 0.25s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  box-shadow: none;
+  width: auto;
+  min-height: 0;
   text-decoration: none;
-  transition: all 0.25s ease;
-  width: auto;
-  min-height: 0;
 }
 
+/* --- Hover and Active States --- */
+.btn-filtro-ocultar:hover,
+.btn-filtro-bairro:hover,
 .btn-filtro-chip:hover {
-  background: rgba(255, 70, 70, 0.08);
-  border-color: rgba(255, 80, 80, 0.28);
-  color: #fff;
-  transform: none;
+  background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,75,75,0.1));
+  border-color: rgba(255,107,107,0.35);
+  color: #fff !important;
+  transform: translateY(-1px);
 }
 
-.btn-filtro-chip.is-active {
-  background: linear-gradient(135deg, rgba(255,77,77,0.24), rgba(255,112,112,0.18));
-  border-color: rgba(255, 80, 80, 0.55);
-  color: #ffb3b3;
-  box-shadow: inset 0 0 0 1px rgba(255, 80, 80, 0.1);
+.btn-filtro-chip.is-active,
+.btn-filtro-ocultar.is-active {
+  background: linear-gradient(135deg, rgba(255,75,75,0.22), rgba(255,107,107,0.16));
+  border-color: rgba(255,107,107,0.5);
+  color: #fff !important;
 }
 
-.btn-filtro-ocultar:hover {
-  background: rgba(255, 70, 70, 0.08);
-  border-color: rgba(255, 80, 80, 0.28);
-  color: #fff;
-  box-shadow: none;
-  transform: none;
+/* Extra override for specific red color inside chip */
+.btn-filtro-ocultar i {
+  color: #ff6b6b;
 }
 
-.btn-filtro-ocultar:active {
-  transform: scale(0.97);
-  box-shadow: 0 0 5px rgba(255, 80, 80, 0.3);
-}
-
-/* --- Botão de filtro de bairro --- */
-.btn-filtro-bairro {
-  background: transparent;
-  border: 0;
-  color: #f1f1f1 !important;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 0.55rem 0.95rem;
-  border-radius: 0;
-  transition: all 0.25s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: auto;
-  min-height: 0;
-}
-
-.btn-filtro-bairro:hover {
-  background: rgba(255, 70, 70, 0.08);
-  border-color: rgba(255, 70, 70, 0.28);
-  color: #ffb3b3 !important;
-  box-shadow: none;
-  transform: none;
-}
-
-/* Remove o azul horrível do foco */
-.btn-filtro-ocultar:focus,
-.btn-filtro-bairro:focus,
-.btn-filtro-ocultar:active,
-.btn-filtro-bairro:active,
-.dropdown-toggle:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  background: none;
-  border-color: rgba(255, 70, 70, 0.4);
+/* Reset dropdown toggle arrow since it's a chip now */
+.btn-filtro-bairro.dropdown-toggle::after {
+  margin-left: 6px;
+  opacity: 0.6;
 }
 
 /* --- Dropdown Menu --- */
@@ -1439,25 +1460,7 @@ body.feed-scroll-locked {
   box-shadow: none;
 }
 
-/* --- Mobile responsivo --- */
-@media (max-width: 768px) {
-  .filtro-bar {
-    flex-direction: column;
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
 
-  .filtro-bar > * + *::before {
-    display: none;
-  }
-
-  .btn-filtro-ocultar,
-  .btn-filtro-bairro,
-  .btn-filtro-chip {
-    width: 100%;
-    justify-content: center;
-  }
-}
 
 
 /* ===== 9. SIDEBAR DE NOTÍCIAS ===== */
@@ -1729,16 +1732,6 @@ body.feed-scroll-locked {
 
 
 /* ===== 11. RESPONSIVIDADE ===== */
-@media (max-width: 768px) {
-  .filtro-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .btn-filtro-ocultar,
-  .btn-filtro-bairro {
-    width: 100%;
-  }
-}
 
 /* =================================================== */
 /* 🎯 FEED DE ATIVIDADES — ESTILIZAÇÃO CONTEXTUAL */
@@ -1971,6 +1964,25 @@ body.feed-scroll-locked {
   }
   .mapa-embed {
     height: 200px;
+  }
+}
+
+/* Mobile: usa rolagem da página inteira no feed para evitar travas dentro dos cards */
+@media (max-width: 991.98px) {
+  body,
+  body.feed-scroll-locked {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .activity-feed-shell {
+    overflow: visible;
+  }
+
+  .activity-sections-scroll {
+    overflow: visible;
+    max-height: none;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

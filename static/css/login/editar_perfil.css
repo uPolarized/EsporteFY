@@ -296,6 +296,27 @@ input[type="file"]::file-selector-button:hover {
     margin-bottom: 2rem; /* Espaçamento da seção */
 }
 
+.profile-photo-security-alert {
+    padding: 0.32rem 0.55rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    border-radius: 0.45rem;
+    width: fit-content;
+    max-width: 520px;
+}
+
+@media (max-width: 768px) {
+    .profile-photo-security-alert {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.profile-fields-right-stack .mb-3:last-child {
+    margin-bottom: 0;
+}
+
 .photo-preview-thumbnail {
     width: 90px;  /* Tamanho da pré-visualização */
     height: 90px;

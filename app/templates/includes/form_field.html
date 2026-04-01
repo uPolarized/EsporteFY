@@ -1,0 +1,41 @@
+<!-- Generic form field renderer with Bootstrap styling -->
+<div class="form-group">
+  {% if field.field.widget.input_type == 'textarea' %}
+    <textarea
+      class="form-control form-control-lg{% if field.errors %} is-invalid{% endif %}"
+      id="{{ field.id_for_label }}"
+      name="{{ field.name }}"
+      placeholder="{{ field.field.widget.attrs.placeholder }}"
+      rows="{{ field.field.widget.attrs.rows }}"
+      {% if field.field.required %}required{% endif %}
+    >{{ field.value|default:'' }}</textarea>
+  {% elif field.field.widget.input_type == 'email' %}
+    <input
+      type="email"
+      class="form-control form-control-lg{% if field.errors %} is-invalid{% endif %}"
+      id="{{ field.id_for_label }}"
+      name="{{ field.name }}"
+      placeholder="{{ field.field.widget.attrs.placeholder }}"
+      value="{{ field.value|default:'' }}"
+      {% if field.field.required %}required{% endif %}
+    />
+  {% else %}
+    <input
+      type="text"
+      class="form-control form-control-lg{% if field.errors %} is-invalid{% endif %}"
+      id="{{ field.id_for_label }}"
+      name="{{ field.name }}"
+      placeholder="{{ field.field.widget.attrs.placeholder }}"
+      value="{{ field.value|default:'' }}"
+      {% if field.field.required %}required{% endif %}
+    />
+  {% endif %}
+  
+  {% if field.errors %}
+    <div class="invalid-feedback d-block mt-2">
+      {% for error in field.errors %}
+        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

@@ -4,6 +4,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone  # Importante para o default do campo novo
 
+from .security import decrypt_text, encrypt_text
+
 class Atividade(models.Model):
     ator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='atividades')
     verbo = models.CharField(max_length=255)
@@ -125,3 +127,93 @@ class LikeAtividade(models.Model):
 
     def __str__(self):
         return f'{self.usuario.username} curtiu atividade #{self.atividade.id}'
+
+
+class Post(models.Model):
+    VIS_PUBLICO = 'publico'
+    VIS_AMIGOS = 'amigos'
+    VISIBILIDADE_CHOICES = (
+        (VIS_PUBLICO, 'Público'),
+        (VIS_AMIGOS, 'Apenas amigos'),
+    )
+
+    autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    conteudo = models.TextField(max_length=500)
+    imagem = models.ImageField(upload_to='posts/', blank=True, null=True)
+    gif_url = models.URLField(max_length=1000, blank=True, null=True)
+    fixado = models.BooleanField(default=False)
+    visibilidade = models.CharField(max_length=10, choices=VISIBILIDADE_CHOICES, default=VIS_PUBLICO)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-fixado', '-criado_em']
+        verbose_name = 'Post'
+        verbose_name_plural = 'Posts'
+
+    @property
+    def conteudo_plano(self):
+        return decrypt_text(self.conteudo)
+
+    def definir_conteudo(self, value):
+        self.conteudo = encrypt_text(value)
+
+    def __str__(self):
+        return f'Post #{self.id} por {self.autor.username}'
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comentarios')
+    autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comentarios')
+    conteudo = models.TextField(max_length=300, blank=True, null=True)
+    imagem = models.ImageField(upload_to='comentarios/', blank=True, null=True)
+    gif_url = models.URLField(max_length=1000, blank=True, null=True)
+    fixado = models.BooleanField(default=False)  # Para fixar comentários importantes
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['criado_em']  # Será alterado para ['-fixado', 'criado_em'] após migration
+        verbose_name = 'Comentário'
+        verbose_name_plural = 'Comentários'
+
+    @property
+    def conteudo_plano(self):
+        return decrypt_text(self.conteudo)
+
+    def definir_conteudo(self, value):
+        value = (value or '').strip()
+        self.conteudo = encrypt_text(value) if value else None
+
+    def __str__(self):
+        return f'Comentário #{self.id} em Post #{self.post_id}'
+
+
+class LikePost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_posts')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-criado_em']
+        unique_together = ('post', 'usuario')
+        verbose_name = 'Like de Post'
+        verbose_name_plural = 'Likes de Posts'
+
+    def __str__(self):
+        return f'{self.usuario.username} curtiu post #{self.post_id}'
+
+
+class LikeComment(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_comments')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-criado_em']
+        unique_together = ('comment', 'usuario')
+        verbose_name = 'Like de Comentário'
+        verbose_name_plural = 'Likes de Comentários'
+
+    def __str__(self):
+        return f'{self.usuario.username} curtiu comentário #{self.comment_id}'

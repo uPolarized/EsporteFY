@@ -5,11 +5,14 @@ from django.core.cache import cache
 from datetime import datetime
 
 
+EXTERNAL_API_TIMEOUT_SECONDS = 2.5
+
+
 def buscar_noticias_esportivas():
     """
     Busca notícias focadas em futebol (Brasileirão, Copa do Brasil, Champions League).
     """
-    cache_key = 'noticias_futebol_feed' # Novo nome de cache para a nova busca
+    cache_key = 'noticias_futebol_feed'
     noticias_cacheadas = cache.get(cache_key)
     
     if noticias_cacheadas is not None:
@@ -40,7 +43,7 @@ def buscar_noticias_esportivas():
     # ------------------------------------
 
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=EXTERNAL_API_TIMEOUT_SECONDS)
         response.raise_for_status()
         data = response.json()
         
@@ -51,7 +54,7 @@ def buscar_noticias_esportivas():
         ]
         
         noticias_finais = artigos_filtrados[:10]
-        cache.set(cache_key, noticias_finais, timeout=3600) # Cache de 1 hora
+        cache.set(cache_key, noticias_finais, timeout=3600)
         return noticias_finais
 
     except requests.exceptions.RequestException as e:
@@ -64,11 +67,18 @@ def buscar_clima_marica():
     Busca o clima atual em Maricá (RJ) usando a API OpenWeatherMap.
     Retorna um dicionário com temperatura, descrição, ícone e mensagem personalizada.
     """
+    cache_key = 'clima_marica'
+    clima_cacheado = cache.get(cache_key)
+    if clima_cacheado is not None:
+        return clima_cacheado
+
     try:
         api_key = settings.OPENWEATHER_API_KEY
+        if not api_key:
+            return None
         cidade = "Maricá"
         url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},BR&appid={api_key}&lang=pt_br&units=metric"
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=EXTERNAL_API_TIMEOUT_SECONDS)
         response.raise_for_status()
         dados = response.json()
 
@@ -93,12 +103,14 @@ def buscar_clima_marica():
         else:
             mensagem = "🌤️ Tempo agradável! Perfeito para jogar com os amigos."
 
-        return {
+        payload = {
             "temperatura": temperatura,
             "descricao": descricao,
             "icone": icone,
             "mensagem": mensagem,  # 👈 ESSENCIAL
         }
+        cache.set(cache_key, payload, timeout=600)
+        return payload
 
     except Exception as e:
         print(f"[ERRO] Falha ao buscar clima de Maricá: {e}")
@@ -107,10 +119,17 @@ def buscar_clima_marica():
     
 def buscar_previsao_chuva():
     """Verifica se há previsão de chuva hoje em Maricá (com base na API OpenWeather)."""
+    cache_key = 'previsao_chuva_marica'
+    previsao_cacheada = cache.get(cache_key)
+    if previsao_cacheada is not None:
+        return previsao_cacheada
+
     try:
         api_key = settings.OPENWEATHER_API_KEY
+        if not api_key:
+            return {"vai_chover": False, "chuva_mm": 0}
         url = f"https://api.openweathermap.org/data/2.5/forecast?q=Maricá,BR&appid={api_key}&lang=pt_br&units=metric"
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=EXTERNAL_API_TIMEOUT_SECONDS)
         response.raise_for_status()
         dados = response.json()
 
@@ -125,10 +144,12 @@ def buscar_previsao_chuva():
                     vai_chover = True
                     chuva_mm += entrada["rain"]["3h"]
 
-        return {
+        payload = {
             "vai_chover": vai_chover,
             "chuva_mm": round(chuva_mm, 1)
         }
+        cache.set(cache_key, payload, timeout=600)
+        return payload
 
     except Exception as e:
         print(f"[ERRO] Previsão de chuva: {e}")

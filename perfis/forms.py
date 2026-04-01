@@ -21,6 +21,7 @@ class PerfilForm(forms.ModelForm):
             'mini_bio',
             'esportes_preferidos',
             'nivel_habilidade',
+            'bairro_base',
             'idade',
             'cidade',
         ]
@@ -28,6 +29,7 @@ class PerfilForm(forms.ModelForm):
             'mini_bio': 'Sobre Mim',
             'esportes_preferidos': 'Esportes Preferidos',
             'nivel_habilidade': 'Nível de Habilidade',
+            'bairro_base': 'Bairro Principal',
             'idade': 'Idade',
             'cidade': 'Cidade',
             'banner': 'Banner do Perfil',
@@ -39,6 +41,34 @@ class PerfilForm(forms.ModelForm):
         }
 
     # ── Validação da FOTO DE PERFIL ──────────────────────────
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            if hasattr(field, 'choices'):
+                from django.utils.translation import gettext_lazy as _
+                new_choices = []
+                for val, label in field.choices:
+                    if val == '' or label == '---------':
+                        new_choices.append((val, "Nenhum"))
+                    else:
+                        new_choices.append((val, label))
+                field.choices = new_choices
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            if hasattr(field, 'choices'):
+                from django.utils.translation import gettext_lazy as _
+                new_choices = []
+                for val, label in field.choices:
+                    if val == '' or label == '---------':
+                        new_choices.append((val, "Nenhum"))
+                    else:
+                        new_choices.append((val, label))
+                field.choices = new_choices
+
     def clean_foto(self):
         from PIL import Image
 

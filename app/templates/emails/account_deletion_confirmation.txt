@@ -1,0 +1,16 @@
+Exclusao de conta no EsporteFY
+
+Ola, {{ username }}.
+
+Recebemos uma solicitacao para excluir sua conta no EsporteFY.
+Para confirmar a exclusao, acesse o link abaixo:
+
+{{ confirm_url }}
+
+Prazo: este link expira em {{ expires_at }} (48 horas).
+
+Se voce nao solicitou a exclusao, ignore este e-mail.
+Voce tambem pode abrir a central LGPD:
+{{ cancel_url }}
+
+Suporte: {{ support_email }}

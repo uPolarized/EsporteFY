@@ -2,7 +2,7 @@ import json
 import redis
 import logging
 from django.conf import settings
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
@@ -66,6 +66,8 @@ def broadcast_atividade(sender, instance, created, **kwargs):
     if created and r:
         try:
             data = build_activity_payload(instance)
+            if data is None:
+                return
             data["type"] = "feed_update"
 
             # Publica no canal que o FastAPI está escutando
@@ -77,3 +79,17 @@ def broadcast_atividade(sender, instance, created, **kwargs):
 
         except Exception as e:
             logger.error(f"Erro no signal de atividade: {e}")
+
+
+@receiver(post_delete, sender=Atividade)
+def broadcast_remocao_atividade(sender, instance, **kwargs):
+    if not r:
+        return
+    try:
+        data = {
+            "type": "feed_remove",
+            "id": instance.id,
+        }
+        r.publish("feed_all", json.dumps(data, cls=DjangoJSONEncoder))
+    except Exception as e:
+        logger.error(f"Erro no signal de remoção de atividade: {e}")

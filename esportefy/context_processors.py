@@ -23,4 +23,5 @@ def recaptcha_keys(request):
     return {
         'RECAPTCHA_PUBLIC_KEY': getattr(settings, 'RECAPTCHA_PUBLIC_KEY', None),
         'WS_AUTH_TOKEN': _build_ws_token(request),
+        'giphy_api_key': getattr(settings, 'GIPHY_API_KEY', 'dc6zaTOxFJmzC'),
     }

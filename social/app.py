@@ -92,20 +92,31 @@ async def mark_user_offline(user_identifier):
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[str, list[WebSocket]] = {}
+        self.accepted_websockets: set[int] = set()
 
     async def connect(self, websocket: WebSocket, room: str):
-        await websocket.accept()
+        ws_id = id(websocket)
+        if ws_id not in self.accepted_websockets:
+            await websocket.accept()
+            self.accepted_websockets.add(ws_id)
         if room not in self.active_connections:
             self.active_connections[room] = []
-        self.active_connections[room].append(websocket)
+        if websocket not in self.active_connections[room]:
+            self.active_connections[room].append(websocket)
         print(f"🟢 [Manager] Socket ADICIONADO na sala: '{room}'")
 
     def disconnect(self, websocket: WebSocket, room: str):
+        ws_id = id(websocket)
         if room in self.active_connections:
             if websocket in self.active_connections[room]:
                 self.active_connections[room].remove(websocket)
             if not self.active_connections[room]:
                 del self.active_connections[room]
+
+        # Remove da lista de aceitos apenas quando não estiver mais em nenhuma sala.
+        still_connected = any(websocket in conns for conns in self.active_connections.values())
+        if not still_connected and ws_id in self.accepted_websockets:
+            self.accepted_websockets.remove(ws_id)
 
     async def broadcast_to_room(self, room: str, message: dict):
         if room in self.active_connections:
@@ -121,9 +132,14 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# Manter referência forte das tasks de background para evitar garbage collection!
+background_tasks = set()
+
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(redis_listener())
+    task = asyncio.create_task(redis_listener())
+    background_tasks.add(task)
+    task.add_done_callback(background_tasks.discard)
 
 async def redis_listener():
     print(f"👂 [Redis] Conectando em {REDIS_URL}...")
@@ -191,18 +207,22 @@ async def notification_socket(websocket: WebSocket):
     user_id = websocket.query_params.get("user")
     username = websocket.query_params.get("username")
     token = websocket.query_params.get("token")
+    session_key = websocket.query_params.get("session")
 
     if not user_id or not username or not token or not is_valid_ws_token(user_id, username, token):
         await websocket.close(code=1008)
         return
 
     room = f"notifications_user_{user_id}"
+    room_session = f"notifications_session_{session_key}" if session_key else None
     print(f"🔔 [FastAPI] Notificações para sala: '{room}'")
 
     # Marcar usuário como online (usando user_id)
     await mark_user_online(user_id)
 
     await manager.connect(websocket, room)
+    if room_session:
+        await manager.connect(websocket, room_session)
     try:
         while True:
             await websocket.receive_text()
@@ -210,6 +230,8 @@ async def notification_socket(websocket: WebSocket):
         # Marcar como offline
         await mark_user_offline(user_id)
         manager.disconnect(websocket, room)
+        if room_session:
+            manager.disconnect(websocket, room_session)
 
 @app.websocket("/ws/feed/")
 async def feed_socket(websocket: WebSocket):

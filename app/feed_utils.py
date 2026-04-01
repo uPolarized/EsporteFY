@@ -19,7 +19,6 @@ SECTION_LABELS = {
 PRIORITY_BY_KIND = {
     'cancelled': 95,
     'created': 90,
-    'friendship': 85,
     'joined': 78,
     'review': 74,
     'left': 68,
@@ -105,31 +104,7 @@ def build_activity_payload(activity, viewer=None, available_partida_ids=None):
     }
 
     if 'agora sao amigos' in verb or 'agora são amigos' in verb:
-        other_user = target if isinstance(target, User) else None
-        cta_user = other_user if viewer and actor == viewer and other_user else actor
-        like_count = activity.likes.count() if hasattr(activity, 'likes') else 0
-        user_liked = activity.likes.filter(usuario=viewer).exists() if viewer else False
-        
-        payload.update({
-            'kind': 'friendship',
-            'category': 'amizades',
-            'badge_label': 'Amizade',
-            'icon': 'bi-people-fill',
-            'headline': 'Nova amizade na comunidade',
-            'description': f'{actor_name} e {target_name} agora fazem parte da mesma rede.',
-            'meta': ['Conexao recente entre jogadores'],
-            'stats': [
-                {'label': 'Conexao', 'value': '2 jogadores'},
-                {'label': 'Curtidas', 'value': str(like_count)},
-            ],
-            'cta_type': 'like',
-            'cta_label': 'Curtido' if user_liked else 'Curtir',
-            'user_liked': user_liked,
-            'like_count': like_count,
-            'activity_id': activity.id,
-            'priority': PRIORITY_BY_KIND['friendship'],
-        })
-        return payload
+        return None
 
     if isinstance(target, Partida):
         has_modal = available_partida_ids is None or target.id in available_partida_ids
@@ -215,15 +190,17 @@ def build_activity_payload(activity, viewer=None, available_partida_ids=None):
 
 def build_activity_sections(activities, viewer=None, available_partida_ids=None):
     grouped = {key: [] for key in SECTION_LABELS}
-    counts = Counter({'all': 0, 'partidas': 0, 'amizades': 0, 'avaliacoes': 0})
+    counts = Counter({'all': 0, 'partidas': 0, 'avaliacoes': 0})
     flat_items = []
 
     for activity in activities:
         payload = build_activity_payload(activity, viewer=viewer, available_partida_ids=available_partida_ids)
+        if payload is None:
+            continue
         grouped[payload['section_key']].append(payload)
         flat_items.append(payload)
         counts['all'] += 1
-        if payload['category'] in ('partidas', 'amizades', 'avaliacoes'):
+        if payload['category'] in ('partidas', 'avaliacoes'):
             counts[payload['category']] += 1
 
     sections = []

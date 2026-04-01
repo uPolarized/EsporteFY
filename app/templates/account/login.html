@@ -1,42 +1,138 @@
-{% extends "account/base.html" %}
+﻿{% extends "account/base.html" %}
 {% load crispy_forms_tags socialaccount static %}
 
 {% block title %}Login - EsporteFY{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/login/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/login/login.css' %}?v=1.2">
+<style>
+    .auth-split-row {
+        height: calc(100vh - 56px); /* Altura removendo nav */
+        overflow: hidden;
+        background-color: #1f1f1f;
+    }
+    .auth-form-col {
+        background: linear-gradient(145deg, #1f1f1f, #2c2c2c);
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    .auth-form-col::-webkit-scrollbar {
+        width: 6px;
+    }
+    .auth-form-col::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+    .auth-img-col {
+        position: relative;
+        background-color: #111;
+        overflow: hidden;
+    }
+    .auth-gradient-overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 120px;
+        background: linear-gradient(to right, #2c2c2c 0%, transparent 100%);
+        z-index: 2;
+        pointer-events: none;
+    }
+    .auth-carousel, .auth-carousel .carousel-inner, .auth-carousel .carousel-item {
+        height: 100%;
+        min-height: calc(100vh - 56px);
+    }
+    .auth-carousel img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        /* Efeito Golden Hour (Fim de tarde / Quente Suave) */
+        filter: brightness(0.65) contrast(1.1) sepia(0.35) saturate(1.5) hue-rotate(-5deg);
+        transition: transform 10s ease; /* Efeito Ken Burns Sutil */
+    }
+    .carousel-item.active img {
+        transform: scale(1.05); /* Efeito zoom-in lento */
+    }
+
+    /* Esconde o "Esqueceu sua senha" azul padrão do Crispy/Allauth na senha */
+    #div_id_password .help-block, #div_id_password .form-text {
+        display: none !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="login-page-dark">
-    <div class="login-wrapper">
-        <div class="login-card">
-            <div class="card-body">
-                <h3 class="card-title text-center mb-4">Bem-vindo de volta!</h3>
-                
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary mb-3">Entrar</button>
+<div class="container-fluid p-0">
+    <div class="row g-0 auth-split-row">
+        <!-- Lado Esquerdo: Formulário (Mobile e Desktop) -->
+        <div class="col-12 col-lg-5 d-flex align-items-center justify-content-center auth-form-col">
+            <div class="login-card w-100" style="max-width: 420px; margin: auto;">
+                <div class="card-body p-0">
+                    <h3 class="card-title text-center mb-4">Bem-vindo de volta!</h3>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="text-end mb-3" style="margin-top: -8px;">
+                            <a href="{% url 'account_reset_password' %}" class="fw-medium" style="font-size: 0.85rem; color: #ff6b6b; text-decoration: none; transition: 0.3s opacity;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Esqueceu sua senha?</a>
+                        </div>
+                        <button type="submit" class="btn w-100 py-3 mb-2 rounded-3 text-white fw-bold shadow-sm" style="font-size: 1.05rem; background-color: #ff6b6b; border: none; transition: all 0.3s ease;">
+                            Entrar
+                        </button>
+                    </form>
+
+                    <div class="d-flex align-items-center my-3">
+                        <hr class="flex-grow-1" style="border-color: rgba(255,255,255,0.1);">
+                        <span class="px-3 text-secondary" style="font-size: 0.85rem;">OU CONECTE-SE COM</span>
+                        <hr class="flex-grow-1" style="border-color: rgba(255,255,255,0.1);">
                     </div>
-                </form>
 
-                <div class="text-center">
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-google w-100">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                             alt="Google logo">
-                        Entrar com Google
-                    </a>
+                    <div class="row g-2 mt-2 mb-2 d-flex align-items-stretch">
+                        <div class="col-6">
+                            <form action="{% provider_login_url 'google' %}" method="post" class="m-0 p-0 h-100">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-google w-100 h-100 py-2 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.9rem;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 18px; height: 18px; object-fit: contain;">
+                                    <span>Google</span>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form action="{% provider_login_url 'github' %}" method="post" class="m-0 p-0 h-100">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-github w-100 h-100 py-2 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.9rem;">
+                                    <i class="bi bi-github" style="font-size: 1.1rem; line-height: 1;"></i>
+                                    <span>GitHub</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <p class="text-center mt-4 text-light" style="font-size: 0.95rem;">
+                        <span class="text-secondary">Não tem conta?</span> <a href="{% url 'account_signup' %}" style="color: #ff6b6b; font-weight: 600; text-decoration: none;">Cadastre-se</a>
+                    </p>
                 </div>
+            </div>
+        </div>
 
-                <hr class="my-4">
-
-                <p class="text-center mt-2 text-muted">
-                    Não tem conta? <a href="{% url 'account_signup' %}" class="link-light">Cadastre-se</a>
-                </p>
+        <!-- Lado Direito: Fotos de Fundo (Apenas Desktop) -->
+        <div class="col-lg-7 d-none d-lg-block auth-img-col">
+            <div class="auth-gradient-overlay"></div>
+            <div id="carouselAuth" class="carousel slide carousel-fade auth-carousel" data-bs-ride="carousel" data-bs-pause="false">
+                <div class="carousel-inner h-100">
+                    <div class="carousel-item active h-100" data-bs-interval="5000">
+                        <img src="/media/fotos_quadras/arena_flamengo.jpg" class="d-block w-100 h-100" alt="Arena Flamengo">
+                    </div>
+                    <div class="carousel-item h-100" data-bs-interval="5000">
+                        <img src="/media/fotos_quadras/campo_do_bananal.jpg" class="d-block w-100 h-100" alt="Campo do Bananal">
+                    </div>
+                    <div class="carousel-item h-100" data-bs-interval="5000">
+                        <img src="/media/fotos_quadras/quadra_da_70.jpg" class="d-block w-100 h-100" alt="Quadra da 70">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

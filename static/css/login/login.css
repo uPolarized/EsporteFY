@@ -107,7 +107,7 @@ body::before {
 }
 
 /* ===== Botão Google ===== */
-.btn-google {
+.btn-google, .btn-github {
     background: rgba(30, 30, 30, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: #ddd;
@@ -124,7 +124,10 @@ body::before {
     width: 22px;
     height: 22px;
 }
-.btn-google:hover {
+.btn-github i {
+    font-size: 1.2rem;
+}
+.btn-google:hover, .btn-github:hover {
     background: rgba(40, 40, 40, 1);
     border-color: #ff6b6b;
     color: #fff;

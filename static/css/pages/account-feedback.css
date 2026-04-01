@@ -1,0 +1,326 @@
+.feedback-page-wrapper {
+    background: linear-gradient(180deg, #0a0e15 0%, #0f1419 100%);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Hero Section */
+  .feedback-hero {
+    background: linear-gradient(135deg, rgba(229, 57, 53, 0.1), rgba(139, 0, 0, 0.05));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4rem 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .hero-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    color: #a8b4c1;
+    line-height: 1.6;
+  }
+
+  /* Info Cards */
+  .info-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .info-card:hover {
+    border-color: rgba(229, 57, 53, 0.3);
+    background: linear-gradient(135deg, rgba(229, 57, 53, 0.05), rgba(229, 57, 53, 0.02));
+  }
+
+  .info-card .card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+
+  .user-status-card .card-icon {
+    color: #4ade80;
+  }
+
+  .anon-status-card .card-icon {
+    color: #fbbf24;
+  }
+
+  .tip-card .card-icon {
+    display: block;
+  }
+
+  .bug-icon { font-size: 2.5rem; }
+  .idea-icon { font-size: 2.5rem; }
+
+  .info-card h4 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-card h5 {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .info-card p, .info-card small {
+    color: #a8b4c1;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .info-card small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .username-display {
+    color: #e53935;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .success-banner {
+    background: rgba(15, 122, 70, 0.2);
+    border: 1px solid #17a664;
+    border-radius: 8px;
+    padding: 1rem;
+    color: #50fa7b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .success-banner i {
+    font-size: 1.2rem;
+  }
+
+  /* Form Card */
+  .feedback-form-card {
+    background: linear-gradient(135deg, rgba(22, 29, 40, 0.8), rgba(18, 24, 32, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2.5rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .form-section:last-of-type {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-label i {
+    color: #e53935;
+    font-size: 1.2rem;
+  }
+
+  /* Form Fields */
+  .feedback-form .form-control,
+  .feedback-form textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    min-height: 42px;
+  }
+
+  .feedback-form textarea {
+    min-height: 140px;
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  .feedback-form .form-control::placeholder,
+  .feedback-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .feedback-form .form-control:focus,
+  .feedback-form textarea:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: #e53935;
+    color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.15);
+    outline: none;
+  }
+
+  .form-hint {
+    display: block;
+    color: #7a8996;
+    font-size: 0.9rem;
+    margin-top: 0.6rem;
+  }
+
+  .form-error {
+    background: rgba(183, 28, 28, 0.15);
+    border: 1px solid rgba(255, 87, 87, 0.3);
+    color: #ff8a8a;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Checkboxes */
+  .feedback-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .form-check-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .form-check-wrapper:hover {
+    border-color: #e53935;
+    background: rgba(229, 57, 53, 0.08);
+  }
+
+  .form-check-wrapper input {
+    cursor: pointer;
+    accent-color: #e53935;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+  }
+
+  .form-check-wrapper .form-check-label {
+    margin: 0 0 0 0.75rem;
+    cursor: pointer;
+    color: #a8b4c1;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .form-check-wrapper input:checked ~ .form-check-label {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .btn-submit, .btn-cancel {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #e53935, #ff6b6b);
+    color: white;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(229, 57, 53, 0.3);
+    background: linear-gradient(135deg, #ff5252, #ff8080);
+  }
+
+  .btn-cancel {
+    background: rgba(255, 255, 255, 0.08);
+    color: #a8b4c1;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .feedback-form-card {
+      padding: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .feedback-hero {
+      padding: 3rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 1.75rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+
+    .feedback-form-card {
+      padding: 1.5rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .feedback-categories-grid {
+      grid-template-columns: 1fr;
+    }
+  }

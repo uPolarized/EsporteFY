@@ -1,0 +1,73 @@
+<!-- Partial: Activity Card for Infinite Scroll -->
+<article class="activity-card activity-card--{{ atividade.verbo|default:'generic' }}" data-activity-id="{{ atividade.id }}">
+  <!-- Header: Avatar + Status + Time -->
+  <div class="activity-card__top">
+    {% if atividade.ator.perfil.foto %}
+      <img src="{{ atividade.ator.perfil.foto.url|media_bust }}" alt="{{ atividade.ator.username }}" class="activity-card__avatar" data-profile-modal="{{ atividade.ator.id }}" style="cursor: pointer;">
+    {% else %}
+      <div class="activity-card__avatar activity-card__avatar--placeholder" data-profile-modal="{{ atividade.ator.id }}" style="cursor: pointer;">{{ atividade.ator.username|first|upper }}</div>
+    {% endif %}
+    <div class="activity-card__content">
+      <!-- Badge + Time Row -->
+      <div class="activity-card__header-row">
+        <span class="activity-card__badge">
+          {% if atividade.verbo == 'criou' %}
+            <i class="bi bi-plus-circle"></i> Criada
+          {% elif atividade.verbo == 'cancelou' %}
+            <i class="bi bi-x-circle"></i> Cancelada
+          {% else %}
+            <i class="bi bi-info-circle"></i> {{ atividade.get_verbo_display|default:'Atividade' }}
+          {% endif %}
+        </span>
+        <span class="activity-card__time">{{ atividade.timestamp|timesince }} atrás</span>
+      </div>
+
+      <!-- User + Action Headline -->
+      <h3 class="activity-card__headline">
+        <strong>{{ atividade.ator.username }}</strong>
+        {{ atividade.get_descricao_formatada }}
+      </h3>
+
+
+    {% if atividade.alvo %}
+      <div class="activity-card__details">
+        <!-- Match Title -->
+        <div class="activity-detail activity-detail--title">
+          <i class="bi bi-dribbble"></i>
+          <span>
+            <small class="activity-detail__label">Partida</small>
+            <strong>{{ atividade.alvo.titulo }}</strong>
+          </span>
+        </div>
+
+        <!-- Location -->
+        <div class="activity-detail activity-detail--location">
+          <i class="bi bi-geo-alt-fill"></i>
+          <span>
+            <small class="activity-detail__label">Local</small>
+            {{ atividade.alvo.quadra.nome }}<br><small>{{ atividade.alvo.quadra.get_bairro_display|default:"Local" }}</small>
+          </span>
+        </div>
+
+        <!-- Date & Time -->
+        <div class="activity-detail activity-detail--datetime">
+          <i class="bi bi-calendar-event"></i>
+          <span>
+            <small class="activity-detail__label">Data</small>
+            {{ atividade.alvo.data_hora|date:"d/m \\à\\s H:i" }}
+          </span>
+        </div>
+
+        <!-- Players Count -->
+        <div class="activity-detail activity-detail--players">
+          <i class="bi bi-people-fill"></i>
+          <span>
+            <small class="activity-detail__label">Jogadores</small>
+            {{ atividade.alvo.vagas_preenchidas }}/{{ atividade.alvo.jogadores_necessarios }} jogadores
+          </span>
+        </div>
+      </div>
+    {% endif %}
+    </div>
+  </div>
+</article>

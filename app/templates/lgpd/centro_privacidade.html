@@ -1,0 +1,364 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Privacidade e Dados Pessoais - EsporteFY{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/lgpd/privacidade.css' %}">
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid privacidade-container">
+	<div class="privacidade-header mb-3">
+		<p class="privacidade-kicker mb-2">LGPD</p>
+		<h1>Privacidade e Dados Pessoais</h1>
+		<p>Painel central de transparencia para documentos legais, consentimentos e portabilidade de dados.</p>
+	</div>
+
+	<div class="privacidade-layout">
+		<main class="privacidade-main">
+			<ul class="nav nav-tabs privacidade-tabs" role="tablist">
+				<li class="nav-item" role="presentation">
+					<button
+						class="nav-link {% if tab_ativa == 'politica' %}active{% endif %}"
+						id="aba-politica"
+						data-bs-toggle="tab"
+						data-bs-target="#conteudo-politica"
+						type="button"
+						role="tab"
+						data-lgpd-tab="politica">
+						Politica de Privacidade
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button
+						class="nav-link {% if tab_ativa == 'termos' %}active{% endif %}"
+						id="aba-termos"
+						data-bs-toggle="tab"
+						data-bs-target="#conteudo-termos"
+						type="button"
+						role="tab"
+						data-lgpd-tab="termos">
+						Termos de Servico
+					</button>
+				</li>
+				{% if user.is_authenticated %}
+				<li class="nav-item" role="presentation">
+					<button
+						class="nav-link {% if tab_ativa == 'meus-dados' %}active{% endif %}"
+						id="aba-meus-dados"
+						data-bs-toggle="tab"
+						data-bs-target="#conteudo-meus-dados"
+						type="button"
+						role="tab"
+						data-lgpd-tab="meus-dados">
+						Meus Dados
+					</button>
+				</li>
+				{% endif %}
+			</ul>
+
+			<div class="tab-content privacidade-conteudo">
+				<section class="tab-pane fade {% if tab_ativa == 'politica' %}show active{% endif %}" id="conteudo-politica" role="tabpanel" aria-labelledby="aba-politica" tabindex="0">
+					{% if politica %}
+					<article class="doc-card doc-card--full">
+						<h2>{{ politica.titulo }}</h2>
+						<p class="doc-meta">
+							{% if politica.versao %}Versao {{ politica.versao }}{% else %}Versao nao informada{% endif %}
+							{% if politica.data_vigencia %} · Vigencia em {{ politica.data_vigencia|date:"d/m/Y" }}{% endif %}
+						</p>
+						<div class="doc-content doc-content--columns">{{ politica.conteudo|linebreaks }}</div>
+					</article>
+					{% else %}
+					<article class="doc-card doc-card--full">
+						<h2>Politica de Privacidade</h2>
+						<p class="doc-meta">Nenhum documento publicado no banco.</p>
+						<p>Publique uma versao ativa no painel administrativo para exibir o conteudo desta aba.</p>
+					</article>
+					{% endif %}
+				</section>
+
+				<section class="tab-pane fade {% if tab_ativa == 'termos' %}show active{% endif %}" id="conteudo-termos" role="tabpanel" aria-labelledby="aba-termos" tabindex="0">
+					{% if termos %}
+					<article class="doc-card doc-card--full">
+						<h2>{{ termos.titulo }}</h2>
+						<p class="doc-meta">
+							{% if termos.versao %}Versao {{ termos.versao }}{% else %}Versao nao informada{% endif %}
+							{% if termos.data_vigencia %} · Vigencia em {{ termos.data_vigencia|date:"d/m/Y" }}{% endif %}
+						</p>
+						<div class="doc-content doc-content--columns">{{ termos.conteudo|linebreaks }}</div>
+					</article>
+					{% else %}
+					<article class="doc-card doc-card--full">
+						<h2>Termos de Servico</h2>
+						<p class="doc-meta">Nenhum documento publicado no banco.</p>
+						<p>Publique uma versao ativa no painel administrativo para exibir o conteudo desta aba.</p>
+					</article>
+					{% endif %}
+				</section>
+
+				{% if user.is_authenticated %}
+				<section class="tab-pane fade {% if tab_ativa == 'meus-dados' %}show active{% endif %}" id="conteudo-meus-dados" role="tabpanel" aria-labelledby="aba-meus-dados" tabindex="0">
+					<div class="data-grid">
+						<article class="doc-card request-card request-card--half">
+							<h2>Solicitacao de Acesso aos Dados</h2>
+							<p class="doc-meta">Direito de acesso e portabilidade (art. 18, LGPD). Prazo de retorno: ate 15 dias uteis.</p>
+
+							{% if has_data_access_table %}
+							<form method="post" action="{% url 'lgpd_request_data_access' %}" class="request-form js-data-access-form">
+								{% csrf_token %}
+								<label class="request-label" for="id_motivo">Motivo da solicitacao (opcional)</label>
+								{{ data_access_form.motivo }}
+
+								<div class="request-actions mt-3">
+									<button class="lgpd-btn lgpd-btn--sm" type="submit" {% if not can_request_data_access %}disabled{% endif %}>
+										Registrar Solicitacao
+									</button>
+									<span id="request-open-note" class="request-note {% if can_request_data_access %}d-none{% endif %}">Voce ja possui uma solicitacao em andamento.</span>
+								</div>
+								<p class="request-live-feedback d-none" id="request-live-feedback"></p>
+							</form>
+							{% else %}
+							<p class="mb-0">Modulo de solicitacao ainda nao foi ativado no banco de dados. Rode as migracoes para habilitar.</p>
+							{% endif %}
+						</article>
+
+						<article class="doc-card request-card request-card--half">
+							<h2>Consentimentos</h2>
+							<p class="doc-meta">Gerencie seus aceites e registre novas confirmacoes.</p>
+
+							{% if has_consent_log_table %}
+							<ul class="consent-list mb-0">
+								{% with consent=consentimentos_atuais.terms_of_service %}
+								<li class="consent-item" data-consent-item="terms_of_service">
+									<div class="consent-item__meta">
+										<span>Termos de Servico</span>
+										<small data-consent-meta>
+											{% if consent %}
+												Versao {{ consent.document_version|default:"1.0" }} · {{ consent.timestamp|date:"d/m/Y H:i" }}
+											{% else %}
+												Sem registro
+											{% endif %}
+										</small>
+									</div>
+									<div class="consent-item__actions consent-item__actions--stack">
+										{% if consent and consent.accepted %}
+											<span class="status-pill status-pill--completed" data-consent-status>Aceito</span>
+										{% else %}
+											<span class="status-pill status-pill--denied" data-consent-status>Nao aceito</span>
+										{% endif %}
+										<div class="consent-buttons consent-buttons--single">
+											{% if consent and consent.accepted %}
+												<span class="lgpd-btn lgpd-btn--sm lgpd-btn--done" data-consent-accepted-badge>Aceito</span>
+											{% else %}
+											<form method="post" action="{% url 'lgpd_update_consent' %}" class="js-consent-form">
+												{% csrf_token %}
+												<input type="hidden" name="consent_type" value="terms_of_service">
+												<input type="hidden" name="accepted" value="1">
+												<button type="submit" class="lgpd-btn lgpd-btn--sm lgpd-btn--confirm">Aceitar consentimento</button>
+											</form>
+											{% endif %}
+										</div>
+									</div>
+								</li>
+								{% endwith %}
+
+								{% with consent=consentimentos_atuais.privacy_policy %}
+								<li class="consent-item" data-consent-item="privacy_policy">
+									<div class="consent-item__meta">
+										<span>Politica de Privacidade</span>
+										<small data-consent-meta>
+											{% if consent %}
+												Versao {{ consent.document_version|default:"1.0" }} · {{ consent.timestamp|date:"d/m/Y H:i" }}
+											{% else %}
+												Sem registro
+											{% endif %}
+										</small>
+									</div>
+									<div class="consent-item__actions consent-item__actions--stack">
+										{% if consent and consent.accepted %}
+											<span class="status-pill status-pill--completed" data-consent-status>Aceito</span>
+										{% else %}
+											<span class="status-pill status-pill--denied" data-consent-status>Nao aceito</span>
+										{% endif %}
+										<div class="consent-buttons consent-buttons--single">
+											{% if consent and consent.accepted %}
+												<span class="lgpd-btn lgpd-btn--sm lgpd-btn--done" data-consent-accepted-badge>Aceito</span>
+											{% else %}
+											<form method="post" action="{% url 'lgpd_update_consent' %}" class="js-consent-form">
+												{% csrf_token %}
+												<input type="hidden" name="consent_type" value="privacy_policy">
+												<input type="hidden" name="accepted" value="1">
+												<button type="submit" class="lgpd-btn lgpd-btn--sm lgpd-btn--confirm">Aceitar consentimento</button>
+											</form>
+											{% endif %}
+										</div>
+									</div>
+								</li>
+								{% endwith %}
+
+								{% with consent=consentimentos_atuais.cookies %}
+								<li class="consent-item consent-item--cookies" data-consent-item="cookies">
+									<div class="consent-item__meta">
+										<span>Cookies opcionais</span>
+										<small data-consent-meta>
+											{% if consent %}
+												Ultima escolha em {{ consent.timestamp|date:"d/m/Y H:i" }}
+											{% else %}
+												Sem registro
+											{% endif %}
+										</small>
+									</div>
+									<div class="consent-item__actions consent-item__actions--stack consent-item__actions--dual">
+										{% if consent and consent.accepted %}
+											<span class="status-pill status-pill--processing" data-consent-status>Aceito</span>
+										{% else %}
+											<span class="status-pill status-pill--pending" data-consent-status>Nao aceito</span>
+										{% endif %}
+											<div class="consent-buttons">
+											<form method="post" action="{% url 'lgpd_update_consent' %}" class="js-consent-form">
+												{% csrf_token %}
+												<input type="hidden" name="consent_type" value="cookies">
+												<input type="hidden" name="accepted" value="1">
+												<button type="submit" class="lgpd-btn lgpd-btn--sm lgpd-btn--accept" data-consent-accept-btn {% if consent and consent.accepted %}disabled{% endif %}>{% if consent and consent.accepted %}Aceito{% else %}Aceitar{% endif %}</button>
+											</form>
+											<form method="post" action="{% url 'lgpd_update_consent' %}" class="js-consent-form">
+												{% csrf_token %}
+												<input type="hidden" name="consent_type" value="cookies">
+												<input type="hidden" name="accepted" value="0">
+												<button type="submit" class="lgpd-btn lgpd-btn--sm lgpd-btn--decline">Recusar</button>
+											</form>
+											</div>
+									</div>
+								</li>
+								{% endwith %}
+							</ul>
+							{% else %}
+							<p class="mb-0">Historico de consentimentos indisponivel ate a aplicacao das migracoes.</p>
+							{% endif %}
+						</article>
+					</div>
+
+					{% if has_data_deletion_table %}
+					<article class="doc-card request-card request-card--danger mt-3">
+						<h3>Excluir Conta (janela de 48 horas)</h3>
+						<p class="doc-meta">Ao solicitar a exclusao, enviaremos um e-mail de confirmacao. Voce podera cancelar em ate 48 horas antes da confirmacao.</p>
+						<form method="post" action="{% url 'lgpd_request_account_deletion' %}" class="request-form js-account-deletion-form">
+							{% csrf_token %}
+							<label class="request-label" for="id_motivo_exclusao">Motivo da exclusao (opcional)</label>
+							<textarea id="id_motivo_exclusao" name="motivo" class="lgpd-textarea" rows="3" placeholder="Conte para a gente o motivo da exclusao (opcional)."></textarea>
+
+							<div class="request-actions mt-3">
+								<button class="lgpd-btn lgpd-btn--sm lgpd-btn--danger" type="submit" {% if not can_request_data_deletion %}disabled{% endif %}>
+									Solicitar Exclusao
+								</button>
+								<span id="deletion-open-note" class="request-note {% if can_request_data_deletion %}d-none{% endif %}">Voce ja possui uma solicitacao de exclusao pendente.</span>
+							</div>
+							<p class="request-live-feedback d-none" id="deletion-live-feedback"></p>
+						</form>
+					</article>
+
+					<article class="doc-card request-card request-card--history mt-3">
+						<h3>Historico das Solicitacoes de Exclusao</h3>
+						<div id="deletion-history-table-wrap" class="table-responsive request-table-wrap {% if not data_deletion_requests %}d-none{% endif %}">
+							<table class="table request-table">
+								<thead>
+									<tr>
+										<th>Data</th>
+										<th>Status</th>
+										<th>Expira em</th>
+										<th>Acao</th>
+									</tr>
+								</thead>
+								<tbody id="deletion-history-body">
+									{% for item in data_deletion_requests %}
+									<tr id="deletion-row-{{ item.id }}">
+										<td>{{ item.data_solicitacao|date:"d/m/Y H:i" }}</td>
+										<td>
+											<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
+										</td>
+										<td>{{ item.data_expiracao|date:"d/m/Y H:i" }}</td>
+										<td>
+											{% if item.status == 'pending' %}
+											<form method="post" action="{% url 'lgpd_cancel_account_deletion' item.id %}" class="d-inline js-deletion-cancel-form" data-request-id="{{ item.id }}">
+												{% csrf_token %}
+												<button type="submit" class="btn btn-sm btn-outline-light">Cancelar</button>
+											</form>
+											{% else %}
+											-
+											{% endif %}
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						<p id="deletion-empty-state" class="mb-0 {% if data_deletion_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de exclusao.</p>
+					</article>
+					{% endif %}
+
+					{% if has_data_access_table %}
+					<article class="doc-card request-card request-card--history mt-3">
+						<h3>Historico das Minhas Solicitacoes</h3>
+						<div id="request-history-table-wrap" class="table-responsive request-table-wrap {% if not data_access_requests %}d-none{% endif %}">
+							<table class="table request-table">
+								<thead>
+									<tr>
+										<th>Data</th>
+										<th>Status</th>
+										<th>Processada em</th>
+										<th>Arquivo</th>
+									</tr>
+								</thead>
+								<tbody id="request-history-body">
+									{% for item in data_access_requests %}
+									<tr>
+										<td>{{ item.data_solicitacao|date:"d/m/Y H:i" }}</td>
+										<td>
+											<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
+										</td>
+										<td>
+											{% if item.data_processamento %}
+												{{ item.data_processamento|date:"d/m/Y H:i" }}
+											{% else %}
+												-
+											{% endif %}
+										</td>
+										<td>
+											{% if item.arquivo_exportacao %}
+												<a href="{{ item.arquivo_exportacao.url }}" class="btn btn-sm btn-outline-light" target="_blank" rel="noopener noreferrer">Baixar</a>
+											{% else %}
+												-
+											{% endif %}
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						<p id="request-empty-state" class="mb-0 {% if data_access_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de acesso aos dados.</p>
+					</article>
+					{% endif %}
+				</section>
+				{% endif %}
+			</div>
+		</main>
+
+		<aside class="privacidade-sidecard">
+			<h4>Contato de privacidade</h4>
+			<p>Para exercicio de direitos LGPD e duvidas sobre tratamento de dados:</p>
+			<a href="mailto:{{ support_email }}" class="support-mail">{{ support_email }}</a>
+			<div class="mt-3 d-flex flex-wrap gap-2">
+				<a href="{% url 'lgpd_hub' %}?tab=politica" class="lgpd-btn lgpd-btn--sm lgpd-btn--ghost">Politica</a>
+				<a href="{% url 'lgpd_hub' %}?tab=termos" class="lgpd-btn lgpd-btn--sm lgpd-btn--ghost">Termos</a>
+				{% if user.is_authenticated %}
+				<a href="{% url 'lgpd_hub' %}?tab=meus-dados" class="lgpd-btn lgpd-btn--sm lgpd-btn--ghost">Meus Dados</a>
+				{% endif %}
+			</div>
+		</aside>
+	</div>
+</div>
+
+<script src="{% static 'js/pages/lgpd-centro-privacidade.js' %}"></script>
+{% endblock %}
+

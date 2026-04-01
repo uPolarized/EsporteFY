@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.db import models
+from django.db.models import Q
+from django.conf import settings
 from django.views.decorators.http import require_POST
 from allauth.account.views import PasswordSetView
 
@@ -15,8 +17,17 @@ from app.redis_utils import publish_to_redis, is_user_online
 from .models import Perfil, SolicitacaoAmizade
 from .forms import PerfilForm, FiltroUsuarioForm
 from partidas.models import Partida
+from partidas.finalizacao import processar_partidas_finalizadas
 from .forms import SetPasswordCaptchaForm
 from social.models import Atividade
+from social.security import throttle_request
+
+
+def _exclude_friendship_activities(queryset):
+    return queryset.exclude(
+        Q(verbo__icontains='agora são amigos') |
+        Q(verbo__icontains='agora sao amigos')
+    )
 
 
 # ============================================================
@@ -68,8 +79,25 @@ class ListaUsuariosView(LoginRequiredMixin, ListView):
 @login_required
 @require_POST
 def enviar_solicitacao_amizade(request, receptor_id):
+    allowed, _ = throttle_request(request, scope='friend_request', limit=20, window_seconds=3600)
+    if not allowed:
+        messages.error(request, 'Muitas solicitações de amizade em pouco tempo. Tente novamente mais tarde.')
+        return redirect('perfis:lista_usuarios')
+
     receptor   = get_object_or_404(User, id=receptor_id)
     solicitante = request.user
+
+    if receptor.id == solicitante.id:
+        messages.warning(request, 'Você não pode enviar solicitação para si mesmo.')
+        return redirect('perfis:lista_usuarios')
+
+    if hasattr(receptor, 'privacy_settings') and not receptor.privacy_settings.allow_friend_requests:
+        messages.info(request, f'{receptor.username} desativou novas solicitações de amizade no momento.')
+        return redirect('perfis:lista_usuarios')
+
+    if solicitante.perfil.amigos.filter(id=receptor.id).exists():
+        messages.info(request, f'Você já é amigo(a) de {receptor.username}.')
+        return redirect('perfis:lista_usuarios')
 
     ja_existe = (
         SolicitacaoAmizade.objects.filter(solicitante=solicitante, receptor=receptor).exists() or
@@ -79,6 +107,13 @@ def enviar_solicitacao_amizade(request, receptor_id):
     if not ja_existe:
         solicitacao = SolicitacaoAmizade.objects.create(
             solicitante=solicitante, receptor=receptor
+        )
+        publish_to_redis(
+            f"notifications_user_{receptor.id}",
+            {
+                "type": "send_generic_notification",
+                "mensagem": f"{solicitante.username} enviou uma solicitação de amizade.",
+            },
         )
         messages.success(request, f'Pedido de amizade enviado para {receptor.username}.')
     else:
@@ -90,16 +125,34 @@ def enviar_solicitacao_amizade(request, receptor_id):
 @login_required
 @require_POST
 def aceitar_solicitacao(request, solicitacao_id):
-    solicitacao = get_object_or_404(SolicitacaoAmizade, id=solicitacao_id)
-    if solicitacao.receptor == request.user:
-        solicitacao.receptor.perfil.amigos.add(solicitacao.solicitante)
-        solicitacao.solicitante.perfil.amigos.add(solicitacao.receptor)
-        solicitante = solicitacao.solicitante
-        solicitacao.delete()
+    allowed, _ = throttle_request(request, scope='friend_request_accept', limit=40, window_seconds=60)
+    if not allowed:
+        messages.error(request, 'Muitas ações em pouco tempo. Tente novamente em instantes.')
+        return redirect('perfis:meu_perfil')
 
-        messages.success(request, f"Você e {solicitante.username} agora são amigos!")
-    else:
-        messages.error(request, "Você não tem permissão para realizar esta ação.")
+    solicitacao = SolicitacaoAmizade.objects.filter(id=solicitacao_id, receptor=request.user).select_related('solicitante', 'receptor').first()
+    if not solicitacao:
+        # Resposta genérica para reduzir enumeração de IDs.
+        messages.info(request, 'Solicitação indisponível ou já processada.')
+        return redirect('perfis:meu_perfil')
+
+    solicitacao.receptor.perfil.amigos.add(solicitacao.solicitante)
+    solicitacao.solicitante.perfil.amigos.add(solicitacao.receptor)
+    solicitante = solicitacao.solicitante
+    solicitacao.delete()
+
+    publish_to_redis(
+        f"notifications_user_{solicitante.id}",
+        {
+            "type": "notification",
+            "remetente": request.user.username,
+            "mensagem": "aceitou seu pedido de amizade!",
+            "conversa_url": f"/perfil/{request.user.username}/",
+            "timestamp": "agora",
+        },
+    )
+
+    messages.success(request, f"Você e {solicitante.username} agora são amigos!")
 
     return redirect('perfis:meu_perfil')
 
@@ -107,15 +160,21 @@ def aceitar_solicitacao(request, solicitacao_id):
 @login_required
 @require_POST
 def recusar_solicitacao(request, solicitacao_id):
-    solicitacao = get_object_or_404(SolicitacaoAmizade, id=solicitacao_id)
-    if solicitacao.receptor == request.user:
-        solicitante = solicitacao.solicitante
-        receptor    = solicitacao.receptor
-        solicitacao.delete()
+    allowed, _ = throttle_request(request, scope='friend_request_reject', limit=40, window_seconds=60)
+    if not allowed:
+        messages.error(request, 'Muitas ações em pouco tempo. Tente novamente em instantes.')
+        return redirect('perfis:meu_perfil')
 
-        messages.info(request, f"Pedido de amizade de {solicitante.username} recusado.")
-    else:
-        messages.error(request, "Você não tem permissão para realizar esta ação.")
+    solicitacao = SolicitacaoAmizade.objects.filter(id=solicitacao_id, receptor=request.user).select_related('solicitante').first()
+    if not solicitacao:
+        # Resposta genérica para reduzir enumeração de IDs.
+        messages.info(request, 'Solicitação indisponível ou já processada.')
+        return redirect('perfis:meu_perfil')
+
+    solicitante = solicitacao.solicitante
+    solicitacao.delete()
+
+    messages.info(request, f"Pedido de amizade de {solicitante.username} recusado.")
 
     return redirect('perfis:meu_perfil')
 
@@ -123,8 +182,21 @@ def recusar_solicitacao(request, solicitacao_id):
 @login_required
 @require_POST
 def remover_amigo(request, user_id):
+    allowed, _ = throttle_request(request, scope='friend_remove', limit=30, window_seconds=60)
+    if not allowed:
+        messages.error(request, 'Muitas ações em pouco tempo. Tente novamente em instantes.')
+        return redirect('perfis:meu_perfil')
+
     amigo_a_remover = get_object_or_404(User, id=user_id)
     usuario_logado  = request.user
+
+    if amigo_a_remover.id == usuario_logado.id:
+        messages.warning(request, 'Ação inválida.')
+        return redirect('perfis:meu_perfil')
+
+    if not usuario_logado.perfil.amigos.filter(id=amigo_a_remover.id).exists():
+        messages.info(request, 'Este usuário já não está na sua lista de amigos.')
+        return redirect('perfis:ver_perfil', username=amigo_a_remover.username)
 
     usuario_logado.perfil.amigos.remove(amigo_a_remover)
     amigo_a_remover.perfil.amigos.remove(usuario_logado)
@@ -150,14 +222,6 @@ class MeuPerfilView(LoginRequiredMixin, DetailView):
         user_logado   = perfil_logado.user
 
         from django.utils import timezone
-
-        all_activities = Atividade.objects.filter(
-            ator=perfil_logado.user
-        ).order_by('-timestamp')
-
-        context['activities_page'] = list(all_activities[:8])
-        context['activities_total'] = all_activities.count()
-        context['activities_page_size'] = 8
 
         context['solicitacoes_pendentes'] = SolicitacaoAmizade.objects.filter(
             receptor=self.request.user, aceito=False
@@ -214,6 +278,7 @@ class MeuPerfilView(LoginRequiredMixin, DetailView):
 
         context['amigos_recentes'] = amigos_com_info[:8]
         context['amigos_com_info'] = amigos_com_info
+        context['giphy_api_key'] = getattr(settings, 'GIPHY_API_KEY', 'dc6zaTOxFJmzC')
 
         return context
 
@@ -233,14 +298,6 @@ class VerPerfilView(LoginRequiredMixin, DetailView):
         user_logado           = self.request.user
         perfil_visitado_user  = self.get_object()
         perfil_visitado_perfil = perfil_visitado_user.perfil
-
-        all_activities = Atividade.objects.filter(
-            ator=perfil_visitado_user
-        ).order_by('-timestamp')
-
-        context['activities_page'] = list(all_activities[:8])
-        context['activities_total'] = all_activities.count()
-        context['activities_page_size'] = 8
 
         context['ja_sao_amigos'] = user_logado.perfil.amigos.filter(
             id=perfil_visitado_user.id
@@ -306,6 +363,7 @@ class VerPerfilView(LoginRequiredMixin, DetailView):
 
         context['amigos_recentes'] = amigos_com_info[:8]
         context['amigos_com_info'] = amigos_com_info
+        context['giphy_api_key'] = getattr(settings, 'GIPHY_API_KEY', 'dc6zaTOxFJmzC')
 
         return context
 
@@ -427,23 +485,51 @@ class CustomPasswordSetView(PasswordSetView):
 # ============================================================
 @login_required
 def api_check_status(request):
+    allowed, _ = throttle_request(request, scope='api_check_status', limit=60, window_seconds=60)
+    if not allowed:
+        return JsonResponse({'error': 'Muitas requisições. Tente novamente em instantes.'}, status=429)
+
     ids_param = request.GET.get('ids', '')
-    ids = [i for i in ids_param.split(',') if i.isdigit()]
-    status_data = {user_id: is_user_online(user_id) for user_id in ids}
+    ids = [i for i in ids_param.split(',') if i.isdigit()][:100]
+
+    allowed_ids = set(str(uid) for uid in request.user.perfil.amigos.values_list('id', flat=True))
+    allowed_ids.add(str(request.user.id))
+
+    filtered_ids = [uid for uid in ids if uid in allowed_ids]
+    status_data = {user_id: is_user_online(user_id) for user_id in filtered_ids}
     return JsonResponse(status_data)
 
 
 @login_required
 def api_atividades(request):
+    allowed, _ = throttle_request(request, scope='api_atividades', limit=30, window_seconds=60)
+    if not allowed:
+        return JsonResponse({'error': 'Muitas requisições. Tente novamente em instantes.'}, status=429)
+
+    processar_partidas_finalizadas()
+
     user_id = request.GET.get('user_id')
-    page = int(request.GET.get('page', 1))
-    page_size = int(request.GET.get('page_size', 8))
+
+    try:
+        page = max(1, int(request.GET.get('page', 1)))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'page inválida'}, status=400)
+
+    try:
+        page_size = min(20, max(1, int(request.GET.get('page_size', 8))))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'page_size inválido'}, status=400)
 
     if not user_id or not user_id.isdigit():
         return JsonResponse({'error': 'user_id inválido'}, status=400)
 
     user = get_object_or_404(User, id=user_id)
-    atividades = Atividade.objects.filter(ator=user).order_by('-timestamp')
+    if user.id != request.user.id and not request.user.perfil.amigos.filter(id=user.id).exists() and not request.user.is_staff:
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+
+    atividades = _exclude_friendship_activities(
+        Atividade.objects.filter(ator=user).select_related('content_type')
+    ).order_by('-timestamp')
     total = atividades.count()
 
     start = (page - 1) * page_size
@@ -484,19 +570,18 @@ def api_atividades(request):
 @login_required
 def api_solicitacoes_amizade(request):
     """
-    Retorna solicitações de amizade (recebidas e enviadas) do usuário logado.
+    Retorna notificações de amizade pendentes recebidas do usuário logado.
     """
+    allowed, _ = throttle_request(request, scope='api_solicitacoes_amizade', limit=60, window_seconds=60)
+    if not allowed:
+        return JsonResponse({'error': 'Muitas requisições. Tente novamente em instantes.'}, status=429)
+
     user = request.user
 
     # Solicitações recebidas
     recebidas = SolicitacaoAmizade.objects.filter(
         receptor=user
     ).select_related('solicitante', 'solicitante__perfil').order_by('-timestamp')
-
-    # Solicitações enviadas
-    enviadas = SolicitacaoAmizade.objects.filter(
-        solicitante=user
-    ).select_related('receptor', 'receptor__perfil').order_by('-timestamp')
 
     recebidas_data = []
     for s in recebidas:
@@ -509,19 +594,7 @@ def api_solicitacoes_amizade(request):
             'timestamp': s.timestamp.isoformat(),
         })
 
-    enviadas_data = []
-    for s in enviadas:
-        enviadas_data.append({
-            'id': s.id,
-            'usuario_id': s.receptor.id,
-            'username': s.receptor.username,
-            'foto_url': s.receptor.perfil.foto.url if s.receptor.perfil.foto else '/media/fotos_perfil/default.jpg',
-            'tipo': 'enviada',
-            'timestamp': s.timestamp.isoformat(),
-        })
-
     return JsonResponse({
         'recebidas': recebidas_data,
-        'enviadas': enviadas_data,
-        'total': len(recebidas_data) + len(enviadas_data),
+        'total': len(recebidas_data),
     })

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import CreateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -277,3 +277,15 @@ def partidas_statuses(request):
         result[str(pid)] = {'avaliada': pid in avaliadas_set}
 
     return JsonResponse(result)
+
+
+@require_GET
+def api_esportes(request):
+    try:
+        from .models import Esporte
+        esportes = Esporte.objects.all().order_by('nome')
+        data = [{'id': e.id, 'nome': e.nome, 'icone': getattr(e, 'icone', '')} for e in esportes]
+        return JsonResponse({'esportes': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
