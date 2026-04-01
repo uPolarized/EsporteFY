@@ -10,7 +10,29 @@ Guia rapido para rodar o projeto somente com Docker, popular o banco e criar sup
 
 ## 2) Configurar variaveis de ambiente
 
-O projeto usa o arquivo [.env](.env) e esta configurado para PostgreSQL via `DATABASE_URL`.
+Antes de subir o projeto, crie seu arquivo `.env` a partir de [.env.example](.env.example).
+
+No PowerShell (Windows):
+
+```bash
+Copy-Item .env.example .env
+```
+
+No Linux/macOS:
+
+```bash
+cp .env.example .env
+```
+
+Depois, edite o arquivo `.env` e ajuste os campos obrigatorios para o seu ambiente, principalmente:
+
+- `SECRET_KEY`
+- `POSTGRES_PASSWORD`
+- `DATABASE_URL`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+
+O projeto usa PostgreSQL via `DATABASE_URL`.
 
 Exemplo:
 
@@ -52,7 +74,7 @@ Esse comando executa:
 1. Seed de esportes (`seed_esporte`)
 2. Seed de quadras (`seed_quadras`)
 3. Criacao/atualizacao de superusuario padrao
-4. Configuracao do SocialApp Google
+4. Configuracao dos SocialApps Google e GitHub
 5. Seed de partidas demo
 
 Sem criar partidas demo:
@@ -85,7 +107,7 @@ docker compose run --rm web python create_user.py
 ## 7) Aviso importante
 
 - O usuario acima e apenas para ambiente de desenvolvimento.
-- Em ambiente real, troque username e senha para dados seus e use senha forte.
+
 
 ## 8) Acessar admin
 
