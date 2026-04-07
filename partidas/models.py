@@ -38,6 +38,21 @@ class Partida(models.Model):
     )
     data_hora = models.DateTimeField(verbose_name="Data e Hora")
     jogadores_necessarios = models.PositiveIntegerField(verbose_name="Jogadores Necessários")
+    
+    NIVEL_MINIMO_CHOICES = [
+        ('Qualquer', 'Qualquer Nível'),
+        ('Iniciante', 'Iniciante'),
+        ('Intermediario', 'Intermediário'),
+        ('Avancado', 'Avançado'),
+        ('Competitivo', 'Competitivo'),
+    ]
+    nivel_minimo = models.CharField(
+        max_length=20, 
+        choices=NIVEL_MINIMO_CHOICES, 
+        default='Qualquer',
+        verbose_name="Nível Mínimo"
+    )
+    
     jogadores_confirmados = models.ManyToManyField(
         User, related_name='partidas_confirmadas', blank=True
     )
@@ -59,6 +74,67 @@ class Partida(models.Model):
     def vagas_restantes(self):
         """Calcula quantas vagas ainda estão disponíveis."""
         return self.jogadores_necessarios - self.vagas_preenchidas
+
+
+class PartidaRSVP(models.Model):
+    STATUS_INTERESSE = 'interesse'
+    STATUS_AGUARDANDO = 'aguardando'
+    STATUS_CONFIRMADO = 'confirmado'
+    STATUS_RECUSADO = 'recusado'
+    STATUS_EXPIRADO = 'expirado'
+
+    STATUS_CHOICES = (
+        (STATUS_INTERESSE, 'Interesse'),
+        (STATUS_AGUARDANDO, 'Aguardando Aprovação'),
+        (STATUS_CONFIRMADO, 'Confirmado'),
+        (STATUS_RECUSADO, 'Recusado'),
+        (STATUS_EXPIRADO, 'Expirado'),
+    )
+
+    partida = models.ForeignKey(
+        Partida,
+        on_delete=models.CASCADE,
+        related_name='rsvps',
+        verbose_name='Partida',
+    )
+    jogador = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='partidas_rsvp',
+        verbose_name='Jogador',
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=STATUS_CHOICES,
+        default=STATUS_INTERESSE,
+        verbose_name='Status',
+    )
+    motivo_recusa = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='Motivo de recusa',
+    )
+    observacao_recusa = models.TextField(
+        blank=True,
+        verbose_name='Observação opcional',
+    )
+    lembrete_24h_enviado = models.BooleanField(default=False)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    confirmado_em = models.DateTimeField(null=True, blank=True)
+    recusado_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'RSVP de Partida'
+        verbose_name_plural = 'RSVPs de Partidas'
+        unique_together = ('partida', 'jogador')
+        indexes = [
+            models.Index(fields=['status', 'atualizado_em']),
+            models.Index(fields=['partida', 'status']),
+        ]
+
+    def __str__(self):
+        return f'{self.jogador.username} · {self.partida.titulo} · {self.status}'
 
 
 # ---------------------------------------------------------

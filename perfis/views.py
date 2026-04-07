@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from datetime import timedelta
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,14 +8,15 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 from allauth.account.views import PasswordSetView
 
-from app.redis_utils import publish_to_redis, is_user_online
+from app.redis_utils import publish_to_redis, is_user_online, get_user_last_seen, list_online_user_ids
 
-from .models import Perfil, SolicitacaoAmizade
+from .models import Perfil, SolicitacaoAmizade, UserPrivacySettings, AccountLoginEvent
 from .forms import PerfilForm, FiltroUsuarioForm
 from partidas.models import Partida
 from partidas.finalizacao import processar_partidas_finalizadas
@@ -28,6 +30,48 @@ def _exclude_friendship_activities(queryset):
         Q(verbo__icontains='agora são amigos') |
         Q(verbo__icontains='agora sao amigos')
     )
+
+
+def _format_last_seen_label(dt):
+    if not dt:
+        return 'Sem registro recente'
+
+    now = timezone.now()
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+
+    local_dt = timezone.localtime(dt)
+    delta = now - dt
+    total_seconds = int(delta.total_seconds())
+
+    if total_seconds < 0:
+        return 'Agora mesmo'
+
+    if total_seconds < 60:
+        return 'Agora mesmo'
+
+    if total_seconds < 3600:
+        minutes = max(1, total_seconds // 60)
+        unit = 'minuto' if minutes == 1 else 'minutos'
+        return f'Ha {minutes} {unit}'
+
+    if total_seconds < 86400:
+        hours = max(1, total_seconds // 3600)
+        unit = 'hora' if hours == 1 else 'horas'
+        return f'Ha {hours} {unit}'
+
+    if local_dt.date() == timezone.localdate():
+        return f'Hoje as {local_dt:%H:%M}'
+
+    if local_dt.date() == timezone.localdate() - timedelta(days=1):
+        return f'Ontem as {local_dt:%H:%M}'
+
+    if total_seconds < 7 * 86400:
+        weekdays = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo']
+        weekday = weekdays[local_dt.weekday()]
+        return f'{weekday} as {local_dt:%H:%M}'
+
+    return local_dt.strftime('%d/%m/%Y as %H:%M')
 
 
 # ============================================================
@@ -47,6 +91,7 @@ class ListaUsuariosView(LoginRequiredMixin, ListView):
             nome   = form.cleaned_data.get('nome_usuario')
             esporte = form.cleaned_data.get('esporte')
             nivel  = form.cleaned_data.get('nivel')
+            bairro = form.cleaned_data.get('bairro')
 
             if nome:
                 queryset = queryset.filter(username__icontains=nome)
@@ -54,6 +99,8 @@ class ListaUsuariosView(LoginRequiredMixin, ListView):
                 queryset = queryset.filter(perfil__esportes_preferidos=esporte)
             if nivel:
                 queryset = queryset.filter(perfil__nivel_habilidade=nivel)
+            if bairro:
+                queryset = queryset.filter(perfil__bairro_base=bairro)
 
         return queryset
 
@@ -69,6 +116,19 @@ class ListaUsuariosView(LoginRequiredMixin, ListView):
         context['amigos_lista']   = list(amigos)
         context['enviadas_lista'] = [s.receptor   for s in solicitacoes_enviadas_qs]
         context['recebidas_lista'] = [s.solicitante for s in solicitacoes_recebidas_qs]
+
+        context['sidebar_total_jogadores'] = User.objects.exclude(id=user.id).count()
+        context['sidebar_total_amigos'] = amigos.count()
+        context['sidebar_solicitacoes_pendentes'] = solicitacoes_recebidas_qs.count()
+
+        bairros_populares = (
+            Perfil.objects.exclude(bairro_base__isnull=True)
+            .exclude(bairro_base='')
+            .values('bairro_base')
+            .annotate(total=Count('id'))
+            .order_by('-total')[:5]
+        )
+        context['sidebar_bairros_populares'] = list(bairros_populares)
 
         return context
 
@@ -146,8 +206,8 @@ def aceitar_solicitacao(request, solicitacao_id):
         {
             "type": "notification",
             "remetente": request.user.username,
-            "mensagem": "aceitou seu pedido de amizade!",
-            "conversa_url": f"/perfil/{request.user.username}/",
+                "mensagem": "aceitou sua solicitação de amizade.",
+                "conversa_url": f"/perfis/usuario/{request.user.username}/",
             "timestamp": "agora",
         },
     )
@@ -203,6 +263,19 @@ def remover_amigo(request, user_id):
 
     messages.info(request, f"Você não é mais amigo(a) de {amigo_a_remover.username}.")
     return redirect('perfis:ver_perfil', username=amigo_a_remover.username)
+
+
+@login_required
+@require_POST
+def toggle_online_status(request):
+    privacy, _ = UserPrivacySettings.objects.get_or_create(user=request.user)
+    privacy.show_online_status = not privacy.show_online_status
+    privacy.save(update_fields=['show_online_status', 'updated_at'])
+
+    status_label = 'visível' if privacy.show_online_status else 'oculto'
+    messages.success(request, f'Seu status online agora está {status_label}.')
+
+    return redirect(request.META.get('HTTP_REFERER', 'feed'))
 
 
 # ============================================================
@@ -598,3 +671,155 @@ def api_solicitacoes_amizade(request):
         'recebidas': recebidas_data,
         'total': len(recebidas_data),
     })
+
+
+@login_required
+def api_perfil(request, user_id):
+    allowed, _ = throttle_request(request, scope='api_perfil_modal', limit=60, window_seconds=60)
+    if not allowed:
+        return JsonResponse({'error': 'Muitas requisições. Tente novamente em instantes.'}, status=429)
+
+    alvo = get_object_or_404(User.objects.select_related('perfil'), id=user_id)
+    viewer = request.user
+
+    ja_sao_amigos = viewer.perfil.amigos.filter(id=alvo.id).exists()
+    has_request = SolicitacaoAmizade.objects.filter(solicitante=viewer, receptor=alvo).exists()
+
+    privacy = getattr(alvo, 'privacy_settings', None)
+    show_online_status = getattr(privacy, 'show_online_status', True)
+    allow_friend_requests = getattr(privacy, 'allow_friend_requests', True)
+
+    is_online = bool(is_user_online(alvo.id)) if show_online_status else False
+    last_seen_dt = get_user_last_seen(alvo.id) or alvo.last_login
+
+    response = {
+        'user': {
+            'id': alvo.id,
+            'username': alvo.username,
+        },
+        'foto': alvo.perfil.foto.url if alvo.perfil.foto else '',
+        'banner': alvo.perfil.banner.url if getattr(alvo.perfil, 'banner', None) else '',
+        'mini_bio': alvo.perfil.mini_bio if getattr(alvo.perfil, 'mini_bio', None) else '',
+        'esporte': getattr(alvo.perfil, 'esportes_preferidos', '') or 'Não informado',
+        'nivel': getattr(alvo.perfil, 'nivel_habilidade', '') or 'Não informado',
+        'cidade': getattr(alvo.perfil, 'cidade', '') or '',
+        'bairro': alvo.perfil.get_bairro_base_display() if getattr(alvo.perfil, 'bairro_base', None) else '',
+        'member_since': alvo.date_joined.strftime('%m/%Y') if getattr(alvo, 'date_joined', None) else '—',
+        'partidas_count': Partida.objects.filter(jogadores_confirmados=alvo).count(),
+        'amigos_count': alvo.perfil.amigos.count(),
+        'rating': getattr(alvo.perfil, 'rating', None),
+        'is_friend': ja_sao_amigos,
+        'has_request': has_request,
+        'allow_friend_requests': allow_friend_requests,
+        'show_online_status': show_online_status,
+        'is_online': is_online,
+        'last_seen_at': last_seen_dt.isoformat() if last_seen_dt else None,
+        'last_seen_label': _format_last_seen_label(last_seen_dt),
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def api_online_players(request):
+    allowed, _ = throttle_request(request, scope='api_online_players', limit=60, window_seconds=60)
+    if not allowed:
+        return JsonResponse({'error': 'Muitas requisições. Tente novamente em instantes.'}, status=429)
+
+    q = (request.GET.get('q') or '').strip()
+    try:
+        limit = int(request.GET.get('limit', 14))
+    except (TypeError, ValueError):
+        limit = 14
+    limit = max(1, min(limit, 40))
+
+    online_ids = list_online_user_ids(max_items=500)
+    online_id_set = set(online_ids)
+    self_online = bool(is_user_online(request.user.id) or is_user_online(request.user.username))
+
+    queryset = User.objects.filter(id__in=online_ids).exclude(id=request.user.id).select_related('perfil')
+    if q:
+        queryset = queryset.filter(username__icontains=q)
+
+    online_by_id = {u.id: u for u in queryset}
+
+    # Fallback 1: sem presença no Redis, usa eventos de login (inclui social login).
+    if not online_by_id:
+        recent_login_threshold = timezone.now() - timedelta(hours=24)
+        recent_login_ids = list(
+            AccountLoginEvent.objects
+            .filter(created_at__gte=recent_login_threshold)
+            .order_by('-created_at')
+            .values_list('user_id', flat=True)
+            .distinct()[:500]
+        )
+
+        recent_qs = User.objects.filter(id__in=recent_login_ids).exclude(id=request.user.id).select_related('perfil')
+        if q:
+            recent_qs = recent_qs.filter(username__icontains=q)
+
+        # Fallback 2: se não houver eventos, usa last_login recente.
+        if not recent_qs.exists():
+            recent_threshold = timezone.now() - timedelta(minutes=30)
+            recent_qs = User.objects.filter(last_login__gte=recent_threshold).exclude(id=request.user.id).select_related('perfil')
+            if q:
+                recent_qs = recent_qs.filter(username__icontains=q)
+
+        ordered_recent = list(recent_qs.order_by('-last_login')[:limit])
+        if not ordered_recent:
+            online_total_count = 1 if self_online else 0
+            return JsonResponse({'count': 0, 'online_count': 0, 'online_total_count': online_total_count, 'self_online': self_online, 'players': []})
+
+        friend_ids = set(request.user.perfil.amigos.values_list('id', flat=True))
+        payload_recent = []
+        for user_obj in ordered_recent:
+            privacy = getattr(user_obj, 'privacy_settings', None)
+            if privacy and not privacy.show_online_status:
+                continue
+
+            last_seen_dt = get_user_last_seen(user_obj.id) or user_obj.last_login
+            payload_recent.append({
+                'id': user_obj.id,
+                'username': user_obj.username,
+                'avatar_url': user_obj.perfil.foto.url if user_obj.perfil.foto else '',
+                'esporte': getattr(user_obj.perfil, 'esportes_preferidos', '') or 'Nao informado',
+                'nivel': getattr(user_obj.perfil, 'nivel_habilidade', '') or 'Nao informado',
+                'is_friend': user_obj.id in friend_ids,
+                'is_online': False,
+                'last_seen_label': _format_last_seen_label(last_seen_dt),
+            })
+
+        online_total_count = (1 if self_online else 0)
+        return JsonResponse({'count': len(payload_recent), 'online_count': 0, 'online_total_count': online_total_count, 'self_online': self_online, 'players': payload_recent})
+
+    friend_ids = set(request.user.perfil.amigos.values_list('id', flat=True))
+
+    ordered_users = []
+    for user_id in online_ids:
+        user_obj = online_by_id.get(user_id)
+        if user_obj:
+            ordered_users.append(user_obj)
+
+    ordered_users.sort(key=lambda u: (u.id not in friend_ids, u.username.lower()))
+
+    payload_players = []
+    for user_obj in ordered_users[:limit]:
+        privacy = getattr(user_obj, 'privacy_settings', None)
+        if privacy and not privacy.show_online_status:
+            continue
+
+        last_seen_dt = get_user_last_seen(user_obj.id) or user_obj.last_login
+        payload_players.append({
+            'id': user_obj.id,
+            'username': user_obj.username,
+            'avatar_url': user_obj.perfil.foto.url if user_obj.perfil.foto else '',
+            'esporte': getattr(user_obj.perfil, 'esportes_preferidos', '') or 'Nao informado',
+            'nivel': getattr(user_obj.perfil, 'nivel_habilidade', '') or 'Nao informado',
+            'is_friend': user_obj.id in friend_ids,
+            'is_online': user_obj.id in online_id_set,
+            'last_seen_label': _format_last_seen_label(last_seen_dt),
+        })
+
+    online_count = sum(1 for item in payload_players if item['is_online'])
+    online_total_count = online_count + (1 if self_online else 0)
+    return JsonResponse({'count': len(payload_players), 'online_count': online_count, 'online_total_count': online_total_count, 'self_online': self_online, 'players': payload_players})

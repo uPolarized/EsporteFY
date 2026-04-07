@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 WS_TOKEN_TTL_SECONDS = int(os.getenv("WS_TOKEN_TTL_SECONDS", "7200"))
+LAST_SEEN_TTL_SECONDS = int(os.getenv("LAST_SEEN_TTL_SECONDS", "604800"))
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8000").split(",")
@@ -76,6 +77,7 @@ async def mark_user_online(user_identifier):
         client = await get_redis_client()
         # TTL de 1 hora - será atualizado a cada mensagem
         await client.setex(f"user_online:{user_identifier}", 3600, "1")
+        await client.setex(f"user_last_seen:{user_identifier}", LAST_SEEN_TTL_SECONDS, str(int(time.time())))
         print(f"✅ [Online] Usuário {user_identifier} marcado como ONLINE")
     except Exception as e:
         print(f"⚠️ Erro ao marcar usuário online: {e}")
@@ -85,6 +87,7 @@ async def mark_user_offline(user_identifier):
     try:
         client = await get_redis_client()
         await client.delete(f"user_online:{user_identifier}")
+        await client.setex(f"user_last_seen:{user_identifier}", LAST_SEEN_TTL_SECONDS, str(int(time.time())))
         print(f"⚫ [Offline] Usuário {user_identifier} marcado como OFFLINE")
     except Exception as e:
         print(f"⚠️ Erro ao marcar usuário offline: {e}")
@@ -197,6 +200,7 @@ async def chat_socket(websocket: WebSocket, username: str):
     try:
         while True:
             await websocket.receive_text()
+            await mark_user_online(user_id)
     except:
         # Marcar como offline
         await mark_user_offline(user_id)
@@ -226,6 +230,7 @@ async def notification_socket(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text()
+            await mark_user_online(user_id)
     except:
         # Marcar como offline
         await mark_user_offline(user_id)
@@ -252,6 +257,7 @@ async def feed_socket(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text()
+            await mark_user_online(user_id)
     except:
         await mark_user_offline(user_id)
         manager.disconnect(websocket, room)

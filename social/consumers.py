@@ -125,16 +125,19 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     # 🔔 Notificação genérica
     async def send_generic_notification(self, event):
-        # Monta o dicionário base
         data = {
-            'type': 'nova_atividade',
-            'titulo': event.get('titulo', 'Nova atividade'),
+            'type': 'send_generic_notification',
+            'titulo': event.get('titulo', 'Nova notificação'),
             'mensagem': event.get('mensagem', ''),
+            'remetente': event.get('remetente', 'Sistema'),
+            'foto_url': event.get('foto_url', ''),
+            'notification_scope': event.get('notification_scope', 'system'),
+            'conversa_url': event.get('conversa_url', '/feed/'),
+            'timestamp': event.get('timestamp', 'agora'),
+            'timestamp_iso': event.get('timestamp_iso'),
         }
-        
-        # Adiciona campos extras dinamicamente se existirem no evento
-        campos_extras = ['acao', 'usuario_id', 'solicitacao_id', 'solicitante_id', 'foto_url']
-        for campo in campos_extras:
+
+        for campo in ('acao', 'usuario_id', 'solicitacao_id', 'solicitante_id', 'transient_popup_only'):
             if campo in event:
                 data[campo] = event[campo]
 

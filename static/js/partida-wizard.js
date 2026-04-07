@@ -21,11 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputTitulo = document.querySelector('input[name="titulo"]');
     const inputDataHora = document.getElementById('wizardDataHora');
     const inputVagas = document.getElementById('wizardVagas');
+    const selectNivel = document.getElementById('wizardNivelMinimo');
 
     // Resumo
     const ctxEsporte = document.getElementById('resumoEsporteText');
-    const ctxQuadra = document.getElementById('resumoQuadraText');
     const ctxVagas = document.getElementById('resumoVagasText');
+    const ctxNivel = document.getElementById('resumoNivelText');
     const ctxData = document.getElementById('resumoDataText');
 
     let loadedData = false;
@@ -87,25 +88,28 @@ document.addEventListener('DOMContentLoaded', function() {
     btnAvancar.addEventListener('click', function() {
         if (!validarPasso(currentStep)) return;
         
-        // Se estiver indo para a etapa 2, injetar a foto da quadra lá em cima
+        // Se estiver indo para a etapa 2, carregar o banner correspondente
         if (currentStep === 1) {
             const selectedCard = document.querySelector('.quadra-card.selected');
-            const quadraHeader = document.getElementById('step2SelectedQuadra');
-            if (selectedCard && quadraHeader) {
+            if (selectedCard) {
+                const titleObj = selectedCard.querySelector('.card-title') ? selectedCard.querySelector('.card-title').textContent.trim() : 'Quadra Selecionada';
                 const imgEl = selectedCard.querySelector('img');
-                const imgUrl = imgEl ? imgEl.src : '';
-                const titleEl = selectedCard.querySelector('.card-title');
-                const titleObj = titleEl ? titleEl.textContent.trim() : 'Quadra Selecionada';
-                
-                // Cria um funda que mescla foto do local com o fundo da tela Dark
-                // O degrade de baixo pra cima começa transparente e vai esmagando pro Dark do bootstrap (#212529) para "sumir" a bordinha
-                quadraHeader.style.backgroundImage = `linear-gradient(to bottom, transparent 0%, rgba(33, 37, 41, 0.7) 40%, rgba(33, 37, 41, 1) 100%), url('${imgUrl}')`;
-                quadraHeader.innerHTML = `
-                    <div class="position-absolute bottom-0 start-0 w-100 p-2 pb-3 text-center" style="z-index: 2;">
-                        <h4 class="text-white fw-bolder mb-1" style="text-shadow: 0 4px 15px rgba(0,0,0,1);"><i class="fa-solid fa-location-dot text-danger me-2"></i>${titleObj}</h4>
-                        <span class="badge bg-danger bg-opacity-75 rounded-pill px-3 py-1 shadow-sm"><i class="fa-solid fa-check me-1"></i>Local Selecionado</span>
-                    </div>
-                `;
+                const imgSrc = imgEl ? imgEl.src : '';
+                const bairroEl = selectedCard.querySelector('.card-text');
+                const bairroTxt = bairroEl ? bairroEl.textContent.replace('Localização não informada', '').trim() : '';
+
+                // Insere os dados nos banners (pode atualizar o passo 3 tbm)
+                document.querySelectorAll('.wizard-quadra-banner').forEach(banner => {
+                    const img = banner.querySelector('.wizard-quadra-banner-img');
+                    const title = banner.querySelector('.wizard-quadra-banner-title');
+                    const bairro = banner.querySelector('.wizard-quadra-banner-bairro');
+                    
+                    if (img && imgSrc) img.src = imgSrc;
+                    if (title) title.textContent = titleObj;
+                    if (bairro) bairro.textContent = bairroTxt;
+                    
+                    banner.style.display = 'block';
+                });
             }
         }
         
@@ -208,10 +212,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function preencherResumo() {
         ctxEsporte.textContent = selectEsporte.options[selectEsporte.selectedIndex]?.text || '-';
         
-        const selectedCard = document.querySelector('.quadra-card.selected');
-        ctxQuadra.textContent = selectedCard ? selectedCard.querySelector('.card-title').textContent.trim() : '-';
-        
         ctxVagas.textContent = inputVagas.value + ' vagas totais';
+        
+        ctxNivel.textContent = selectNivel.options[selectNivel.selectedIndex]?.text || 'Qualquer Nível';
         
         if (inputDataHora.value) {
             const dateObj = new Date(inputDataHora.value);
@@ -338,8 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-            
-            const result = await response.json();
+
+            const contentType = response.headers.get('content-type') || '';
+            const result = contentType.includes('application/json')
+                ? await response.json()
+                : { status: 'error', message: await response.text() };
             
             if((response.ok && result.status === 'success') || result.status === 'success') {
                 window.location.href = result.redirect_url || '/';

@@ -5,7 +5,8 @@
 
 {% block extra_head %}
 {% now "U" as feed_css_version %}
-<link rel="stylesheet" href="{% static 'css/feed.css' %}">
+<link rel="stylesheet" href="{% static 'css/feed.css' %}?v={{ feed_css_version }}">
+<link rel="stylesheet" href="{% static 'css/profile-modal.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   @media (max-width: 991.98px) {
@@ -15,11 +16,6 @@
     .feed-col-mobile.mobile-active-tab {
       display: block !important;
       animation: fadeIn 0.3s ease;
-    }
-    
-    /* Ocultar a saudação genérica redundante em mobile se estiver em outras tabs */
-    #mobile-greeting {
-      display: none !important;
     }
   }
   @keyframes fadeIn {
@@ -87,18 +83,6 @@
 <div class="container-fluid my-4 feed-shell">
   <div class="row gx-4">
     
-    <div class="col-12 order-md-1 order-lg-2 mb-4 d-lg-none">
-      <div class="text-center">
-        {% now "H" as hora_atual %}
-        <h1 class="mb-0 welcome-header">
-          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
-          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
-          {% else %}🌙Boa noite
-          {% endif %}!
-        </h1>
-      </div>
-    </div>
-
     {% if not is_mobile_client or aba_atual == 'feed' or aba_atual == 'atividades' %}
     <div class="{% if not is_mobile_client or aba_atual == 'feed' %}col-lg-3 order-md-2 order-lg-1{% else %}col-12{% endif %} feed-col-mobile {% if request.GET.aba == 'atividades' %}mobile-active-tab{% endif %}" id="tab-atividades">
       <section id="feed-atividades" class="activity-feed-shell">
@@ -216,28 +200,27 @@
       <div id="feed-partidas" class="feed-center-rail">
         <div class="unified-partidas-container">
         <section class="center-intro-panel">
-      <div class="dashboard-hero" id="mobile-greeting">
-        {% now "H" as hora_atual %}
-        <h1 class="dashboard-hero__title">
-          {% if hora_atual|add:"0" < 12 %}☀️Bom dia
-          {% elif hora_atual|add:"0" < 18 %}🌤️Boa tarde
-          {% else %}🌙Boa noite
-          {% endif %}, {{ user.username }}
-        </h1>
-        <p class="dashboard-hero__subtitle">Seu painel em tempo real para entrar no próximo jogo.</p>
+      <div class="dashboard-hero">
+        <h1 class="dashboard-hero__title">Seu painel em tempo real</h1>
+        <p class="dashboard-hero__subtitle">Acompanhe partidas, atividades e notícias antes de entrar no próximo jogo.</p>
 
-        <div class="dashboard-hero__stats">
-          <div class="hero-stat">
-            <small>Partidas hoje</small>
-            <strong>{{ partidas_hoje_count }}</strong>
-          </div>
-          <div class="hero-stat">
-            <small>Jogadores online</small>
-            <strong>{{ jogadores_online_count }}</strong>
-          </div>
-          <div class="hero-stat">
-            <small>Quadras próximas</small>
-            <strong>{{ quadras_proximas_count }}</strong>
+        <div class="dashboard-hero__summary-card">
+          <div class="dashboard-hero__stats">
+            <article class="hero-stat">
+              <span class="hero-stat__label"><i class="bi bi-calendar2-check"></i>Partidas hoje</span>
+              <strong>{{ partidas_hoje_count }}</strong>
+              <span class="hero-stat__hint">confirmadas no dia</span>
+            </article>
+            <article class="hero-stat hero-stat--online">
+              <span class="hero-stat__label"><i class="bi bi-broadcast-pin"></i>Amigos online</span>
+              <strong data-online-friends-count>0</strong>
+              <span class="hero-stat__hint">ativos agora</span>
+            </article>
+            <article class="hero-stat">
+              <span class="hero-stat__label"><i class="bi bi-geo-alt"></i>Quadras proximas</span>
+              <strong>{{ quadras_proximas_count }}</strong>
+              <span class="hero-stat__hint">na sua regiao</span>
+            </article>
           </div>
         </div>
 
@@ -379,18 +362,48 @@
                 data-bs-toggle="modal" data-bs-target="#modalCancelarPartida{{ partida.id }}">
                 <i class="bi bi-x-circle me-1"></i>Cancelar
               </button>
-            {% elif user in partida.jogadores_confirmados.all %}
+              {% if partida.pending_rsvps %}
+                <span class="match-btn match-btn--leave" title="Solicitações pendentes">
+                  <i class="bi bi-hourglass-split me-1"></i>
+                  {% with total=partida.pending_rsvps|length %}
+                    {% if total == 1 %}
+                      1 pendente
+                    {% else %}
+                      {{ total }} pendentes
+                    {% endif %}
+                  {% endwith %}
+                </span>
+              {% endif %}
+            {% elif partida.user_rsvp_status == 'confirmado' %}
               <form method="post" action="{% url 'partidas:sair_da_partida' partida_id=partida.id %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="match-btn match-btn--leave">
                   <i class="bi bi-box-arrow-left me-1"></i>Sair
                 </button>
               </form>
-            {% elif partida.vagas_restantes > 0 %}
-              <form method="post" action="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="d-inline">
+            {% elif partida.user_rsvp_status == 'aguardando' %}
+              <button class="match-btn match-btn--leave" disabled>
+                <i class="bi bi-hourglass-split me-1"></i>Solicitação enviada
+              </button>
+            {% elif partida.user_rsvp_status == 'interesse' %}
+              <form method="post" action="{% url 'partidas:confirmar_presenca_partida' partida_id=partida.id %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="match-btn match-btn--join">
-                  <i class="bi bi-check-circle me-1"></i>Participar
+                  <i class="bi bi-check2-circle me-1"></i>Confirmar
+                </button>
+              </form>
+              <form method="post" action="{% url 'partidas:recusar_partida' partida_id=partida.id %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="motivo_recusa" value="Sem disponibilidade">
+                <button type="submit" class="match-btn match-btn--leave">
+                  <i class="bi bi-x-circle me-1"></i>Não vou
+                </button>
+              </form>
+            {% elif partida.vagas_restantes > 0 %}
+              <form method="post" action="{% url 'partidas:registrar_interesse_partida' partida_id=partida.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="match-btn match-btn--join">
+                  <i class="bi bi-hand-index-thumb me-1"></i>Tenho interesse
                 </button>
               </form>
             {% else %}
@@ -427,28 +440,31 @@
 
       </div>
       {% for partida in partidas %}
-      <div class="modal fade" id="jogadoresModal{{ partida.id }}" tabindex="-1" aria-labelledby="jogadoresModalLabel{{ partida.id }}" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+      <div class="jogadores-inline-modal" id="jogadoresModal{{ partida.id }}" aria-hidden="true">
+        <div class="jogadores-inline-dialog" role="dialog" aria-modal="true" aria-labelledby="jogadoresModalLabel{{ partida.id }}">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="jogadoresModalLabel{{ partida.id }}">
-                👥 Jogadores Confirmados — {{ partida.titulo }}
+              <h5 class="modal-title detalhes-modal-title" id="jogadoresModalLabel{{ partida.id }}">
+                Todos os Jogadores
               </h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+              <button type="button" class="btn-close btn-close-white js-close-jogadores-inline" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
               {% if partida.jogadores_confirmados.all %}
               <ul class="list-group">
                 {% for jogador in partida.jogadores_confirmados.all %}
-                <li class="list-group-item d-flex align-items-center">
-                  {% if jogador.perfil.foto %}
-                    <img src="{{ jogador.perfil.foto.url|media_bust }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
-                  {% else %}
-                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
-                      {{ jogador.username|first|upper }}
-                    </div>
-                  {% endif %}
-                  <span class="fw-semibold">{{ jogador.username }}</span>
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    {% if jogador.perfil.foto %}
+                      <img src="{{ jogador.perfil.foto.url|media_bust }}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                    {% else %}
+                      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                        {{ jogador.username|first|upper }}
+                      </div>
+                    {% endif %}
+                    <span class="fw-semibold">{{ jogador.username }}</span>
+                  </div>
+                  <a href="/perfis/usuario/{{ jogador.username }}/" class="btn btn-sm btn-outline-light">Ver perfil</a>
                 </li>
                 {% endfor %}
               </ul>
@@ -468,78 +484,187 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content detalhes-modal">
             <div class="modal-header">
-              <h5 class="modal-title" id="detalhesPartidaLabel{{ partida.id }}">
-                ⚽ {{ partida.titulo }}
+              <h5 class="modal-title detalhes-modal-title" id="detalhesPartidaLabel{{ partida.id }}">
+                {{ partida.titulo }}
               </h5>
               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             
             <div class="modal-body">
-              <div class="info-linha">
-                <i class="bi bi-person-fill"></i>
-                <strong>Organizador:</strong> {{ partida.organizador.username }}
-              </div>
-              <div class="info-linha">
-                <i class="bi bi-geo-alt-fill"></i>
-                <strong>Local:</strong> {{ partida.quadra.nome }} — {{ partida.quadra.get_bairro_display }}
-              </div>
-              <div class="info-linha">
-                <i class="bi bi-calendar-event"></i>
-                <strong>Data:</strong> {{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}
-              </div>
-              <div class="info-linha">
-                <i class="bi bi-people-fill"></i>
-                <strong>Jogadores:</strong> {{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}
-              </div>
-              <div class="info-linha">
-                
-                
+              <div class="detalhes-banner-wrapper mb-4">
+                {% with foto_quadra=partida.quadra.foto_principal %}
+                  {% if foto_quadra %}
+                    <img
+                      src="{{ foto_quadra.imagem.url|media_bust }}"
+                      alt="Quadra {{ partida.quadra.nome }}"
+                      class="detalhes-banner-img"
+                      loading="lazy">
+                  {% else %}
+                    <div class="detalhes-banner-fallback" role="img" aria-label="Banner da quadra {{ partida.quadra.nome }}"></div>
+                  {% endif %}
+                {% endwith %}
+                <div class="detalhes-banner-overlay" aria-hidden="true"></div>
+                <div class="detalhes-banner-content">
+                  <p class="detalhes-banner-kicker">Quadra confirmada</p>
+                  <p class="detalhes-banner-title mb-0">{{ partida.quadra.nome }} - {{ partida.quadra.get_bairro_display }}</p>
+                </div>
               </div>
 
-              {% if partida.quadra.latitude and partida.quadra.longitude %}
-            <div class="map-wrapper mt-4">
-              <iframe
-                class="mapa-embed"
-                loading="lazy"
-                allowfullscreen
-                data-src="https://www.openstreetmap.org/export/embed.html?bbox=-43.0,-23.1,-42.7,-22.8&layer=mapnik&marker={{ partida.quadra.latitude|unlocalize }},{{ partida.quadra.longitude|unlocalize }}"
-                id="mapa-iframe-{{ partida.id }}">
-              </iframe>
-            </div>
-            
-           <div class="text-center mt-3">
-              <a href="https://www.google.com/maps/dir/?api=1&destination={{ partida.quadra.latitude|unlocalize }},{{ partida.quadra.longitude|unlocalize }}"
-                 target="_blank" 
-                 class="btn btn-como-chegar w-100"> <i class="bi bi-geo-alt-fill me-2"></i>Como Chegar (Abrir no Maps)
-              </a>
-            </div>
-            
-            {% endif %}
+              <div class="detalhes-info-grid" aria-label="Informações da partida">
+                <div class="detalhes-info-item">
+                  <span class="detalhes-info-label"><i class="bi bi-person-fill" aria-hidden="true"></i>Organizador</span>
+                  <strong class="detalhes-info-value">{{ partida.organizador.username }}</strong>
+                </div>
+                <div class="detalhes-info-item">
+                  <span class="detalhes-info-label"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Local</span>
+                  <strong class="detalhes-info-value">{{ partida.quadra.nome }} — {{ partida.quadra.get_bairro_display }}</strong>
+                </div>
+                <div class="detalhes-info-item">
+                  <span class="detalhes-info-label"><i class="bi bi-calendar-event" aria-hidden="true"></i>Data</span>
+                  <strong class="detalhes-info-value">{{ partida.data_hora|date:"d/m/Y \\à\\s H:i" }}</strong>
+                </div>
+                <div class="detalhes-info-item">
+                  <span class="detalhes-info-label"><i class="bi bi-people-fill" aria-hidden="true"></i>Vagas</span>
+                  <strong class="detalhes-info-value">{{ partida.vagas_preenchidas }}/{{ partida.jogadores_necessarios }}</strong>
+                </div>
+              </div>
 
-            <hr>
+              <div class="detalhes-confirmados mt-3" aria-label="Jogadores interessados">
+                <div class="detalhes-confirmados-header">
+                  <i class="bi bi-people-fill" aria-hidden="true"></i>
+                  <strong>Interessados</strong>
+                  <span class="detalhes-confirmados-total">{{ partida.vagas_preenchidas }}</span>
+                  <button type="button" class="detalhes-confirmados-link js-open-jogadores-inline" data-jogadores-modal="jogadoresModal{{ partida.id }}">
+                    Ver todos
+                  </button>
+                </div>
+                <div class="detalhes-confirmados-lista">
+                  {% for jogador in partida.jogadores_confirmados.all|slice:":6" %}
+                    <button type="button" class="detalhes-confirmado-btn" data-profile-modal="{{ jogador.id }}" title="Ver perfil de {{ jogador.username }}" aria-label="Abrir perfil de {{ jogador.username }}">
+                      {% if jogador.perfil.foto %}
+                        <img src="{{ jogador.perfil.foto.url|media_bust }}" alt="{{ jogador.username }}" class="detalhes-confirmado-avatar" loading="lazy">
+                      {% else %}
+                        <span class="detalhes-confirmado-avatar detalhes-confirmado-avatar--placeholder" aria-label="{{ jogador.username }}">
+                          {{ jogador.username|first|upper }}
+                        </span>
+                      {% endif %}
+                    </button>
+                  {% empty %}
+                    <span class="detalhes-confirmados-vazio">Nenhum jogador confirmado até agora.</span>
+                  {% endfor %}
+                  {% if partida.vagas_preenchidas > 6 %}
+                    <span class="detalhes-confirmado-extra">+{{ partida.vagas_preenchidas|add:"-6" }}</span>
+                  {% endif %}
+                </div>
+              </div>
 
-              <div class="text-center mt-3">
-                {% if user == partida.organizador %}
-                  
-                {% elif user in partida.jogadores_confirmados.all %}
-                  <form method="post" action="{% url 'partidas:sair_da_partida' partida.id %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Sair da Partida</button>
-                  </form>
-                {% elif partida.vagas_restantes > 0 %}
-                  <form method="post" action="{% url 'partidas:participar_partida' partida.id %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Participar</button>
-                  </form>
-                {% else %}
-                  <button class="btn btn-secondary" disabled>Partida Lotada</button>
-                {% endif %}
+              <div class="detalhes-actions mt-3">
+                <div class="detalhes-actions-left">
+                  {% if partida.quadra.latitude and partida.quadra.longitude %}
+                    <div class="como-chegar-wrapper">
+                      <a href="#"
+                         class="btn btn-como-chegar js-open-maps-popup"
+                         data-bs-toggle="modal"
+                         data-bs-target="#mapsRedirectModal"
+                         data-maps-url="https://www.google.com/maps/dir/?api=1&destination={{ partida.quadra.latitude|unlocalize }},{{ partida.quadra.longitude|unlocalize }}">
+                        <i class="bi bi-geo-alt-fill me-2" aria-hidden="true"></i>Como Chegar
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="detalhes-actions-right">
+                  {% if user == partida.organizador %}
+                    <div class="detalhes-organizador-panel">
+                      <span class="detalhes-organizador-pill">Você está organizando esta partida</span>
+                      {% if partida.pending_rsvps %}
+                        <section class="pending-requests" aria-label="Solicitações pendentes">
+                          <header class="pending-requests__header">
+                            <strong>Solicitações pendentes</strong>
+                            <span class="pending-requests__count">{{ partida.pending_rsvps|length }}</span>
+                          </header>
+                          <div class="pending-requests__list">
+                            {% for rsvp in partida.pending_rsvps %}
+                              <article class="pending-requests__item">
+                                <div class="pending-requests__player">
+                                  {% if rsvp.jogador.perfil.foto %}
+                                    <img src="{{ rsvp.jogador.perfil.foto.url|media_bust }}" alt="{{ rsvp.jogador.username }}" class="pending-requests__avatar">
+                                  {% else %}
+                                    <span class="pending-requests__avatar pending-requests__avatar--placeholder">{{ rsvp.jogador.username|first|upper }}</span>
+                                  {% endif %}
+                                  <div class="pending-requests__identity">
+                                    <span class="pending-requests__name">{{ rsvp.jogador.username }}</span>
+                                    <small>aguardando aprovação</small>
+                                  </div>
+                                </div>
+                                <div class="pending-requests__actions">
+                                  <form method="post" action="{% url 'partidas:aprovar_jogador_partida' partida.id rsvp.jogador.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="pending-btn pending-btn--accept">Aceitar</button>
+                                  </form>
+                                  <form method="post" action="{% url 'partidas:recusar_jogador_partida' partida.id rsvp.jogador.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="pending-btn pending-btn--reject">Recusar</button>
+                                  </form>
+                                </div>
+                              </article>
+                            {% endfor %}
+                          </div>
+                        </section>
+                      {% endif %}
+                    </div>
+                  {% elif partida.user_rsvp_status == 'confirmado' %}
+                    <form method="post" action="{% url 'partidas:sair_da_partida' partida.id %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger detalhes-btn-main">Sair da Partida</button>
+                    </form>
+                  {% elif partida.user_rsvp_status == 'aguardando' %}
+                    <button class="btn btn-secondary detalhes-btn-main" disabled>Solicitação enviada</button>
+                  {% elif partida.user_rsvp_status == 'interesse' %}
+                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                      <form method="post" action="{% url 'partidas:confirmar_presenca_partida' partida.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success detalhes-btn-main">Confirmar presença</button>
+                      </form>
+                      <form method="post" action="{% url 'partidas:recusar_partida' partida.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="motivo_recusa" value="Sem disponibilidade">
+                        <button type="submit" class="btn btn-outline-light detalhes-btn-main">Não vou</button>
+                      </form>
+                    </div>
+                  {% elif partida.vagas_restantes > 0 %}
+                    <form method="post" action="{% url 'partidas:registrar_interesse_partida' partida.id %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success detalhes-btn-main">Tenho interesse</button>
+                    </form>
+                  {% else %}
+                    <button class="btn btn-secondary detalhes-btn-main" disabled>Partida Lotada</button>
+                  {% endif %}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
       {% endfor %}
+
+      <div class="modal fade" id="mapsRedirectModal" tabindex="-1" aria-labelledby="mapsRedirectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="mapsRedirectModalLabel">Aviso</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-0">Você será redirecionado para o Google Maps.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <a id="mapsRedirectConfirmLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Continuar</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {% for partida in partidas %}
       <div class="modal fade" id="modalCancelarPartida{{ partida.id }}" tabindex="-1" aria-labelledby="modalCancelarLabel{{ partida.id }}" aria-hidden="true">
@@ -575,7 +700,6 @@
     <div id="tab-noticias" class="{% if not is_mobile_client or aba_atual == 'feed' %}col-lg-3 order-md-3 order-lg-3{% else %}col-12{% endif %} feed-col-mobile {% if request.GET.aba == 'noticias' %}mobile-active-tab{% endif %}">
       <div id="feed-noticias" class="feed-right-rail">
       <div class="right-unified-panel">
-      
       {% cache 600 clima_widget %}
       {% if clima_atual %}
       <div class="weather-card text-center">
@@ -644,6 +768,7 @@
 
 <script src="{% static 'js/gif-picker-v2.js' %}"></script>
 <script src="{% static 'js/posts.js' %}"></script>
+<script src="{% static 'js/profile-modal.js' %}"></script>
 <script src="{% static 'js/pages/feed-page.js' %}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {

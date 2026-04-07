@@ -4,29 +4,40 @@
 {% block title %}Encontrar Jogadores - EsporteFY{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/login/lista_usuarios.css' %}">
+<link rel="stylesheet" href="{% static 'css/login/lista_usuarios.css' %}?v=20260406c">
+<link rel="stylesheet" href="{% static 'css/profile-modal.css' %}?v=20260406c">
+<link rel="stylesheet" href="{% static 'css/online-players-panel.css' %}?v=20260406c">
 {% endblock %}
 
 {% block body_class %}dark-theme{% endblock %}
 
 {% block content %}
-<div class="container my-4 my-md-5">
-    <h1 class="mb-4 text-center">Encontrar Jogadores na Plataforma</h1>
+<div class="container my-4 my-md-5 encontrar-jogadores-page">
+    <header class="encontrar-jogadores-hero mb-4">
+        <p class="encontrar-jogadores-kicker mb-2">Rede EsporteFY</p>
+        <h1 class="mb-2 text-center">Encontrar Jogadores na Plataforma</h1>
+        <p class="encontrar-jogadores-subtitle mb-0">Clique na foto ou no nome para abrir o mini perfil e agir rapido.</p>
+    </header>
 
-    <!-- 🔍 FILTRO DE BUSCA -->
-    <div class="card filter-card mb-4 shadow-sm">
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-8 order-2 order-lg-1">
+        <!-- 🔍 FILTRO DE BUSCA -->
+        <div class="card filter-card mb-4 shadow-sm encontrar-jogadores-filter">
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     {{ filtro_form.nome_usuario|as_crispy_field }}
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     {{ filtro_form.esporte|as_crispy_field }}
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     {{ filtro_form.nivel|as_crispy_field }}
                 </div>
-                <div class="col-md-1 d-grid">
+                <div class="col-md-2">
+                    {{ filtro_form.bairro|as_crispy_field }}
+                </div>
+                <div class="col-md-2 d-grid">
                     <button type="submit" class="btn btn-primary">Buscar</button>
                 </div>
             </form>
@@ -42,28 +53,39 @@
     {% endif %}
 
     <!-- 🧑‍🤝‍🧑 LISTA DE JOGADORES -->
-    <div class="list-group shadow-sm">
+    <div class="list-group shadow-sm encontrar-jogadores-list">
         {% for usuario in usuarios %}
-            <div class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row gap-3 card-usuario"
+              <div class="list-group-item d-flex justify-content-between align-items-center flex-column flex-sm-row gap-3 card-usuario"
                  data-user-id="{{ usuario.id }}">
                 
                 <!-- Foto e informações -->
                 <div class="d-flex align-items-center">
                     {% if usuario.perfil.foto %}
-                        <img src="{{ usuario.perfil.foto.url|media_bust }}" alt="{{ usuario.username }}" 
-                             width="50" height="50" class="rounded-circle me-3" style="object-fit: cover;">
+                        <img src="{{ usuario.perfil.foto.url|media_bust }}" alt="{{ usuario.username }}"
+                             width="50" height="50" class="rounded-circle me-3"
+                             style="object-fit: cover; cursor: pointer;"
+                             data-profile-modal="{{ usuario.id }}"
+                             title="Ver mini perfil de {{ usuario.username }}"
+                             aria-label="Abrir mini perfil de {{ usuario.username }}">
                     {% else %}
                         <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white"
-                             style="width: 50px; height: 50px;">
+                             style="width: 50px; height: 50px; cursor: pointer;"
+                             data-profile-modal="{{ usuario.id }}"
+                             title="Ver mini perfil de {{ usuario.username }}"
+                             aria-label="Abrir mini perfil de {{ usuario.username }}">
                             <span class="h5 mb-0">{{ usuario.username|first|upper }}</span>
                         </div>
                     {% endif %}
 
                     <div>
                         <h5 class="mb-1">
-                            <a href="{% url 'perfis:ver_perfil' username=usuario.username %}" class="text-decoration-none text-light">
+                            <button type="button"
+                                    class="btn btn-link p-0 text-decoration-none text-light fw-semibold align-baseline"
+                                    data-profile-modal="{{ usuario.id }}"
+                                    title="Abrir mini perfil de {{ usuario.username }}"
+                                    aria-label="Abrir mini perfil de {{ usuario.username }}">
                                 {{ usuario.username }}
-                            </a>
+                            </button>
                         </h5>
                         <small class="text-muted">
                             Esporte: {{ usuario.perfil.esportes_preferidos|default:"Não informado" }} |
@@ -102,7 +124,7 @@
 
     <!-- 📄 Paginação -->
     {% if is_paginated %}
-        <nav class="mt-4">
+        <nav class="mt-4 js-pagination">
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
@@ -118,10 +140,75 @@
             </ul>
         </nav>
     {% endif %}
+            <div class="infinite-scroll-anchor" data-infinite-scroll data-next-url="{% if is_paginated and page_obj.has_next %}{% querystring page=page_obj.next_page_number %}{% endif %}">
+                <div class="infinite-scroll-loader" data-infinite-loader hidden>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Carregando mais jogadores...</span>
+                </div>
+            </div>
+            </div>
+            <aside class="col-lg-4 order-1 order-lg-2">
+                <div class="online-players-panel-shell">
+                    <section class="online-players-panel" data-online-players-panel data-online-limit="14" data-online-interval="15000">
+                        <header class="online-players-panel__header">
+                            <h3 class="online-players-panel__title"><i class="bi bi-broadcast"></i> Jogadores Online</h3>
+                            <span class="online-players-panel__count" data-online-count>0 online</span>
+                        </header>
+                        <div class="online-players-panel__controls">
+                            <div class="online-players-panel__segmented" role="tablist" aria-label="Filtro de jogadores online">
+                                <button type="button" class="online-players-panel__chip is-active" data-online-filter="all">Todos</button>
+                                <button type="button" class="online-players-panel__chip" data-online-filter="friends">Amigos</button>
+                            </div>
+                            <button type="button" class="online-players-panel__refresh" data-online-refresh aria-label="Atualizar agora">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                        <div class="online-players-panel__list" data-online-list>
+                            <p class="online-players-panel__empty">Carregando jogadores online...</p>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="discover-card mt-3">
+                    <h4 class="discover-card__title">Resumo rápido</h4>
+                    <div class="discover-card__stats">
+                        <article class="discover-stat">
+                            <span class="discover-stat__value">{{ sidebar_total_jogadores }}</span>
+                            <span class="discover-stat__label">Jogadores</span>
+                        </article>
+                        <article class="discover-stat">
+                            <span class="discover-stat__value">{{ sidebar_total_amigos }}</span>
+                            <span class="discover-stat__label">Amigos</span>
+                        </article>
+                        <article class="discover-stat">
+                            <span class="discover-stat__value">{{ sidebar_solicitacoes_pendentes }}</span>
+                            <span class="discover-stat__label">Pendentes</span>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="discover-card mt-3">
+                    <h4 class="discover-card__title">Bairros em alta</h4>
+                    <ul class="discover-card__list mb-0">
+                        {% for item in sidebar_bairros_populares %}
+                            <li>
+                                <span>{{ item.bairro_base }}</span>
+                                <strong>{{ item.total }}</strong>
+                            </li>
+                        {% empty %}
+                            <li class="discover-card__empty">Sem dados suficientes ainda.</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </aside>
+        </div>
 </div>
 
 
-<script src="{% static 'js/pages/perfis-lista-usuarios.js' %}"></script>
+<script src="{% static 'js/pages/perfis-lista-usuarios.js' %}?v=20260406c"></script>
+<script src="{% static 'js/profile-modal.js' %}?v=20260406c"></script>
+<script src="{% static 'js/pages/online-players-panel.js' %}?v=20260406c"></script>
+<script src="{% static 'js/pages/perfis-infinite-scroll.js' %}?v=20260406c"></script>
 
 
 

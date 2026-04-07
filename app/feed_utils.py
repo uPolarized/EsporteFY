@@ -50,7 +50,7 @@ def _section_key_for(timestamp):
 
 
 def _time_label(timestamp):
-    return f"ha {timesince(timestamp, timezone.now()).split(',')[0]}"
+    return f"há {timesince(timestamp, timezone.now()).split(',')[0]}"
 
 
 def _partida_meta(partida):
@@ -80,6 +80,7 @@ def build_activity_payload(activity, viewer=None, available_partida_ids=None):
 
     payload = {
         'id': activity.id,
+        'actor_id': actor.id if actor else None,
         'actor_name': actor_name,
         'actor_initial': actor_name[:1].upper() if actor_name else '?',
         'actor_avatar_url': _safe_avatar_url(actor),
@@ -145,16 +146,16 @@ def build_activity_payload(activity, viewer=None, available_partida_ids=None):
                 'badge_label': 'Entrada',
                 'icon': 'bi-person-check-fill',
                 'headline': target.titulo,
-                'description': f'{actor_name} confirmou presenca nessa partida.',
+                'description': f'{actor_name} confirmou presença nesta partida.',
                 'priority': PRIORITY_BY_KIND['joined'],
             })
         elif 'saiu' in verb:
             payload.update({
                 'kind': 'left',
-                'badge_label': 'Saida',
+                'badge_label': 'Saída',
                 'icon': 'bi-door-open-fill',
                 'headline': target.titulo,
-                'description': f'{actor_name} saiu dessa partida e liberou uma vaga.',
+                'description': f'{actor_name} saiu desta partida e liberou uma vaga.',
                 'priority': PRIORITY_BY_KIND['left'],
             })
         elif 'cancelou' in verb:
@@ -163,17 +164,17 @@ def build_activity_payload(activity, viewer=None, available_partida_ids=None):
                 'badge_label': 'Cancelamento',
                 'icon': 'bi-x-octagon-fill',
                 'headline': target.titulo,
-                'description': f'{actor_name} cancelou a partida antes do horario marcado.',
+                'description': f'{actor_name} cancelou a partida antes do horário marcado.',
                 'priority': PRIORITY_BY_KIND['cancelled'],
             })
         elif 'avaliou' in verb:
             payload.update({
                 'kind': 'review',
                 'category': 'avaliacoes',
-                'badge_label': 'Avaliacao',
+                'badge_label': 'Avaliação',
                 'icon': 'bi-star-fill',
                 'headline': target.titulo,
-                'description': f'{actor_name} avaliou essa experiencia de jogo.',
+                'description': f'{actor_name} avaliou essa experiência de jogo.',
                 'priority': PRIORITY_BY_KIND['review'],
             })
             if not has_modal:

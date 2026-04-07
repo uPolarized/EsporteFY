@@ -57,6 +57,7 @@ function sanitizeInternalUrl(value, fallback = '#') {
 }
 
 function toastMeta(kind) {
+    if (kind === 'greeting') return { title: 'Saudacao', icon: 'bi-stars', css: 'is-warning' };
     if (kind === 'success') return { title: 'Sucesso!', icon: 'bi-check-circle-fill', css: 'is-success' };
     if (kind === 'error') return { title: 'Erro!', icon: 'bi-x-octagon-fill', css: 'is-error' };
     if (kind === 'warning') return { title: 'Atenção!', icon: 'bi-exclamation-triangle-fill', css: 'is-warning' };
@@ -209,13 +210,214 @@ function unlockNotificationAudio() {
     }
 }
 
+function readLoginGreetingPayload() {
+    const node = document.getElementById('json-login-greeting-popup');
+    if (!node) return null;
+
+    try {
+        const payload = JSON.parse(node.textContent || '{}');
+        return payload && typeof payload === 'object' ? payload : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+const GREETING_TRACK_PREFIX = 'esportefy_greeting_track_';
+
+function readJsonScriptValue(id) {
+    const node = document.getElementById(id);
+    if (!node) return null;
+
+    try {
+        return JSON.parse(node.textContent || 'null');
+    } catch (_) {
+        return null;
+    }
+}
+
+function getCurrentGreetingPeriod(now = new Date()) {
+    const hour = now.getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 18) return 'afternoon';
+    return 'night';
+}
+
+function getTodayKey(now = new Date()) {
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function greetingTrackKey(userId) {
+    return `${GREETING_TRACK_PREFIX}${String(userId || '')}`;
+}
+
+function loadGreetingTrack(userId) {
+    if (!userId) return { day: '', shown: {} };
+
+    try {
+        const raw = localStorage.getItem(greetingTrackKey(userId));
+        if (!raw) return { day: '', shown: {} };
+        const parsed = JSON.parse(raw);
+        const day = typeof parsed?.day === 'string' ? parsed.day : '';
+        const shown = parsed?.shown && typeof parsed.shown === 'object' ? parsed.shown : {};
+        return { day, shown };
+    } catch (_) {
+        return { day: '', shown: {} };
+    }
+}
+
+function saveGreetingTrack(userId, track) {
+    if (!userId) return;
+
+    try {
+        localStorage.setItem(greetingTrackKey(userId), JSON.stringify(track));
+    } catch (_) {}
+}
+
+function wasGreetingShown(userId, dayKey, period) {
+    const track = loadGreetingTrack(userId);
+    if (track.day !== dayKey) return false;
+    return Boolean(track.shown?.[period]);
+}
+
+function markGreetingShown(userId, dayKey, period) {
+    const track = loadGreetingTrack(userId);
+    const shown = track.day === dayKey ? { ...(track.shown || {}) } : {};
+    shown[period] = true;
+    saveGreetingTrack(userId, { day: dayKey, shown });
+}
+
+function resolvePeriodFromVariant(variant) {
+    if (variant === 'morning' || variant === 'afternoon' || variant === 'night') {
+        return variant;
+    }
+    return getCurrentGreetingPeriod();
+}
+
+function buildPeriodicGreetingPayload(period, username) {
+    if (period === 'morning') {
+        return {
+            title: `Bom dia, ${username}`,
+            message: 'Partiu marcar uma partida hoje?',
+        };
+    }
+
+    if (period === 'afternoon') {
+        return {
+            title: `Boa tarde, ${username}`,
+            message: 'Bora achar uma partida agora?',
+        };
+    }
+
+    return {
+        title: `Boa noite, ${username}`,
+        message: 'Noite perfeita pra jogar mais uma.',
+    };
+}
+
+function showGreetingToast(payload) {
+    const title = String(payload?.title || 'Bem-vindo').trim();
+    const message = String(payload?.message || 'Que bom te ver por aqui!').trim();
+    const text = title ? `${title}. ${message}` : message;
+    showToast('greeting', text, 5500);
+    playNotificationSound();
+}
+
+function maybeShowPeriodicGreeting() {
+    const userId = readJsonScriptValue('json-user-id');
+    const username = readJsonScriptValue('json-username');
+    if (!userId || !username) return;
+
+    const now = new Date();
+    const dayKey = getTodayKey(now);
+    const currentPeriod = getCurrentGreetingPeriod(now);
+
+    if (wasGreetingShown(userId, dayKey, currentPeriod)) {
+        return;
+    }
+
+    const loginPayload = readLoginGreetingPayload();
+    if (loginPayload) {
+        const loginPeriod = resolvePeriodFromVariant(loginPayload.variant);
+        showGreetingToast(loginPayload);
+        markGreetingShown(userId, dayKey, loginPeriod);
+        return;
+    }
+
+    const periodicPayload = buildPeriodicGreetingPayload(currentPeriod, username);
+    showGreetingToast(periodicPayload);
+    markGreetingShown(userId, dayKey, currentPeriod);
+}
+
+function msUntilNextGreetingBoundary(now = new Date()) {
+    const next = new Date(now);
+    const hour = now.getHours();
+
+    if (hour < 12) {
+        next.setHours(12, 0, 0, 0);
+    } else if (hour < 18) {
+        next.setHours(18, 0, 0, 0);
+    } else {
+        next.setDate(next.getDate() + 1);
+        next.setHours(0, 0, 0, 0);
+    }
+
+    return Math.max(1000, next.getTime() - now.getTime() + 1000);
+}
+
+function scheduleNextGreetingCheck() {
+    if (window.esportefyGreetingTimeoutId) {
+        clearTimeout(window.esportefyGreetingTimeoutId);
+    }
+
+    const delay = msUntilNextGreetingBoundary();
+    window.esportefyGreetingTimeoutId = setTimeout(() => {
+        maybeShowPeriodicGreeting();
+        scheduleNextGreetingCheck();
+    }, delay);
+}
+
+function initPeriodicGreetingNotifications() {
+    maybeShowPeriodicGreeting();
+    scheduleNextGreetingCheck();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            maybeShowPeriodicGreeting();
+            scheduleNextGreetingCheck();
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPeriodicGreetingNotifications, { once: true });
+} else {
+    initPeriodicGreetingNotifications();
+}
+
 function triggerPopupTeste() {
     const tests = [
-        { type: 'info', msg: 'João aceitou seu pedido de amizade!', time: 100 },
-        { type: 'success', msg: 'Sua partida Futebol de Sexta foi criada com sucesso!', time: 1600 },
-        { type: 'warning', msg: 'Atenção: A partida de Tênis de amanhã foi cancelada pelo organizador.', time: 3100 },
-        { type: 'error', msg: 'Não foi possível exportar seus dados LGPD. Tente novamente.', time: 4600 },
-        { type: 'info', msg: 'Você tem uma nova mensagem de contatozinho123.', time: 6100 }
+        { type: 'success', msg: 'Teste de amizade: João aceitou sua solicitação.', time: 100 },
+        { type: 'success', msg: 'Teste de partida: sua partida "Futebol de Sexta" foi criada.', time: 1250 },
+        { type: 'success', msg: 'Teste de presença: você confirmou entrada na partida "Pelada no Flamengo".', time: 2400 },
+        { type: 'warning', msg: 'Teste de saída: você saiu da partida "Pelada no Flamengo".', time: 3550 },
+        { type: 'warning', msg: 'Teste de cancelamento: a partida "Tênis de Amanhã" foi cancelada.', time: 4700 },
+        { type: 'info', msg: 'Teste de confirmação: Lucas confirmou presença na sua partida "Pelada no Flamengo".', time: 5850 },
+        { type: 'info', msg: 'Teste LGPD: seu arquivo de dados pessoais já está disponível para download.', time: 7000 },
+        { type: 'info', msg: 'Teste de mensagem: você recebeu uma nova conversa de contato123.', time: 8150 },
+        { type: 'warning', msg: 'Teste de sessão: sua conta foi acessada em outro dispositivo.', time: 9300 },
+        { type: 'error', msg: 'Teste LGPD: não foi possível exportar seus dados pessoais agora.', time: 10450 },
+        { type: 'info', msg: 'Teste de amizade: solicitação enviada para Marina.', time: 11700 },
+        { type: 'info', msg: 'Teste de amizade: você e Pedro agora são amigos.', time: 12900 },
+        { type: 'warning', msg: 'Teste de amizade: pedido de Ana recusado.', time: 14100 },
+        { type: 'info', msg: 'Teste de amizade: você não é mais amigo(a) de Carlos.', time: 15300 },
+        { type: 'info', msg: 'Teste de feed: a partida "Vôlei no Centro" recebeu uma nova avaliação.', time: 16500 },
+        { type: 'success', msg: 'Teste de RSVP: sua inscrição na partida "Treino de Basquete" foi confirmada.', time: 17700 },
+        { type: 'warning', msg: 'Teste de RSVP: você cancelou sua presença na partida "Treino de Basquete".', time: 18900 },
+        { type: 'info', msg: 'Teste de perfil: alguém interagiu com o seu perfil.', time: 20100 },
+        { type: 'info', msg: 'Teste de sistema: uma notificação genérica foi recebida.', time: 21300 }
     ];
     
     tests.forEach(test => {
@@ -239,7 +441,23 @@ function loadNotificationHistory(userId) {
         const raw = localStorage.getItem(notificationHistoryKey(userId));
         if (!raw) return [];
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed.map(normalizeNotificationHistoryItem) : [];
+        if (!Array.isArray(parsed)) return [];
+
+        const filtered = parsed.filter((item) => {
+            const message = String(item?.mensagem || '').toLowerCase();
+            return !(
+                message.includes('sua solicitação para')
+                && message.includes('foi enviada com sucesso')
+            );
+        });
+
+        if (filtered.length !== parsed.length) {
+            try {
+                localStorage.setItem(notificationHistoryKey(userId), JSON.stringify(filtered));
+            } catch (_) {}
+        }
+
+        return filtered.map(normalizeNotificationHistoryItem);
     } catch (_) {
         return [];
     }
@@ -313,13 +531,17 @@ function clearNotificationHistory(userId) {
 function buildRealtimeNotificationContent(entry) {
     const remetente = escapeHtml(entry.remetente || 'Contato');
     const mensagem = escapeHtml(entry.mensagem || 'Nova notificação recebida.');
+    const notificationScope = entry.notification_scope || (entry.foto_url ? 'user' : 'system');
+    const senderLabel = notificationScope === 'system' ? 'Sistema' : remetente;
     const avatarUrl = sanitizeHttpUrl(entry.foto_url, { allowRelative: true, fallback: '' });
     const freshAvatarUrl = avatarUrl
         ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
         : '';
-    const avatar = freshAvatarUrl
-        ? `<img src="${freshAvatarUrl}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">`
-        : `<div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">${remetente.charAt(0).toUpperCase()}</div>`;
+    const avatar = notificationScope === 'system'
+        ? `<div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;"><i class="bi bi-bell-fill"></i></div>`
+        : (freshAvatarUrl
+            ? `<img src="${freshAvatarUrl}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">`
+            : `<div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">${senderLabel.charAt(0).toUpperCase()}</div>`);
 
     const link = sanitizeInternalUrl(entry.conversa_url, '#');
     const receivedAt = resolveNotificationDate(entry.timestamp_iso, entry.timestampIso, entry.timestamp);
@@ -333,7 +555,7 @@ function buildRealtimeNotificationContent(entry) {
                 </div>
                 <div class="flex-grow-1 overflow-hidden">
                     <div class="d-flex justify-content-between align-items-center gap-2">
-                        <h6 class="mb-0 fw-bold text-truncate rt-notification__sender" style="font-size: 0.9rem;">${remetente}</h6>
+                        <h6 class="mb-0 fw-bold text-truncate rt-notification__sender" style="font-size: 0.9rem;">${senderLabel}</h6>
                         <small class="text-secondary rt-notification__time" style="font-size: 0.7rem;">${timestamp}</small>
                     </div>
                     <p class="mb-0 text-secondary small rt-notification__message">${mensagem}</p>
@@ -830,10 +1052,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Verificar se é um evento de amizade
                 if (data.type === 'send_generic_notification' || data.type === 'amizade_notification') {
                     carregarSolicitacoesAmizade();
-                    
-                    // Mostrar toast informando
-                    let toastMsg = data.mensagem || 'Nova solicitação de amizade!';
-                    showToast(resolveRealtimeToastKind(data), toastMsg, 6000);
+                    const popupOnly = Boolean(data.transient_popup_only);
+
+                    const scope = data.notification_scope || (data.type === 'amizade_notification' ? 'user' : 'system');
+                    const conteudoHTML = buildRealtimeNotificationContent({
+                        remetente: data.remetente || 'Sistema',
+                        mensagem: data.mensagem || 'Nova notificação recebida.',
+                        foto_url: data.foto_url || '',
+                        notification_scope: scope,
+                        conversa_url: data.conversa_url || '/feed/',
+                        timestamp: data.timestamp || 'agora',
+                        timestamp_iso: data.timestamp_iso || new Date().toISOString(),
+                    });
+
+                    if (!popupOnly) {
+                        const notificationId = `rt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                        appendNotificationHistoryItem(uid, {
+                            notificationId,
+                            remetente: data.remetente || 'Sistema',
+                            mensagem: data.mensagem || 'Nova notificação recebida.',
+                            foto_url: data.foto_url || '',
+                            notification_scope: scope,
+                            conversa_url: data.conversa_url || '/feed/',
+                            timestamp: data.timestamp || 'agora',
+                            timestamp_iso: data.timestamp_iso || new Date().toISOString(),
+                        });
+                        prependRealtimeNotificationToLists(notificationId, conteudoHTML);
+
+                        const badge = document.getElementById('badge-notificacoes');
+                        if (badge) {
+                            badge.classList.add('badge-animada');
+                            setTimeout(() => badge.classList.remove('badge-animada'), 500);
+                        }
+                    }
+
+                    showToast(resolveRealtimeToastKind(data), data.mensagem || 'Nova notificação recebida.', 6000);
                     playNotificationSound();
                     return;
                 }

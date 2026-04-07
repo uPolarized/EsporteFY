@@ -22,8 +22,11 @@ urlpatterns = [
     path('solicitacao/recusar/<int:solicitacao_id>/', views.recusar_solicitacao, name='recusar_solicitacao'),
 
     path('remover-amigo/<int:user_id>/', views.remover_amigo, name='remover_amigo'),
+    path('status-online/toggle/', views.toggle_online_status, name='toggle_online_status'),
     path('accounts/password/set/', CustomPasswordSetView.as_view(), name='account_set_password'),
     path('api/status/', api_check_status, name='api_check_status'),
+    path('api/perfil/<int:user_id>/', views.api_perfil, name='api_perfil'),
+    path('api/online-players/', views.api_online_players, name='api_online_players'),
     path('api/atividades/', views.api_atividades, name='api_atividades'),
     path('api/solicitacoes/', api_solicitacoes_amizade, name='api_solicitacoes_amizade'),
 ]

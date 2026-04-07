@@ -1,311 +1,419 @@
-/* ============================
- * Lista de Usuários - Tema Escuro
- * Seguro para o template fornecido
- * ============================ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap');
 
-/* ---- Variáveis de tema ---- */
-:root{
-    --bg: #1a1b1d;
-    --page-pad: 1.25rem;
-    --card-bg: rgba(28,28,30,0.72);
-    --card-border: rgba(255,255,255,0.04);
-    --glass-blur: 10px;
-    --accent: #e53935;       /* vermelho principal EsporteFY */
-    --accent-2: #ff6b6b;     /* tom de destaque */
-    --muted: #9aa0a6;
-    --text: #f3f4f6;
-    --success: #2ecc71;
-    --danger: #ff6b6b;
-    --shadow: 0 8px 22px rgba(2,6,23,0.6);
+:root {
+    --bg-0: #07090d;
+    --bg-1: #0f1420;
+    --bg-2: #111724;
+    --surface: rgba(13, 18, 28, 0.78);
+    --surface-strong: rgba(12, 16, 25, 0.92);
+    --line: rgba(255, 255, 255, 0.1);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --text: #f3f7ff;
+    --muted: #a5afc3;
+    --brand: #ff424d;
+    --brand-2: #ff7b66;
+    --ok: #30d17a;
+    --danger: #ff7a8b;
+    --glow: 0 20px 45px rgba(2, 6, 16, 0.54);
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.mb-4{
+html,
+body {
+    min-height: 100%;
+    background:
+        radial-gradient(1100px 420px at 8% -10%, rgba(255, 66, 77, 0.24), transparent 62%),
+        radial-gradient(840px 320px at 96% -6%, rgba(59, 130, 246, 0.16), transparent 64%),
+        linear-gradient(165deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+    color: var(--text);
+    font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+}
+
+.encontrar-jogadores-page {
+    max-width: 1180px;
+    position: relative;
+    z-index: 1;
+}
+
+.encontrar-jogadores-hero {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background:
+        linear-gradient(130deg, rgba(255, 66, 77, 0.2), rgba(9, 12, 18, 0.48) 42%, rgba(9, 12, 18, 0.78)),
+        radial-gradient(420px 120px at 85% 12%, rgba(255, 123, 102, 0.2), transparent 70%);
+    box-shadow: var(--glow);
+    padding: 1.55rem 1.2rem 1.2rem;
     text-align: center;
 }
 
-/* ---- Fundo e tipografia ---- */
-html, body {
-    height: 100%;
+.encontrar-jogadores-hero h1 {
     margin: 0;
-    background: linear-gradient(180deg, var(--bg) 0%, #0b0c0d 100%);
-    color: var(--text);
-    font-family: "Inter", "Segoe UI", Tahoma, system-ui, -apple-system, "Helvetica Neue", Arial;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: "Sora", "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(1.65rem, 3.2vw, 2.7rem);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
 }
 
-/* Mantém espaçamento do container e centraliza verticalmente em telas altas */
-.container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-/* ---- Card principal (search/form) ---- */
-.card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    backdrop-filter: blur(var(--glass-blur));
-    box-shadow: var(--shadow);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* Hover leve no card, não altera layout */
-.card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 4px 10px rgba(229,57,53,0.06);
-}
-
-/* Espaçamento interno responsivo do body do card */
-.card-body {
-    padding: 1rem 1rem;
-}
-@media (min-width: 768px) {
-    .card-body { padding: 1.25rem 1.5rem; }
-}
-
-/* * *** CORREÇÃO 1: Rótulos legíveis ***
- * Define a cor dos labels (ex: "Buscar por nome")
- */
-.form-label {
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
-
-/* ---- Inputs e selects (crispy/bootstrap) ---- */
-.form-control,
-.form-select {
-    background-color: rgba(38,38,38,0.8);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 10px;
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    -webkit-appearance: none;
-}
-
-/* * *** CORREÇÃO 2: Placeholder legível ***
- * Aumenta a opacidade do placeholder de 0.35 para 0.8
- */
-.form-control::placeholder { 
-    color: var(--muted);
-    opacity: 0.8; 
-}
-
-/* Foco claro e acessível */
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(229,57,53,0.08);
-    outline: none;
-    background-color: rgba(48,48,48,0.9);
-}
-
-/* focus-visible para acessibilidade */
-:focus-visible {
-    outline: 2px dashed rgba(255,255,255,0.06);
-    outline-offset: 2px;
-}
-
-/* ---- Lista de usuários (list-group) ---- */
-.list-group {
-    margin-top: 0.5rem;
-    border-radius: 12px;
-    overflow: visible; /* permite sombras dos itens */
-}
-
-/* Itens com glass + transição — NÃO alteramos display/flex-direction */
-.list-group-item {
-    background: linear-gradient(180deg, rgba(28,28,30,0.64), rgba(23,23,24,0.64));
-    border: 1px solid rgba(255,255,255,0.03);
-    border-radius: 10px;
-    margin-bottom: 0.6rem;
-    padding: 0.9rem;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    align-items: center; /* ajuda o conteúdo flex */
-}
-
-/* Hover "lift" com glow sutil do accent — não muda fluxo */
-.list-group-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 6px 18px rgba(229,57,53,0.08);
-    background: linear-gradient(180deg, rgba(34,34,34,0.75), rgba(25,25,26,0.75));
-}
-
-/* Quando estiver ativo/clicked breve feedback */
-.list-group-item:active {
-    transform: translateY(-1px);
-    transition-duration: 0.09s;
-}
-
-/* Conteúdo flex interno — preserva orientações responsivas do template */
-.list-group-item > .d-flex {
-    gap: 0.75rem;
-    align-items: center;
-}
-
-/* Assure wrap on small screens (keeps Bootstrap behavior) */
-@media (max-width: 575.98px) {
-    .list-group-item { padding: 0.85rem; }
-}
-
-/* ---- Avatares ---- */
-.list-group-item img.rounded-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: inline-block;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.04);
-}
-
-/* Placeholder quando não há foto (template usa bg-secondary inline) */
-.list-group-item .bg-secondary.rounded-circle {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
+.encontrar-jogadores-kicker {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.74rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 136, 144, 0.52);
+    background: rgba(255, 66, 77, 0.16);
+    color: #ffdce0;
+    font-size: 0.71rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+.encontrar-jogadores-subtitle {
+    margin-top: 0.4rem;
+    color: #cad4e6;
+    font-size: 0.95rem;
+}
+
+.encontrar-jogadores-filter.card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    backdrop-filter: blur(14px);
+    box-shadow: var(--glow);
+}
+
+.encontrar-jogadores-filter .card-body {
+    padding: 1.15rem 1rem;
+}
+
+.form-label {
+    color: #aeb7cc;
+    font-size: 0.82rem;
     font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.form-control,
+.form-select {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f7faff;
+    border-radius: 12px;
+    min-height: 44px;
+    width: 100%;
+    min-width: 0;
+    padding: 0.62rem 2.2rem 0.62rem 0.9rem;
+    transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), background-color 180ms var(--ease-out);
+}
+
+.form-select {
+    color-scheme: dark;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #ff7b66 50%),
+        linear-gradient(135deg, #ff7b66 50%, transparent 50%);
+    background-position:
+        calc(100% - 16px) calc(50% - 3px),
+        calc(100% - 10px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
+
+.form-select option {
+    background: #101723;
+    color: #f7faff;
+}
+
+.form-select option:checked,
+.form-select option:hover {
+    background: #1f2b40;
     color: #ffffff;
-    background-color: #424242; /* fallback */
-    border: 1px solid rgba(255,255,255,0.04);
 }
 
-/* Texto do usuário */
-.list-group-item h5 {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--text);
-    font-weight: 600;
+.form-control::placeholder {
+    color: #8c96ad;
+    opacity: 1;
 }
 
-/* Subtexto (esporte, nível) */
-.list-group-item small.text-muted {
-    color: var(--muted);
-    display: block;
-    margin-top: 0.18rem;
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(255, 123, 102, 0.88);
+    box-shadow: 0 0 0 4px rgba(255, 66, 77, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
 }
 
-/* ---- Botões de ação ---- */
+.encontrar-jogadores-filter .form-label {
+    line-height: 1.15;
+    margin-bottom: 0.4rem;
+}
+
+.encontrar-jogadores-filter .form-control,
+.encontrar-jogadores-filter .form-select {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.encontrar-jogadores-filter .form-control::placeholder {
+    color: #7f889a;
+}
+
+.encontrar-jogadores-filter .form-control,
+.encontrar-jogadores-filter .form-select,
+.encontrar-jogadores-filter .btn-primary {
+    height: 48px;
+}
+
 .btn {
-    border-radius: 8px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: transform 130ms var(--ease-out), box-shadow 130ms var(--ease-out), border-color 130ms var(--ease-out), background-color 130ms var(--ease-out), color 130ms var(--ease-out);
 }
 
-/* Botão primário (Adicionar Amigo) */
-.btn-primary {
-    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
-    border: none;
+.btn:active {
+    transform: scale(0.97);
+}
+
+.encontrar-jogadores-filter .btn-primary,
+.card-usuario .btn-outline-primary,
+.card-usuario .btn-primary {
+    border: 0;
     color: #fff;
-    padding: 6px 10px;
-    font-weight: 600;
-    box-shadow: 0 6px 18px rgba(229,57,53,0.12);
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 10px 22px rgba(255, 66, 77, 0.34);
 }
 
-/* Hover/Active do primário */
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(229,57,53,0.16); }
-.btn-primary:active { transform: translateY(0); }
-
-/* Botões secundários e warning */
-.btn-secondary {
-    background: rgba(66,66,66,0.9);
-    border: 1px solid rgba(255,255,255,0.03);
-    color: var(--text);
-}
-.btn-secondary:hover { transform: translateY(-2px); background: rgba(90,90,90,0.95); }
-
-.btn-warning {
-    background: linear-gradient(90deg, #ffb84d 0%, #ff9f1a 100%);
-    border: none;
-    color: #111;
-}
-.btn-warning:hover { transform: translateY(-2px); }
-
-/* Pedido Enviado (disabled) */
-.btn[disabled], .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.encontrar-jogadores-filter .btn-primary:hover,
+.card-usuario .btn-outline-primary:hover,
+.card-usuario .btn-primary:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    box-shadow: 0 14px 26px rgba(255, 66, 77, 0.4);
 }
 
-/* Badge "Amigos" */
+.card-usuario .btn-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    color: #ced6e5;
+}
+
+.card-usuario .btn-warning {
+    border: 0;
+    color: #211404;
+    background: linear-gradient(135deg, #ffcb6e, #ffb347);
+}
+
 .badge.bg-success {
-    background-color: rgba(46,204,113,0.12);
-    color: var(--success);
-    border: 1px solid rgba(46,204,113,0.12);
-    padding: 0.45rem 0.6rem;
-    border-radius: 8px;
-    font-weight: 600;
+    background: rgba(48, 209, 122, 0.18) !important;
+    border: 1px solid rgba(48, 209, 122, 0.45);
+    color: #8fffbc;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.5rem 0.75rem;
 }
 
-/* ---- Alertas (messages) ---- */
-.alert {
-    border-radius: 10px;
-    background: linear-gradient(180deg, rgba(36,36,36,0.72), rgba(26,26,26,0.72));
-    border: 1px solid rgba(255,255,255,0.03);
-    color: var(--text);
-}
-
-/* Especificidade para danger / success */
-.alert-danger {
-    border-left: 4px solid var(--danger);
-    color: var(--danger);
-    background: rgba(40,16,16,0.6);
-}
-.alert-success {
-    border-left: 4px solid var(--success);
-    color: var(--success);
-    background: rgba(14,28,16,0.6);
-}
-
-/* Botão fechar nas alerts (inverte para visível em tema escuro) */
-.alert .btn-close {
-    filter: invert(1) grayscale(1) brightness(2);
-}
-
-/* ---- Paginação ---- */
-.pagination .page-link {
+.encontrar-jogadores-list {
+    display: grid;
+    gap: 0.7rem;
+    border: 0;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.03);
-    color: var(--muted);
-    margin: 0 0.12rem;
-    border-radius: 8px;
-    padding: 6px 10px;
+}
+
+.list-group-item.card-usuario {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--line-soft);
+    background:
+        linear-gradient(132deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01)),
+        var(--surface-strong);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+    padding: 0.9rem 0.95rem;
+    transition: transform 170ms var(--ease-out), border-color 170ms var(--ease-out), box-shadow 170ms var(--ease-out), background-color 170ms var(--ease-out);
+}
+
+.list-group-item.card-usuario::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, rgba(255, 66, 77, 0.96), rgba(255, 123, 102, 0.55));
+    opacity: 0.72;
+}
+
+.list-group-item.card-usuario:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 123, 102, 0.42);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.42);
+}
+
+.list-group-item.card-usuario img.rounded-circle,
+.list-group-item.card-usuario .bg-secondary.rounded-circle {
+    width: 52px;
+    height: 52px;
+    border: 2px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.28);
+    transition: transform 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+}
+
+.list-group-item.card-usuario [data-profile-modal]:hover {
+    transform: translateY(-2px) scale(1.03);
+    border-color: rgba(255, 123, 102, 0.86);
+    box-shadow: 0 12px 22px rgba(255, 66, 77, 0.32);
+}
+
+.list-group-item.card-usuario h5 .btn-link {
+    color: #f6f9ff;
+    font-family: "Sora", "Plus Jakarta Sans", sans-serif;
+    font-size: 1.03rem;
+    font-weight: 700;
+}
+
+.list-group-item.card-usuario h5 .btn-link:hover,
+.list-group-item.card-usuario h5 .btn-link:focus-visible {
+    color: #ffbeb9;
+    text-decoration: none;
+}
+
+.list-group-item.card-usuario small.text-muted {
+    color: #96a2b8 !important;
+    font-size: 0.82rem;
+}
+
+.online-players-panel {
+    position: static;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background:
+        linear-gradient(155deg, rgba(11, 18, 28, 0.95), rgba(9, 13, 20, 0.98)),
+        radial-gradient(180px 100px at 90% 10%, rgba(48, 209, 122, 0.12), transparent 75%);
+    box-shadow: var(--glow);
+}
+
+.online-players-panel-shell {
+    position: relative;
+}
+
+@media (min-width: 992px) {
+    .online-players-panel-shell {
+        margin-bottom: 1rem;
+    }
+
+    .online-players-panel {
+        position: sticky;
+        top: 104px;
+    }
+}
+
+.pagination .page-link {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d3ddf0;
+    border-radius: 10px;
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(90deg, rgba(229,57,53,0.95), rgba(255,107,107,0.95));
     color: #fff;
-    border: none;
-    box-shadow: 0 6px 20px rgba(229,57,53,0.12);
+    border: 0;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 10px 20px rgba(255, 66, 77, 0.35);
 }
 
-.pagination .page-link:hover {
-    transform: translateY(-2px);
-    color: #fff;
+.alert {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f4f8ff;
 }
 
-/* ---- Pequenos ajustes visuais ---- */
-/* Garante contraste do link de perfil (se houver) */
-a { 
-    color: var(--accent-2); 
-    text-decoration: none; /* Mantém sem sublinhado */
-}
-a:hover { 
-    text-decoration: none; /* <<< CORRIGIDO (não sublinha ao passar o mouse) */
-    color: #ff8b8b;      /* Mantém a mudança de cor no hover */
+.alert-danger {
+    background: rgba(82, 18, 27, 0.48);
+    border-color: rgba(255, 122, 139, 0.42);
 }
 
-/* Garante que os componentes flutuantes não cortem sombra */
-.list-group, .card { overflow: visible; }
+.alert-success {
+    background: rgba(11, 64, 42, 0.5);
+    border-color: rgba(48, 209, 122, 0.4);
+}
 
-/* Ajustes mobile finais */
-@media (max-width: 576px){
-    .list-group-item { padding: 0.85rem; }
-    .list-group-item h5 { font-size: 0.98rem; }
-    .btn { font-size: 0.88rem; padding: 6px 8px; }
+.infinite-scroll-anchor {
+    display: flex;
+    justify-content: center;
+    padding: 0.8rem 0 0.2rem;
+}
+
+.infinite-scroll-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #c5cede;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+}
+
+@media (max-width: 991.98px) {
+    .online-players-panel {
+        position: static;
+        margin-top: 0.2rem;
+    }
+
+    .online-players-panel-shell {
+        min-height: 0;
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .encontrar-jogadores-hero {
+        border-radius: 18px;
+        padding: 1.2rem 0.9rem 1rem;
+    }
+
+    .encontrar-jogadores-subtitle {
+        font-size: 0.89rem;
+    }
+
+    .encontrar-jogadores-filter .card-body {
+        padding: 0.9rem;
+    }
+
+    .encontrar-jogadores-filter .col-md-4,
+    .encontrar-jogadores-filter .col-md-2 {
+        width: 100%;
+    }
+
+    .encontrar-jogadores-filter .btn-primary {
+        width: 100%;
+    }
+
+    .list-group-item.card-usuario {
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .list-group-item.card-usuario {
+        border-radius: 14px;
+    }
+
+    .list-group-item.card-usuario::before {
+        top: 10px;
+        bottom: 10px;
+    }
+
+    .list-group-item.card-usuario .d-flex.gap-2 {
+        width: 100%;
+    }
+
+    .list-group-item.card-usuario .d-flex.gap-2 .btn,
+    .list-group-item.card-usuario .d-flex.gap-2 .badge {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
 }

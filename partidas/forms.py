@@ -30,6 +30,7 @@ class PartidaForm(forms.ModelForm):
             "quadra",
             "data_hora",
             "jogadores_necessarios",
+            "nivel_minimo",
         ]
         widgets = {
             "data_hora": forms.DateTimeInput(attrs={"type": "datetime-local"}),

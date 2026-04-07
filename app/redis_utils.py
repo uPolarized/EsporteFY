@@ -1,6 +1,8 @@
 import redis
 import logging
 import json
+from datetime import datetime, timezone
+from django.contrib.auth.models import User
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -50,3 +52,69 @@ def is_user_online(user_identifier):
             logger.error(f"Erro ao verificar status online: {e}")
             return False
     return False
+
+
+def get_user_last_seen(user_identifier):
+    """
+    Retorna o ultimo timestamp de presença salvo no Redis.
+    Args:
+        user_identifier: user_id (int) ou username (str)
+    Returns:
+        datetime|None: datetime UTC timezone-aware, ou None quando ausente/erro.
+    """
+    client = get_redis_client()
+    if client:
+        try:
+            raw_value = client.get(f"user_last_seen:{user_identifier}")
+            if not raw_value:
+                return None
+
+            timestamp = float(raw_value)
+            return datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        except Exception as e:
+            logger.error(f"Erro ao obter ultimo visto: {e}")
+            return None
+    return None
+
+
+def list_online_user_ids(max_items=200):
+    """
+    Lista ids de usuarios online com base nas chaves user_online:{id}.
+    """
+    client = get_redis_client()
+    if not client:
+        return []
+
+    user_ids = []
+    try:
+        for key in client.scan_iter(match="user_online:*", count=200):
+            if isinstance(key, bytes):
+                key = key.decode('utf-8', errors='ignore')
+
+            suffix = str(key).split(':')[-1]
+            if suffix.isdigit():
+                user_ids.append(int(suffix))
+            else:
+                try:
+                    mapped_id = User.objects.filter(username=suffix).values_list('id', flat=True).first()
+                    if mapped_id:
+                        user_ids.append(int(mapped_id))
+                except Exception:
+                    pass
+
+            if len(user_ids) >= max_items:
+                break
+    except Exception as e:
+        logger.error(f"Erro ao listar usuarios online: {e}")
+        return []
+
+    # Remove duplicados preservando ordem.
+    seen = set()
+    deduped = []
+    for uid in user_ids:
+        if uid in seen:
+            continue
+        seen.add(uid)
+        deduped.append(uid)
+
+    return deduped

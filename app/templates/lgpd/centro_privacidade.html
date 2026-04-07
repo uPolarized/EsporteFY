@@ -239,104 +239,111 @@
 						</article>
 					</div>
 
-					{% if has_data_deletion_table %}
-					<article class="doc-card request-card request-card--danger mt-3">
-						<h3>Excluir Conta (janela de 48 horas)</h3>
-						<p class="doc-meta">Ao solicitar a exclusao, enviaremos um e-mail de confirmacao. Voce podera cancelar em ate 48 horas antes da confirmacao.</p>
-						<form method="post" action="{% url 'lgpd_request_account_deletion' %}" class="request-form js-account-deletion-form">
-							{% csrf_token %}
-							<label class="request-label" for="id_motivo_exclusao">Motivo da exclusao (opcional)</label>
-							<textarea id="id_motivo_exclusao" name="motivo" class="lgpd-textarea" rows="3" placeholder="Conte para a gente o motivo da exclusao (opcional)."></textarea>
-
-							<div class="request-actions mt-3">
-								<button class="lgpd-btn lgpd-btn--sm lgpd-btn--danger" type="submit" {% if not can_request_data_deletion %}disabled{% endif %}>
-									Solicitar Exclusao
-								</button>
-								<span id="deletion-open-note" class="request-note {% if can_request_data_deletion %}d-none{% endif %}">Voce ja possui uma solicitacao de exclusao pendente.</span>
+					{% if has_data_deletion_table or has_data_access_table %}
+					<article class="doc-card request-card request-card--history mt-3 request-history-unified">
+						<div class="request-history-unified__header">
+							<div>
+								<h3 class="mb-1">Historico das solicitacoes</h3>
+								<p class="doc-meta mb-0">Cada item mostra o tipo da solicitacao, para voce diferenciar acesso aos dados de exclusao da conta.</p>
 							</div>
-							<p class="request-live-feedback d-none" id="deletion-live-feedback"></p>
-						</form>
-					</article>
-
-					<article class="doc-card request-card request-card--history mt-3">
-						<h3>Historico das Solicitacoes de Exclusao</h3>
-						<div id="deletion-history-table-wrap" class="table-responsive request-table-wrap {% if not data_deletion_requests %}d-none{% endif %}">
-							<table class="table request-table">
-								<thead>
-									<tr>
-										<th>Data</th>
-										<th>Status</th>
-										<th>Expira em</th>
-										<th>Acao</th>
-									</tr>
-								</thead>
-								<tbody id="deletion-history-body">
-									{% for item in data_deletion_requests %}
-									<tr id="deletion-row-{{ item.id }}">
-										<td>{{ item.data_solicitacao|date:"d/m/Y H:i" }}</td>
-										<td>
-											<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
-										</td>
-										<td>{{ item.data_expiracao|date:"d/m/Y H:i" }}</td>
-										<td>
-											{% if item.status == 'pending' %}
-											<form method="post" action="{% url 'lgpd_cancel_account_deletion' item.id %}" class="d-inline js-deletion-cancel-form" data-request-id="{{ item.id }}">
-												{% csrf_token %}
-												<button type="submit" class="btn btn-sm btn-outline-light">Cancelar</button>
-											</form>
-											{% else %}
-											-
-											{% endif %}
-										</td>
-									</tr>
-									{% endfor %}
-								</tbody>
-							</table>
 						</div>
-						<p id="deletion-empty-state" class="mb-0 {% if data_deletion_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de exclusao.</p>
-					</article>
-					{% endif %}
 
-					{% if has_data_access_table %}
-					<article class="doc-card request-card request-card--history mt-3">
-						<h3>Historico das Minhas Solicitacoes</h3>
-						<div id="request-history-table-wrap" class="table-responsive request-table-wrap {% if not data_access_requests %}d-none{% endif %}">
-							<table class="table request-table">
-								<thead>
-									<tr>
-										<th>Data</th>
-										<th>Status</th>
-										<th>Processada em</th>
-										<th>Arquivo</th>
-									</tr>
-								</thead>
-								<tbody id="request-history-body">
-									{% for item in data_access_requests %}
-									<tr>
-										<td>{{ item.data_solicitacao|date:"d/m/Y H:i" }}</td>
-										<td>
-											<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
-										</td>
-										<td>
-											{% if item.data_processamento %}
-												{{ item.data_processamento|date:"d/m/Y H:i" }}
-											{% else %}
-												-
-											{% endif %}
-										</td>
-										<td>
-											{% if item.arquivo_exportacao %}
-												<a href="{{ item.arquivo_exportacao.url }}" class="btn btn-sm btn-outline-light" target="_blank" rel="noopener noreferrer">Baixar</a>
-											{% else %}
-												-
-											{% endif %}
-										</td>
-									</tr>
-									{% endfor %}
-								</tbody>
-							</table>
+						<div class="request-history-unified__sections">
+							{% if has_data_deletion_table %}
+							<section class="request-history-block request-history-block--deletion">
+								<div class="request-history-block__head">
+									<span class="request-history-badge request-history-badge--deletion">Exclusao da conta</span>
+									<span class="request-history-block__meta">48 horas para cancelamento</span>
+								</div>
+								<div id="deletion-history-table-wrap" class="table-responsive request-table-wrap {% if not data_deletion_requests %}d-none{% endif %}">
+									<table class="table request-table">
+										<thead>
+											<tr>
+												<th>Data</th>
+												<th>Status</th>
+												<th>Expira em</th>
+												<th>Acao</th>
+											</tr>
+										</thead>
+										<tbody id="deletion-history-body">
+											{% for item in data_deletion_requests %}
+											<tr id="deletion-row-{{ item.id }}">
+												<td>
+													<div class="request-table-type">Exclusao da conta</div>
+													{{ item.data_solicitacao|date:"d/m/Y H:i" }}
+												</td>
+												<td>
+													<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
+												</td>
+												<td>{{ item.data_expiracao|date:"d/m/Y H:i" }}</td>
+												<td>
+													{% if item.status == 'pending' %}
+													<form method="post" action="{% url 'lgpd_cancel_account_deletion' item.id %}" class="d-inline js-deletion-cancel-form" data-request-id="{{ item.id }}">
+														{% csrf_token %}
+														<button type="submit" class="btn btn-sm btn-outline-light">Cancelar</button>
+													</form>
+													{% else %}
+													-
+													{% endif %}
+												</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+								<p id="deletion-empty-state" class="mb-0 {% if data_deletion_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de exclusao.</p>
+							</section>
+							{% endif %}
+
+							{% if has_data_access_table %}
+							<section class="request-history-block request-history-block--access">
+								<div class="request-history-block__head">
+									<span class="request-history-badge request-history-badge--access">Acesso aos dados</span>
+									<span class="request-history-block__meta">Exportacao do seu arquivo pessoal</span>
+								</div>
+								<div id="request-history-table-wrap" class="table-responsive request-table-wrap {% if not data_access_requests %}d-none{% endif %}">
+									<table class="table request-table">
+										<thead>
+											<tr>
+												<th>Data</th>
+												<th>Status</th>
+												<th>Processada em</th>
+												<th>Arquivo</th>
+											</tr>
+										</thead>
+										<tbody id="request-history-body">
+											{% for item in data_access_requests %}
+											<tr>
+												<td>
+													<div class="request-table-type">Acesso aos dados</div>
+													{{ item.data_solicitacao|date:"d/m/Y H:i" }}
+												</td>
+												<td>
+													<span class="status-pill status-pill--{{ item.status }}">{{ item.get_status_display }}</span>
+												</td>
+												<td>
+													{% if item.data_processamento %}
+														{{ item.data_processamento|date:"d/m/Y H:i" }}
+													{% else %}
+														-
+													{% endif %}
+												</td>
+												<td>
+													{% if item.arquivo_exportacao %}
+														<a href="{{ item.arquivo_exportacao.url }}" class="btn btn-sm btn-outline-light" target="_blank" rel="noopener noreferrer">Baixar</a>
+													{% else %}
+														-
+													{% endif %}
+												</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+								<p id="request-empty-state" class="mb-0 {% if data_access_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de acesso aos dados.</p>
+							</section>
+							{% endif %}
 						</div>
-						<p id="request-empty-state" class="mb-0 {% if data_access_requests %}d-none{% endif %}">Voce ainda nao realizou solicitacoes de acesso aos dados.</p>
 					</article>
 					{% endif %}
 				</section>

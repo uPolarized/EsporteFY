@@ -40,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const username = data.solicitante_username;
       const userCards = document.querySelectorAll('.list-group-item.card-usuario');
       userCards.forEach((container) => {
-        const link = container.querySelector('h5 a');
-        if (!link) return;
-        const cardUsername = (link.textContent || '').trim();
+        const profileTrigger = container.querySelector('h5 [data-profile-modal]');
+        if (!profileTrigger) return;
+        const cardUsername = (profileTrigger.textContent || '').trim();
         if (cardUsername === username) {
           swapToFriendsBadge(container);
           console.log(`✅ Atualizado para 'Amigos' com ${username}`);
@@ -60,8 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
         botoes.forEach(btn => {
           const container = btn.closest(".list-group-item");
           if (!container) return;
-          const link = container.querySelector('h5 a');
-          const cardUsername = (link?.textContent || '').trim();
+          const profileTrigger = container.querySelector('h5 [data-profile-modal]');
+          const cardUsername = (profileTrigger?.textContent || '').trim();
           if (cardUsername === username) {
             swapToPendingButton(container, btn.dataset.userid || '');
             console.log(`↩️ Pedido recusado — botão restaurado para ${username}`);

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse
+from django.db import transaction
 from django.core.serializers.json import DjangoJSONEncoder
 
 from .models import Mensagem, Atividade
@@ -73,8 +74,10 @@ def broadcast_atividade(sender, instance, created, **kwargs):
             # Publica no canal que o FastAPI está escutando
             # Usando o canal 'feed_all' que está configurado no app.py
             channel_name = "feed_all"
-            
-            r.publish(channel_name, json.dumps(data, cls=DjangoJSONEncoder))
+
+            transaction.on_commit(
+                lambda: r.publish(channel_name, json.dumps(data, cls=DjangoJSONEncoder))
+            )
             logger.info(f"📰 Atividade publicada no feed: {channel_name}")
 
         except Exception as e:
@@ -90,6 +93,6 @@ def broadcast_remocao_atividade(sender, instance, **kwargs):
             "type": "feed_remove",
             "id": instance.id,
         }
-        r.publish("feed_all", json.dumps(data, cls=DjangoJSONEncoder))
+        transaction.on_commit(lambda: r.publish("feed_all", json.dumps(data, cls=DjangoJSONEncoder)))
     except Exception as e:
         logger.error(f"Erro no signal de remoção de atividade: {e}")

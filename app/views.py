@@ -33,7 +33,7 @@ import random
 
 # Importações dos modelos e API
 import requests
-from partidas.models import AvaliacaoJogador, AvaliacaoQuadra, Esporte, Partida
+from partidas.models import AvaliacaoJogador, AvaliacaoQuadra, Esporte, Partida, PartidaRSVP
 from partidas.finalizacao import processar_partidas_finalizadas
 from quadras.models import Quadra
 from social.models import Atividade
@@ -204,6 +204,39 @@ class CustomSocialConnectionsView(ConnectionsView):
                     partidas_queryset = partidas_queryset.filter(data_hora__time__gte=custom_time)
 
             partidas_list = list(partidas_queryset[:self.FEED_MAX_PARTIDAS])
+
+            rsvp_by_partida = {
+                partida_id: status
+                for partida_id, status in PartidaRSVP.objects.filter(
+                    partida__in=partidas_list,
+                    jogador=request.user,
+                ).values_list('partida_id', 'status')
+            }
+
+            confirmadas_ids = set(
+                Partida.jogadores_confirmados.through.objects.filter(
+                    user_id=request.user.id,
+                    partida_id__in=[p.id for p in partidas_list],
+                ).values_list('partida_id', flat=True)
+            )
+
+            pending_by_partida = {}
+            pending_qs = PartidaRSVP.objects.filter(
+                partida__in=partidas_list,
+                partida__organizador=request.user,
+                status=PartidaRSVP.STATUS_AGUARDANDO,
+            ).select_related('jogador', 'jogador__perfil').order_by('criado_em')
+            for rsvp in pending_qs:
+                pending_by_partida.setdefault(rsvp.partida_id, []).append(rsvp)
+
+            for partida in partidas_list:
+                fallback_status = (
+                    PartidaRSVP.STATUS_CONFIRMADO
+                    if partida.id in confirmadas_ids
+                    else None
+                )
+                partida.user_rsvp_status = rsvp_by_partida.get(partida.id, fallback_status)
+                partida.pending_rsvps = pending_by_partida.get(partida.id, [])
 
             context['partidas'] = partidas_list
             context['esportes_disponiveis'] = Esporte.objects.all()
@@ -505,6 +538,39 @@ class FeedView(LoginRequiredMixin, View):
                     partidas_queryset = partidas_queryset.filter(data_hora__time__gte=custom_time)
 
             partidas_list = list(partidas_queryset[:self.FEED_MAX_PARTIDAS])
+
+            rsvp_by_partida = {
+                partida_id: status
+                for partida_id, status in PartidaRSVP.objects.filter(
+                    partida__in=partidas_list,
+                    jogador=request.user,
+                ).values_list('partida_id', 'status')
+            }
+
+            confirmadas_ids = set(
+                Partida.jogadores_confirmados.through.objects.filter(
+                    user_id=request.user.id,
+                    partida_id__in=[p.id for p in partidas_list],
+                ).values_list('partida_id', flat=True)
+            )
+
+            pending_by_partida = {}
+            pending_qs = PartidaRSVP.objects.filter(
+                partida__in=partidas_list,
+                partida__organizador=request.user,
+                status=PartidaRSVP.STATUS_AGUARDANDO,
+            ).select_related('jogador', 'jogador__perfil').order_by('criado_em')
+            for rsvp in pending_qs:
+                pending_by_partida.setdefault(rsvp.partida_id, []).append(rsvp)
+
+            for partida in partidas_list:
+                fallback_status = (
+                    PartidaRSVP.STATUS_CONFIRMADO
+                    if partida.id in confirmadas_ids
+                    else None
+                )
+                partida.user_rsvp_status = rsvp_by_partida.get(partida.id, fallback_status)
+                partida.pending_rsvps = pending_by_partida.get(partida.id, [])
 
             context['partidas'] = partidas_list
             context['esportes_disponiveis'] = Esporte.objects.all()
@@ -1052,7 +1118,7 @@ class LgpdRequestAccountDeletionView(LoginRequiredMixin, View):
             messages.error(request, error_msg)
             return redirect(f"{reverse('lgpd_hub')}?tab=meus-dados")
 
-        motivo = (request.POST.get("motivo") or "").strip()
+        motivo = (request.POST.get("motivo") or request.POST.get("motivo_exclusao") or "").strip()
         now = timezone.now()
         deletion_request = DataDeletionRequest.objects.create(
             user=request.user,

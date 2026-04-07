@@ -13,6 +13,40 @@ from allauth.socialaccount.signals import social_account_added
 from allauth.socialaccount.models import SocialAccount
 
 
+def _build_login_greeting_popup(username):
+    now = timezone.localtime(timezone.now())
+    hour = now.hour
+
+    if hour < 12:
+        return {
+            'title': f'Bom dia, {username}',
+            'message': 'Partiu marcar uma partida hoje?',
+            'icon': 'bi-sun-fill',
+            'cta_label': 'Abrir feed',
+            'cta_url': '/feed/',
+            'variant': 'morning',
+        }
+
+    if hour < 18:
+        return {
+            'title': f'Boa tarde, {username}',
+            'message': 'Bora achar uma partida agora?',
+            'icon': 'bi-brightness-high-fill',
+            'cta_label': 'Abrir feed',
+            'cta_url': '/feed/',
+            'variant': 'afternoon',
+        }
+
+    return {
+        'title': f'Boa noite, {username}',
+        'message': 'Noite perfeita pra jogar mais uma.',
+        'icon': 'bi-moon-stars-fill',
+        'cta_label': 'Abrir feed',
+        'cta_url': '/feed/',
+        'variant': 'night',
+    }
+
+
 @receiver(m2m_changed, sender=Perfil.amigos.through)
 def criar_atividade_nova_amizade(sender, instance, action, pk_set, **kwargs):
 
@@ -42,6 +76,8 @@ def registrar_evento_login(sender, request, user, **kwargs):
         user_agent=user_agent,
         login_method=login_method,
     )
+
+    request.session['login_greeting_popup'] = _build_login_greeting_popup(user.username)
 
 
 @receiver(user_logged_in)

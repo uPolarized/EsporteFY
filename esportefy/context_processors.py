@@ -25,3 +25,18 @@ def recaptcha_keys(request):
         'WS_AUTH_TOKEN': _build_ws_token(request),
         'giphy_api_key': getattr(settings, 'GIPHY_API_KEY', 'dc6zaTOxFJmzC'),
     }
+
+
+def login_greeting_popup(request):
+    popup = None
+    user = getattr(request, 'user', None)
+    is_authenticated = bool(user and user.is_authenticated)
+    is_feed_route = request.path.startswith('/feed')
+
+    # Consome a saudação apenas no feed autenticado para não perder em redirects intermediários.
+    if is_authenticated and is_feed_route:
+        popup = request.session.pop('login_greeting_popup', None)
+
+    return {
+        'login_greeting_popup': popup,
+    }

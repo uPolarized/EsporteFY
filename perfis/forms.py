@@ -1,5 +1,6 @@
 from django import forms
 from .models import Perfil
+from quadras.models import Quadra
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from allauth.account.forms import SetPasswordForm, ChangePasswordForm
@@ -138,18 +139,34 @@ class FiltroUsuarioForm(forms.Form):
     nome_usuario = forms.CharField(
         label='Buscar por nome',
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Digite um nome de usuário...'})
+        widget=forms.TextInput(attrs={'placeholder': 'Digite um nome de usuário...', 'class': 'form-control'})
     )
     esporte = forms.ChoiceField(
         label='Filtrar por Esportes',
         required=False,
-        choices=[('', 'Todos os Esportes')] + Perfil.ESPORTES_CHOICES
+        choices=[('', 'Todos')] + Perfil.ESPORTES_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     nivel = forms.ChoiceField(
         label='Filtrar por Nível',
         required=False,
-        choices=[('', 'Todos os Níveis')] + Perfil.NIVEL_HABILIDADE_CHOICES
+        choices=[('', 'Todos')] + Perfil.NIVEL_HABILIDADE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
+    bairro = forms.ChoiceField(
+        label='Filtrar por Bairro',
+        required=False,
+        choices=[('', 'Todos')] + list(Quadra.BAIRRO_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if hasattr(field.widget, 'attrs'):
+                classes = field.widget.attrs.get('class', '')
+                if 'form-control' not in classes and 'form-select' not in classes:
+                    field.widget.attrs['class'] = f"{classes} form-control".strip()
 
 
 # ============================================================

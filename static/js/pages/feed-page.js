@@ -7,8 +7,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const feedSectionsRoot = document.getElementById('feed-sections');
   const activityFeedShell = document.querySelector('.activity-feed-shell');
   const feedToggleFilters = document.getElementById('feed-toggle-filters');
+  const onlineFriendsCounter = document.querySelector('[data-online-friends-count]');
   let ocultando = false;
   let activeFeedFilter = 'all';
+
+  async function refreshOnlineFriendsCounter() {
+    if (!onlineFriendsCounter) return;
+
+    try {
+      const response = await fetch('/perfis/api/online-players/?limit=40', {
+        credentials: 'same-origin',
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const players = Array.isArray(data.players) ? data.players : [];
+      const friendsOnline = players.filter((player) => Boolean(player.is_online) && Boolean(player.is_friend)).length;
+
+      onlineFriendsCounter.textContent = String(friendsOnline);
+    } catch (_) {
+      // Silencia falha de rede para evitar ruído no feed.
+    }
+  }
+
+  if (onlineFriendsCounter) {
+    refreshOnlineFriendsCounter();
+    setInterval(refreshOnlineFriendsCounter, 30000);
+  }
 
   toggleBtn.addEventListener('click', () => {
     ocultando = !ocultando;
@@ -41,11 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderActivityAvatar(data) {
+    const actorId = escapeFeedValue(data.actor_id || '');
+    const actorName = escapeFeedValue(data.actor_name || 'Jogador');
     if (data.actor_avatar_url) {
       const url = `${data.actor_avatar_url}${String(data.actor_avatar_url).includes('?') ? '&' : '?'}v=${Date.now()}`;
-      return `<img src="${escapeFeedValue(url)}" alt="${escapeFeedValue(data.actor_name)}" class="activity-card__avatar">`;
+      return `<img src="${escapeFeedValue(url)}" alt="${actorName}" class="activity-card__avatar" data-profile-modal="${actorId}" style="cursor: pointer;" title="Abrir mini perfil de ${actorName}" aria-label="Abrir mini perfil de ${actorName}">`;
     }
-    return `<div class="activity-card__avatar activity-card__avatar--placeholder">${escapeFeedValue(data.actor_initial || '?')}</div>`;
+    return `<div class="activity-card__avatar activity-card__avatar--placeholder" data-profile-modal="${actorId}" style="cursor: pointer;" title="Abrir mini perfil de ${actorName}" aria-label="Abrir mini perfil de ${actorName}">${escapeFeedValue(data.actor_initial || '?')}</div>`;
   }
 
   function renderActivityMeta(data) {
@@ -240,6 +268,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.feedSetupLikeButtons = setupLikeButtons;
   setupLikeButtons();
+
+  // Aviso central antes de redirecionar para o Google Maps
+  const mapsRedirectConfirmLink = document.getElementById('mapsRedirectConfirmLink');
+  if (mapsRedirectConfirmLink) {
+    document.addEventListener('click', (event) => {
+      const mapsBtn = event.target.closest('.js-open-maps-popup');
+      if (!mapsBtn) return;
+
+      event.preventDefault();
+      const destinationUrl = mapsBtn.getAttribute('data-maps-url') || mapsBtn.getAttribute('href') || '#';
+      mapsRedirectConfirmLink.setAttribute('href', destinationUrl);
+    });
+  }
+
+  // Submodal de jogadores (abre sem fechar modal de detalhes)
+  document.addEventListener('click', (event) => {
+    const openBtn = event.target.closest('.js-open-jogadores-inline');
+    if (openBtn) {
+      event.preventDefault();
+      const modalId = openBtn.getAttribute('data-jogadores-modal');
+      const modalEl = modalId ? document.getElementById(modalId) : null;
+      if (modalEl) {
+        modalEl.classList.add('is-open');
+        modalEl.setAttribute('aria-hidden', 'false');
+      }
+      return;
+    }
+
+    const closeBtn = event.target.closest('.js-close-jogadores-inline');
+    if (closeBtn) {
+      const modalEl = closeBtn.closest('.jogadores-inline-modal');
+      if (modalEl) {
+        modalEl.classList.remove('is-open');
+        modalEl.setAttribute('aria-hidden', 'true');
+      }
+      return;
+    }
+
+    const overlay = event.target.closest('.jogadores-inline-modal');
+    if (overlay && event.target === overlay) {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    document.querySelectorAll('.jogadores-inline-modal.is-open').forEach((modalEl) => {
+      modalEl.classList.remove('is-open');
+      modalEl.setAttribute('aria-hidden', 'true');
+    });
+  });
 });
 
 
@@ -357,23 +437,3 @@ feedSocket.onmessage = function(e) {
 };
 }
 
-const modalsDetalhes = document.querySelectorAll('[id^="detalhesPartidaModal"]');
-  
-  modalsDetalhes.forEach(modal => {
-    modal.addEventListener('show.bs.modal', event => {
-      try {
-        // Encontra o iframe *dentro* deste modal específico
-        const iframe = modal.querySelector('.mapa-embed');
-        
-        // Se o iframe existir e ainda não tiver um 'src', defina-o
-        if (iframe && !iframe.getAttribute('src')) {
-          const mapaSrc = iframe.getAttribute('data-src');
-          if (mapaSrc) {
-            iframe.setAttribute('src', mapaSrc);
-          }
-        }
-      } catch (e) {
-        console.error("Erro ao carregar mapa no modal:", e);
-      }
-    });
-  });

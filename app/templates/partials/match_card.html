@@ -72,6 +72,10 @@
             <i class="bi bi-box-arrow-left me-1"></i>Sair
           </button>
         </form>
+      {% elif partida.user_rsvp_status == 'aguardando' %}
+        <button class="match-btn match-btn--join" disabled>
+          <i class="bi bi-hourglass-split me-1"></i>Solicitação enviada
+        </button>
       {% elif partida.vagas_restantes > 0 %}
         <form method="post" action="{% url 'partidas:participar_partida' partida_id=partida.id %}" class="d-inline">
           {% csrf_token %}
